@@ -1,0 +1,40 @@
+1. 将一个目录初始化为git repo
+$git init
+
+2. 将文件添加到版本控制（从[工作区]添加到stage[暂存区]）
+$git add <file1> <file2>
+$git add keeplearning.txt
+
+3. 将stage暂存区的内容提交
+$git commit -m <message>
+$git commit -m "this is my first commit"
+
+4. 查看仓库当前状态
+$git status
+
+5. 查看上次修改
+$git diff keeplearning.txt
+
+6. 查看提交日志（命令显示从最近到最远的提交日志）
+$git log
+
+7. 查看提交日志-带hash的单行记录显示
+$git log --pretty=oneline
+
+8. 想要回退到上一个版本
+$git reset --hard HEAD^
+
+9. 想要回退到上上个版本
+$git reset --hard HEAD^^
+
+10. 想要回退到上N个版本
+$git reset --hard HEAD~N
+
+11. 想回到未来的某个版本
+$git reset --hard <hashID>
+$git reset --hard 658fbb613227161a957bcb2006a651114dc580e5
+//上述<hashID>不用输入那么长，开头几位就够了，git会自行寻找
+$git reset --hard 658fbb
+
+12. 想要恢复到未来版本，但不知道未来版本的hashID。查看每一次git命令历史
+$git reflog
