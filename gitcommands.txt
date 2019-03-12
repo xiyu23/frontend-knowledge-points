@@ -44,3 +44,6 @@ $git checkout -- <file>
 $git checkout -- keeplearning.txt
 //如果修改1已经被git add到暂存区，而后又做了修改2但还未添加到暂存区，则此时git checkout只会将修改2丢弃，即恢复到上一次git add后的状态（有修改1，无修改2）
 
+14. 想要将已通过git add添加到暂存区的修改撤回(Unstage)，此命令可将暂存区的修改撤销，重新放回工作区（工作区的修改仍在，只不过将此文件从git暂存区中移出，这样可以提交剩余的位于暂存区的修改）
+$git reset HEAD <file>
+$git reset HEAD keeplearning.txt
