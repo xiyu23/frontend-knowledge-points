@@ -38,3 +38,9 @@ $git reset --hard 658fbb
 
 12. 想要恢复到未来版本，但不知道未来版本的hashID。查看每一次git命令历史
 $git reflog
+
+13. 想要丢弃对工作区文件所做的修改，还原到working tree clean状态
+$git checkout -- <file>
+$git checkout -- keeplearning.txt
+//如果修改1已经被git add到暂存区，而后又做了修改2但还未添加到暂存区，则此时git checkout只会将修改2丢弃，即恢复到上一次git add后的状态（有修改1，无修改2）
+
