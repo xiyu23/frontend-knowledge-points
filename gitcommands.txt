@@ -47,3 +47,6 @@ $git checkout -- keeplearning.txt
 14. 想要将已通过git add添加到暂存区的修改撤回(Unstage)，此命令可将暂存区的修改撤销，重新放回工作区（工作区的修改仍在，只不过将此文件从git暂存区中移出，这样可以提交剩余的位于暂存区的修改）
 $git reset HEAD <file>
 $git reset HEAD keeplearning.txt
+
+15. 删除文件（记得commit！删除和add其实都是修改而已）
+$git rm <file>
