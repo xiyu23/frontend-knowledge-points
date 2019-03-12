@@ -644,7 +644,7 @@ gen.next()
 gen.next('replacing the yield expression')
 
 53. try-catch中的throw new Exception vs throw new Error
-都是从Throwable派生而来。
+都是从派生而来。
 
 54. 
 
