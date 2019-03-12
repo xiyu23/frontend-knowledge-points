@@ -1,0 +1,835 @@
+1.[regexp]正则
+2.[js]prototype/prototype chain
+See [anchor id=13]prototype chain[/anchor]
+3.[js]is
+determines whether two values are the same value
+和==、===都不同
++0.is(-0) => false
++0.is(+0) => true
+
++0 === -0 => true
+4.[html]常见的浏览器端的存储技术有哪些？
+cookie:（8KB）
+server通过http headers"Set-Cookie"来设置cookie，浏览器随后的请求都会将已保存的cookie携带在request的http header中，发送给server。
+浏览器关闭则cookie清空，否则可以通过在"Set-Cookie"中指明过期时间（相对于client，而非server），即使浏览器关闭，cookie也还在。这种方式的cookie叫"permanent cookie"（Many login forms also offer a "remember me"checkbox to change this to a persistent cookie at the user's request），而之前称为"session cookie"。
+"Secure" and "HttpOnly"
+Secure: 表明cookie必须通过https发送。(Cookie to only be transmitted over secure protocol as https)
+HttpOnly: 表明cookie不能被js访问（可抵抗XSS的反射攻击：阻止js访问cookie）。（cookies are inaccessible to JavaScript's Document.cookie API）
+CSRF(Cross-Site Request Forgery, C-surf)
+跨站请求注入，就是建立在用户已登录漏洞网站的前提下，hacker通过诱导或窃取用户session，伪装成用户发起并非他自己本意的恶意请求，服务器根本无法识别，因为在服务器看来这就好像是用户自己发起的。
+简单的例子：bank.com通过GET来服务用户转账，bank.com/transfer?to=Alice&amount=100。对于GET请求所有数据都在URL中，客户端的cookie会在每次请求时都会放在HTTP Header中发送给服务器。hacker发给受害者一个链接"bank.com/transfer?to=hacker&amount=100000"，这样当受害者在浏览器中点击时，就会被服务器执行。因为服务器无法知道这是不是用户本身的意图，就当做合法的请求执行了。对于POST，
+
+Cross-site Scripting (XSS)
+定义：是将恶意代码注入到网站的跨站脚本攻击。
+三种：Stored XSS Attacks, Reflected XSS Attacks, DOM Based XSS Attacks(less well-known)
+前两种都是服务端的flaw，攻击代码被注入在http response中。后一种称是Client Side XSS（也成为local XSS，应该是本地遭遇的，如开一个wifi然后利用网关监听所有HTTP请求，等真正server返回Response后，网关向Response中注入再返回给客户端）
+Stored XSS Attacks：注入的恶意脚本在服务器上，这样当用户请求到这部分内容时，脚本会在benign用户这边执行。[example]我在foo.com上留言，留言的内容是一段脚本，保存到了服务器。当其他用户访问foo.com加载留言时，我这段脚本就被服务器发送给用户，继而在用户浏览器中被执行。[避免：过滤/转义危险输入]
+Reflected XSS Attacks: 用户点击url触发攻击，将恶意代码放在请求中，服务端将部分输入作为响应返回给用户，在用户浏览器中被执行。这种最容易通过创建一个恶意url，邮件等方式发送给用户引诱点击。[避免：过滤/转义危险输入]。比如一个网站从请求的url中取name，回显在页面上给用户看。如果hacker修改url发给用户，用户点击后这段恶意代码可能就被服务器放在了页面中返回给用户，进而用户被hijacked。如1: weakless-site.com/q?name=<script>alert('heihei!');</script>, 2: weakless-site.com/q?name=<script>var cookie = document.cookie; /* 把这个cookie发送给黑客的网站 */</script>
+DOM Based XSS Attacks: 通过修改DOM形成XSS。页面中脚本执行时（比如创建DOM），从url中取的参数。这样的话，我（作为攻击者）修改url中参数的值为一段脚本。将这个链接发给小白用户，用户点击后，客户端脚本从url中取值，并试图创建DOM。那这段脚本就被注入到了小白用户的DOM中，继而被执行。比如wikipedia上举的例子，网站语言default=xx，xx是一个<select>的选项，如果修改url中的default=Chinese<script>alert(123);</script>，那么这个带有script值的就注入到了前端页面中，这个构造DOM的过程是在前端执行的。（其实也是服务端的bug啊）
+
+Replay Attack(重放攻击)
+
+
+[了解HTTP authentication]
+
+
+web storage分2种：（FF：10MB/domain，String in javascript are UTF-16，占2字节，即能存储5M个字符）
+基于OS或Browser的不同，一般都存储在文件中。
+cons.
+1.只能存储string，对于一些数据类型，我们必须序列化再存；
+2.无安全性，current domain页面中的js可以访问
+3.读写是同步的，不能喝web worker一起使用
+4.大小仍然限制为10MB
+sessionStorage: 只要浏览器开着，浏览器关闭自动清空。
+localStorage：同上，只是数据没有过期时间，浏览器关闭也不会清空。
+【综上】适用于存储非敏感信息、不超过10MB的字符串。
+
+
+indexedDB: (web storage只能存储少量的数据，而本尊可以存储大量结构化的数据(structured data)，包括file/blob)
+note-powerful but complicated, you'd better use library instead. If you'd prefer a simple API, try libraries such as localForage, dexie.js, ZangoDB, PouchDB, and JsStore that make IndexedDB more programmer-friendly.
+
+[JSON Web Tokens (JWTs)]
+
+
+5.[js]构造函数
+6.[js]iief
+[explain]javascript中的()不可以包含statement，因此将function括起来，当parser分析时就会认为()内的function是一个expression，而不是function declaration，这就是Immediately-invoked执行了。在一些必须是expression的地方，function写那里是不会有歧义的，因此function外围加不加parens都可以。在function后添加parentheses可以调用该函数。如
+var f = function(){return 5;}();//f == 5
+(function() { /* code */ } ());//way1
+(function() { /* code */ } )();//way2
+建议还是约定俗成，统一带上parens以明确地表示出这是一个iife：
+var f = (function(){return 5;})();
+或
+var f = (function(){return 5;}());
+And because any function defined inside another function can access the outer function’s passed-in arguments and variables (this relationship is known as a closure, an Immediately-Invoked Function Expression can be used to “lock in” values and effectively save state.
+7.[js]var vs let
+a.两者都会被hoisting，但let声明的变量如果没有初始化就引用，则会显式地抛出Reference error，不像var不会抛出异常（认为var变量被初始化为undefined，不像let、const这俩都不会被默认初始化），var只有global/function scope，而let还可以限制在block scope，如{}、for()内。
+b.var声明后会被初始化为undefined, let声明后则不会被初始化，直到执行到它的初始化语句。
+c.var在global声明的变量会作为window object的一个property, window.myVar = 5。而let不会。
+d.const和let类似，const声明时必须初始化，作用域为块级，也存在临时性死区temporal dead zone
+[Temporal dead zone]临时性死区：由于let被hoisting但它不像var会被默认初始化为undefined，let在作用域顶部到为它赋值的语句这一段区域都是未初始化的，此时若引用let变量则会抛出Reference error。
+[ref]https://scotch.io/tutorials/understanding-hoisting-in-javascript#toc-es5
+知识点：hoisting
+var foo = function(x, y){
+    return x - y;
+}
+function foo(x, y){
+    return x + y;
+}
+var num = foo(1, 2);
+
+//会被javascript编译器处理为：
+//variable hoisting变量提升
+var foo;//foo#1
+var num;
+
+//function declaration hoisting函数声明提升
+function foo(x, y){//foo#2
+    return x + y;
+}
+
+//function expression NOT hoisted函数表达式不会被提升
+foo = function(x, y){//foo#3
+    return x - y;
+}
+
+num = foo(1, 2);//这里使用foo#3
+
+//规则
+1. 变量声明、函数声明都会被提升到作用域顶处；
+2. 当出现相同名称时，优先级为：变量声明(foo#1) < 函数声明(foo#2) < 变量赋值(foo#3)
+
+因此，num计算时是用的foo#3。
+
+refs:
+1. https://developer.mozilla.org/en-US/docs/Glossary/Hoisting
+2. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/var
+3. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function
+4. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/function
+5. https://stackoverflow.com/questions/40675821/what-happens-when-javascript-variable-name-and-function-name-is-the-same
+8.[js]event loop
+[explain]所有同步任务在主线程上执行，形成一个执行栈(execution context stack)；还有一个任务队列(stack queue)存放事件。当执行栈上的同步任务执行完后，主线程有空闲了，这时才会读取任务队列中的第一个事件并执行。
+理想状态下，浏览器每秒进行60次repaint，实际上Render也是一个回调函数，它也会在stack queue排队，只不过render的优先级要更高。所以当call stack不空时，render即便优先级再高，还是被阻塞，等空了才能优先执行render queue中的函数。
+So, basically the browser is kind of constrained by what you're doing javaScript, the browser would like to repaint the screen every 16.6 milliseconds, 60 frame a second is ideal, that's the fastest it will do repaints if it can. But it's constrained by what you're doing in JavaScript for various reasons, so it can't actually do a render if there is code on the stack, right. Like the render kind of call is almost like a callback in itself. It has to wait till the stack is clear. The difference is that the render is given a higher priority than your callback, every 16 milliseconds it's going to queue a rend, wait till the stack is clear before it can actually do that render.
+[ref]https://2014.jsconf.eu/speakers/philip-roberts-what-the-heck-is-the-event-loop-anyway.html
+[ref]http://davidshariff.com/blog/what-is-the-execution-context-in-javascript/
+9.[js]closure
+[explain]A closure is the combination of a function and the lexical environment within which that function was declared. 就是说在函数声明所在的scope，结合函数本身，形成一个闭包的概念。实际上利用函数访问作用域的概念，经典容易犯错的如for loop中为不同的按钮事件赋event handler. 最终这些handler引用的都是循环最后一个局部变量。对于性能问题，MDN建议没必要用闭包的地方，就不要再在function中声明function，这样在每次创建object都会reassign，应在prototype上添加function。
+闭包可用来实现Module Pattern[anchor=#11]，其实就是把一些方法、属性模块化到一个object(这个object一般是单例)，由iife返回。这样可以减少global scope pollution，而且还创建了privacy。
+Having all this, how should we tell the parser that what we really want, is to call a function immediately after its creation? The answer is obvious. It’s should be a function expression, and not a function declaration. And the simplest way to create an expression is to use mentioned above grouping operator. Inside it always there is an expression. Thus, the parser distinguishes a code as a function expression (FE) and there is no ambiguity. Such a function will be created during the execution stage, then executed, and then removed (if there are no references to it).
+[ref]http://benalman.com/news/2010/11/immediately-invoked-function-expression/
+[ref]http://dmitrysoshnikov.com/ecmascript/chapter-5-functions/#question-about-surrounding-parentheses
+10.[js]enclosing function
+[explain]nested function的上一级function，即向外一层的那个function scope
+11.[js]Module Pattern
+[ref]https://coryrylan.com/blog/javascript-module-pattern-basics
+[explain]是一种js的设计模式，通常会通过iife创建一个单例object，而后供client代码调用。
+12.[js]strict mode
+限制了一些语法的使用，如
+a. 对于在function中的this，如果非严格模式下，this指向global object(即window)，严格模式下，this在进入运行作用域内时被设定，且不会再被改变(the value of this remains at whatever it was set to when entering the execution context)。
+13.[js][+2]prototypal inheritance
+[explain]Each object has a private property which holds a link to another object called its prototype.
+__proto__ contains the object's constructor's prototype object.(__proto__是每个object都有的属性，指向其构造函数的原型对象prototype object)
+Let's say that xiyu is an instance of constructor Person. So xiyu.__proto__ is the Person's prototype. In the same way, xiyu.__proto__.__proto__ is the prototype of Object, which is Object itself. And xiyu.__proto__.__proto__.__proto__ is null.
+
+prototype是构造函数(constructor)上的一个属性，它的值就是一个对象，存储了可以被子类（链）继承的properties和methods。
+定义在prototype上的properties和methods才会被子类继承。如Object.prototype.valueOf()会被继承，但Object.assign()就不会被继承。(They are methods/properties available just on the Object() constructor itself.)
+The prototype property's value is an object, which is basically a bucket for storing properties and methods that we want to be inherited by objects further down the prototype chain.
+
+在constructor function的prototype属性上定义methods，在constructor中定义properties，这样代码更加易读。
+In fact, a fairly common pattern for more object definitions is to define the properties inside the constructor, and the methods on the prototype. This makes the code easier to read, as the constructor only contains the property definitions, and the methods are split off into separate blocks. 
+[note]prototype vs this[/note]
+每个object都有一个指向它prototype的指针，这个指针是js内部的一个对象（不过在多数主流浏览器下，可以通过__proto__来访问），prototype对象定义了一些你想要继承的成员变量/函数。
+
+this.name = 'xiyu';//这是在具体对象上定义了一个自有属性，而不是原型上的，不会被继承。
+Setting a property to an object creates an own property.
+
+Object.create(object) //ECMA5(2009), 用object作为新创建对象的prototype object，返回新建对象
+实现classes的关键字包括: class, constructor, static, extends, super.//ECMA6(2015)， that suit keywords is just a syntactical sugar...
+
+[ref]https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Object_prototypes
+[ref]https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain
+14.[js]how does this work?
+In most cases, the value of this is determined by how a function is called.
+如果想要传this，则可以通过Function原型对象上的call/apply方法。Function.prototype.call(arguments one by one)/Function.prototype.apply(arguments as an array-like)。
+15.[js]event bubbling
+16.[network]描述客户端和服务端之间进行通信的一些方式，网络协议等（IP, TCP, HTTP/S/2, UDP, RTC, DNS, etc.）
+[DNS]
+DNS将域名映射为IP，供浏览器向主机发起请求。
+(1). 浏览器输入www.example.com后，需要将此主机地址转换为实际的IP地址，先从浏览器缓存中查找；
+(2). 如果没有，则尝试从本机hosts文件中查找映射；
+(3). 如果没有，则尝试向本机配置的首选DNS发起请求，DNS在它本地存储的记录中查找；
+(4). 如果没有，则首选DNS服务器会向ISP发请求（如英特网服务提供商：电信）；
+(5). 如果没有，则ISP服务器应该会开始直接请求根域名（即root domain：.），全球有13台根域名服务器；
+(6). 此时进入迭代查询，根DNS将顶级域名（.com）服务器的IP地址返回给ISP；
+(6.1). ISP再向（.com）DNS发请求，（.com）DNS将（.example.com）的IP地址告诉返回；
+(6.2). 此时ISP已经拿到了www.example.com对应的主机地址，就可以进行下一步：发起TCP连接请求了。
+
+[域名发散]
+Domain Sharding(shard: (玻璃等的)尖片），由于浏览器限制了对同一域名的最大连接数（一般为6-10左右），在HTTP/1.1中每个连接对应一次请求，因此对于网页需要加载较多资源时很难满足快速的响应。为了利用并发性突破浏览器的连接数限制，人们想出了将资源分散到不同的域名下，这样就能大大提高并行连接的数量，因而提高网页的加载速度。这个思路便就是域名发散了。
+但遗憾的是，经过实际数据测试，在PC端表现尚可，移动端却非常缓慢（2G、3G、4G、WiFi）。数据显示在4G时加载www.taobao.com总耗时1733ms，当使用域名发散机制时，平均DNS解析时间需要2.32s（Safari，2-shard）、2.55s（Safari，4-shard）。
+所以移动端不适合域名发散，那只能乖乖地尽量将资源放在同一域名下。这就叫做域名收敛（其实就是最普通的做法而已，只不过并不一定严格地全部都放在同一域名下，可能数量较域名发散少些吧，寻找一个性能最优的域名发散数量~）。
+那还是不快啊，有什么更好的办法吗？
+有，大屌Google告诉你：SPeeDY！
+
+[域名收敛]
+见域名发散。
+
+[SPeeDY]
+SPDY，是HTTP/2.0的前身。
+
+[HTTP/1.0 vs HTTP/1.1]
+HTTP 1.0 (1994)
+(1). 不支持长连接(keep-alive)，即当一个请求结束后，这个连接就关掉了，必须再另建立一个连接发起请求。也即不能在一个TCP连接上完成多个请求；
+正因为此，HTTP 1.0存在严重效率问题，这都是源于TCP的慢启动（瞧瞧多么专业的术语，好好复习下吧！）。
+
+HTTP 1.1 (1996-2015)
+(1). 支持长连接（客户端在请求时设置Request Header：Connection: Keep-Alive）；
+(2). 要求在Request Header中加入Host Header（当不同host指向同一IP时，服务器可以根据host来分辨客户端的意图，即想访问哪个host的资源，同一台机器上充当多域名）；
+(3). 缓存方面，增加了'entity tag'(E-Tag)，标记资源相当于hash；（扩展下：Caching知识点）
+(4). 100 Continue status状态码，当客户端不清楚服务器能否响应请求时、或者客户端是否有权限发起某个请求时，与其发送大量的数据不如仅发送一个Request Header，来试探下。如果服务器返回HTTP/1.1 100，则意味着一切OK，可以正式地发送请求。
+(5). much much more...
+[ref]https://stackoverflow.com/questions/246859/http-1-0-vs-1-1
+
+[HTTP Caching]
+只有GET请求会缓存，用URI进行对比。
+Cache-Control是个通用的指令，Request和Response的Header都可以用。
+private cache: 只能由单独的用户自己使用；shared cache：可以由多用户使用，如代理服务器可以作为缓存，服务于多用户。
+Pragma：是HTTP/1.0的Header，相当于Cache-Control: no-cache
+Vary: 该指令用于指示缓存应服务于那些匹配的请求。有点绕，举例子：
+请求1：GET Accept-Encoding: *； 响应1：Content-Encoded: gzip; Vary: Content-Encoding
+请求2：GET Accept-Encoding: br;  响应2：Content-Encoded: br; Vary: Content-Encoding
+注意，这里响应2仍然是将客户端发来的请求2 foward到origin server，因为Vary指明Encoding必须相同才可利用缓存（这里Accept-Encoding不同，缓存的是gzip，而请求的是br）
+请求3：GET Accept-Encoding: br; 响应3*：这次匹配，命中Cache直接返回。
+
+17.[js]for...in vs for...of(for...of是es6)
+for...in：对object的所有enumerable的属性进行任意顺序的遍历，包含继承的属性。但注意对Array/String用for...in，遍历得到的每个value是index，而不是数组元素/每个字符。因为在javascript中，everything is an object！
+for...of：对iterable objects进行遍历（如内置的Array、Map均已实现，但Object是没有的），因此为了让Object也支持遍历，则应首先这个object得有@@iterator方法，即Object得有一个叫做"@@iterator"的属性，且这个属性可以通过常量"[Symbol.iterator]"来访问。
+[Symbol.iterator]：它是一个无参函数，返回一个实现了next接口的object。而next是一个无参函数，返回形如{value: somVal, done: boolean}的object（参见iterator protocol）。p.s.和C#的枚举类类比即可：类含有一个iterator用来遍历，这个iterator又实现了iterable接口。
+要让一个object支持iteration，需要加一个[Symbol.iterator]属性、且其值为一个可以返回迭代器（就是一个实现了next的object）的函数。
+var myIterator = {
+    next: function() {
+        // ...
+    }
+    [Symbol.iterator]: function() { return this }
+};
+[...myIterableObject]: spread syntax[ES6], allows an iterable such as an array expression or string to be expanded in places where zero or more arguments (for function calls) or elements (for array literals) are expected, or an object expression to be expanded in places where zero or more key-value pairs (for object literals) are expected.
+
+18.[js][+3]call vs apply vs bind(ES5)
+语法都很像：myFunction.call/bind(thisArg[, arg1[, ...]]); myFunction.apply(thisArg[, argsArray]);
+相同点：都是想改变function中执行时的this。
+注意：primitive value passed as thisArg is converted to object
+Function.prototype.call/Function.prototype.apply
+使用给定的object作为this，执行一个函数。call的参数列表是one by one，apply的参数列表是以数组形式提供（也可以是array-like object）。
+什么是array-like object?
+就是一个含有'length'属性、同时且含有[0, length)整型属性作为关键字的object。如{ 'length': 2, '0': 'eat', '1': 'bananas' }。
+
+Function.prototype.bind
+为myFunction创建一个wrapper function(bound function),当它被调用时，内部this指向'thisArg'；这里的arg1...等参数，在调用时会插在实参的最前面。
+Function.prototype.bind = function(scope){
+  var fn = this;
+  return function(){
+    return fn.apply(scope);
+    //return this.apply(scope);//特别注意！这个写法是错误的！仔细想想this的定义：this是function内的变量，它的值由函数如何被调用决定的。这里this并//不是作用域外上面那个this，而是当前function内的this！讲道理这个this未能决定是被谁调用的，所以是window object（strict模式下是null/undefined）
+  };
+};
+[ref]https://www.smashingmagazine.com/2014/01/understanding-javascript-function-prototype-bind/
+
+confused me a lot:
+//slice是call的bound function，而这个bound function中，this指向的是Array.prototype.slice这个函数。
+//Array.prototype.slice虽然定义在Array的prototype上，Array及其子类可以直接使用。但slice执行时，this实际上指向对象Instance。且只要这个对象是个array-like object就可以。故，为了能对array-like object使用slice方法，则就要想办法把slice执行时的this，指向那个object。slice内部执行时，就是调用了的myArrayLikeObject.slice。
+//这就有了call/apply，可以this绑定为通过thisArg传入的array-like object。
+//slice(param) == Array.prototype.slice.call(param);
+var unboundSlice = Array.prototype.slice;
+var slice = Function.prototype.call.bind(unboundSlice);
+//boundCall:
+//this == unboundSlice
+//2018年11月11日08:03:53 myFunction.bind(scope); means 在scope上调用myFunction，即call(unboundSlice)==unboundSlice.call
+//所以在boundCall调用时，内部相当于 unboundSlice.call() == Array.prototype.slice.call
+//TMD好绕...我想我理解了。关键在于调用一个方法时，我们用object.method()，这里thisArg就是要手动改变object的。
+function ToArray() {
+  return slice(arguments);
+}
+arguments is an Array-like object accessible inside functions that contains the values of the arguments passed to that function.
+
+var list1 = ToArray(1, 2, 3); // [1, 2, 3]
+[ref]https://stackoverflow.com/questions/7056925/how-does-array-prototype-slice-call-work
+19.[js][es6]promise、promise chaining
+主要是用来使异步代码的编写变得更加优雅。
+A promise represents the result of an asynchronous operation. 3个状态：pending, fulfilled, rejected.
+[tips]
+1. 语法
+var cleanRoomPromise = new Promise(function (resolve, reject){
+    //do something, possibly async...
+   	
+    //when this shit finished
+    var isFinished = true;
+    if (isFinished){
+        resolve('room cleaned');
+    }
+    else{
+        reject('not cleaned');
+    }
+});
+
+2. 机制
+Promise的构造函数接受一个function参数，称之为executor。new Promise时，executor会被立即执行，执行完毕后，构造函数才返回。
+executor中关键在于，当任务完成时（正常/出错），分别调用resolve/reject。resolve/reject都接受一个参数，可以是任意类型。这俩函数是由javascript引擎定义好的，在构造Promise时，在ctor内部调用executor时，会将内置的这俩函数传给executor。当promise设置的任务完成时调用这俩，其实就是做了一件事：修改Promise内部的状态。对于resolve，设置status为"fulfilled"（即promise成功）、result为"room cleaned"（即调用resolve时的参数）；同理对于reject，设置status为"rejected"（即promise出错）、result为"not cleaned"（即调用reject时的参数）。
+当调用了resolve/reject后，此时会执行传给then的回调函数。
+
+对于then，then的执行是异步的，即使promise中的任务不是异步，立即就执行完的，但.then的任务是会被挂起，当promise确定要执行回调时，该任务会被放在event loop中的队列中，直到当current execution完毕，js引擎才有空去检查、并执行队列中的任务。So the code after .then ends up always running before the Promise’s subscribers, even in the case of an immediately-resolved Promise.
+cleanRoomPromise. then(alert);
+console.log('always run before alert');
+我的理解是这可能开了一个定时器线程，轮询检查promise的状态，然后根据status调用resolve/reject callback。
+[ref]https://javascript.info/promise-basics (感觉比MDN、Google Developer写得更简单易懂。。)
+
+3. 链式调用chaining
+.then(resolveCallback, rejectCallback).then...
+.then返回的还是一个promise，且then传入的回调函数所return的值，将作为下一个then调用函数时传入的参数。
+如果then中的回调没有return一个值，那传给下一个then的value=undefined
+.all/.race/.resolve/.reject
+.all : when the promise returned by 'All' resolved, the returned values will be in order of the Promises passed, regardless of completion order.
+Rejection:
+If any of the passed-in promises reject, Promise.all asynchronously rejects with the value of the promise that rejected, whether or not the other promises have resolved.
+
+20.[js][ecma2015]arrow functions
+注意：它的execution context中没有this、arguments、super这些变量，所以不能作为构造函数。也没有prototype属性、也不能作为generator。
+() => expr1;//等价于 return expr1;
+a => { expr1; expr2; }
+(a, b) => { expr1; expr2; }
+(a, b) => ({ name: a, age: b });//返回一个object literal时，这种concise写法，函数体必须用()括起来
+非常关键：因为箭头函数作用域没有自己的this，所以试图通过call/apply来设置this是无用的，这个变量会被忽略。
+Since arrow functions do not have their own this, the methods call() or apply() can only pass in parameters. thisArg is ignored.
+//tricky：这货有个牛逼的地方在于：因为内部没this，它实际上按照普通的变量作用域法则去找this，完美枪毙setTimeout中this指向window object的问题。
+function Person(){
+  this.age = 0;
+
+  setInterval(() => {
+    this.age++; // |this| properly refers to the Person object
+  }, 1000);
+}
+
+21.[js][es6]Rest parameters
+语法：function foo(a, b, ...restParamArgs)
+解释：允许定义无限参数，在调用时，除了a、b，其他参数都会被放到一个名叫"restParamArgs"的Array中。
+区别：arguments是object，restParamArgs是Array；arguments是传给函数的所有参数，而restParamArgs是除去实参剩余的部分，构成的一个数组。
+
+22.[js][es6]generator, yield, iterable protocol, iterator protocol, function*
+
+23.[js][es6]what next?
+
+24.[network]http vs https
+25.[js]逻辑运算符：&&、||、!
+expr1 && expr2: 若expr1能转为false，则返回expr1；否则返回expr2
+expr1 || expr2: 若expr1能转为true，则返回expr1，否则返回expr2
+!expr: 若expr1能转为false，则返回true；否则返回false
+'dog' && 'cat' => 'cat'
+null, undefined, “”, ‘’, NaN, 0 => are considered falsy
+26.[js]比较运算符：==、===(strict mode)、<=、etc
+终极奥义看这个spec：http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3 
+The equality operator converts the operands if they are not of the same type, then applies strict comparison.
+0 == false // true
+0 == null // false,
+
+如果一个操作数是Boolean，则转为+0(false)或1(true)
+如果an object和string/number作比较，则将object做强制类型转换valueOf/toString
+（强制转换发生的必要条件：object是在和primitive类型做比较！否则是采用比较两个object的规则）
+
+ref:
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators#Using_the_Equality_Operators 
+ref: http://www.ecma-international.org/ecma-262/5.1/#sec-9.1
+字符串比较按照unicode顺序
+NaN is not equal to anything, include NaN.
+
+Positive and negative zeros are equal to one another.
++0 === -0
+
+Null and Undefined Types are strictly equal to themselves and abstractly equal to each other.
+undefined == null
+undefined !== null
+undefined === undefined
+null === null
+isNaN(1 + null)      // false
+isNaN(1 + undefined) // true
+
+27.[structure]web服务器集群
+集中式：一个任务交给1台服务器处理
+分布式：一个任务分解成若干子任务，发送给不同服务器处理
+负载均衡：1台apache作为门面，在前端用负载均衡把请求发送给跟在后面的若干个tomcat应用服务器
+负载均衡带来的问题：会话问题
+会话处理：
+1. session粘性：固定发给第一次访问的服务器
+2. session同步：任意一台服务器session发生变化，同步到所有服务器
+3. session共享：多台服务器共享同一个session服务器（采用redis或memcached）（访问disk慢）
+    应用程序连session服务器用分布式缓存系统，后面再跟数据库。
+    3.1 memcached 分布式存储服务器集群相互之间不通讯，应用程序在set/get时，通过对key做hash算法决定这个数据应该映射到哪个memcached。比如有2台memcahed，"foo=bar"映射到memcached1，"hi=xiyu"映射到memcached2。(ref: https://www.cnblogs.com/phpstudy2015-6/p/6713164.html)
+4. cookie：保存在客户端，不安全&&数据量有限&&每次请求都要带
+
+28.[http server]Nginx vs Apache vs Nodejs
+Apache HTTP Server（latest: 2.4.37, 2018-10-23），is free and open-source cross-platform web server software。大多运行在Linux，但现在也有一部分可运行在Windows。最早开发于1995，2009年成为第一个为超过100millions网站做服务的软件。截止2018年8月，估计有39%的网站使用Apache。
+a.Nginx和Apache都是用C写的，因此解释型的Nodejs相比于前者，执行效率天然就会慢一些；
+b.Nginx和Nodejs类似，都是异步非阻塞、事件驱动型，只用到较少的进程，因此高并发支持的较好，多个连接对应一个进程。epoll网络I/O模型是Nginx能处理高并发的核心原因；Apache则是阻塞型的，一个连接对应一个进程。
+c.Node适合并发场合，如chart room、multiplayer game，不适合static websites like CMS, blog, ecommerce。
+Apache使用PHP脚本语言。
+Nginx和Apache类似，适合serving static files。
+三者并不互斥，通常有的服务器会安装Apache and/or Nginx，并一同安装Node，以更好地服务不同类型的请求。
+In fact, It is rare to find a website that relies solely on node to serve content in the wild.
+
+Apache vs Tomcat
+Apache HTTP Server是一个HTTP服务器（也可直接叫Apache，或httpd，用C写的）；
+Tomcat（latest: 9.0.13, 2018-11-07）是一个Java Servlet Container（用Java写的），用于部署java servlet和jsp（打包成WAR=Web ARchive，直接丢进Tomcat的部署目录下）。
+Servlet是用于响应HTTP请求的，在它之上有一些框架如struts可以将此过程更抽象，以实现web applications.（oracle定义：A servlet is a small Java program that runs within a Web server. Servlets receive and respond to requests from Web clients, usually across HTTP, the HyperText Transfer Protocol.）
+Java Servlet必须放在Servlet container（web container）中运行。容器将请求分派给对应的servlet、管理servlet的声明周期。servlet就是一个真正用于处理请求、返回响应的object。它与JSP的不同之处在于，JSP是在HTML代码中可以嵌入Java代码；而Servlet是在把HTML代码嵌到Java代码中。
+容器：处理网络相关的事情，如建立连接、解析请求，它是一个壳子。而真正处理请求的逻辑，是在容器中运行着的程序。
+
+[static content vs dynamic content]
+static content: 静态内容，如html, js, images, css等（is the content which fetched from disk）
+dynamic content: 运行时生成的内容，每次请求可能是不同的。（is generated at request time, and may change from one request to another）
+动态内容可以用CGI等方式生成。
+[CGI]
+Common Gateway Interface
+
+[Servlet的生命周期]
+Servlet 4.0 released on 2017.09（需要平台Java EE 8，引入了HTTP/2）
+***servlet需要实现HttpServlet接口：核心的3个，init、service、destroy***
+1. 初始化阶段，容器调用init来初始化一个servlet instance；
+2. 初始化后，这个servlet实例就可以响应客户端的各种请求了，每个请求都在servlet实例自己的线程中处理（ Each request is serviced in its own separate thread）（容器调用service来处理每个请求，分派至不同类型如doPost, doGet, doPut, doDelete等）
+3. 容器调用destroy来销毁servlet instance（生命周期中，初始化、销毁只会执行一次，当初始化后，servlet就可以一直为client服务。具体什么时候销毁，依赖于各自容器的实现）。
+
+
+1. client -> HTTP Server（比如请求一个jsp）
+2. HTTPServer -> JSP Engine（JSP Engine从磁盘读jsp文件，并编译成.class，此称作为Servlet）
+3. Servlet Engine处理
+4. Servlet Engine -> HTTP Server（输出结果）
+5. HTTP Server -> client（返回Response给client）
+
+
+[Apache]
+MPM: multi-processing module (MPM)
+MPM是Apache HTTP Server用于配合httpd，属于处理请求的核心模块，服务器开发人员可以自行决定装载哪个模块以满足各自的特性要求（甚至是在Runtime装载，当然同一时刻只能装一个）。三种主流的请求处理机制：prefork、worker、event(Unix-like)。另外还有个专为windowsNT优化的winnt。
+mpm_prefork_module: 实现的是非线程web server（这意味如果有用到那些非线程安全的lib，用这个就比较合适）。httpd进程作为root启动，维持一个服务器进程池，创建一些空闲的子进程用于listening（一般是5~10个）。每个进程用于处理到来的请求。server config中配置的MaxRequestWorkers，决定了prefork方式的服务器在同一时刻能处理的请求数（默认256，多思考设定多了会怎样？答案是内存资源不足，导致频繁换页）。其中有个问题，因为是有一些空闲进程在等待请求到来，当请求到来时，这些进程从阻塞（睡眠）中唤醒进入就绪状态，但这些只能有一个进程来为这个请求服务，此时操作系统就要做决定谁来投入运行。那么其它进程又要重新回到阻塞状态。这个现象就叫做thundering herd problem。如果每次只有一个进程，那就应该会高效许多。总结：可以看到进程模型式的服务器相当耗费RAM，而且负载很高时会导致请求被拒绝的现象发生。
+
+mpm_worker_module: 实现的是进程、线程混合型web server。仍然是httpd以root权限启动作为父进程，初始创建2个子进程，与process model用子进程来处理请求不同的是，worker model的子进程会创建1个listening thread，多个server threads，listening线程负责监听请求到来，将请求递交给server thread进行处理。一般默认16个子进程，每个子进程可以创建25个线程。所以总共能够响应的请求数=16*25=400（这也不高啊。。）。同process-based一样，同样受制于thundering herd problem。（不是很理解，看今晚的CSAPP内容就理解了，关键在于对同一port只能有一个listening fd！）
+
+
+[CSAPP][network]
+socket: 就是一个file descriptor，即对应一个文件（可以看作是an endpoint of a connection）。一个连接可以表示为(clientIP:port, serverIP:port)。客户端port是由内核确定的一个临时port，应该并没有什么意义。
+连接的建立：
+client调用socket创建一个file descriptor，而后调用connect向服务器+端口发起连接请求（connect blocks until got response from server）；
+server端首先启动服务来listening：调用socket创建一个file descriptor（默认是active，即client fd），调用bind将server fd绑定到服务器IP、端口上，然后调用listen将该fd转换为listening fild descriptor，此时表明这是一个passive fd，即位于服务端的server fd，可以监听incoming requests。accept用于接受到来的请求，blocks until a request coming，请求到来后返回一个connection file descriptor(connfd)，此时连接就在client端的socket和server端的connfd之间建立好了。
+原来上讲，对服务端的同一个IP+Port，同一时刻只能有一个进程在listening（即只有一个listening fd）。如果进程在调用listen时已经有进程在listening这个IP+Port，那么会报类似"Address is already in use"的错。但有意思的是，多个进程是可以同时监听同一个IP+Port的。就看你基础扎不扎实了:D（想想fork子进程后会发生什么）。原因：对于处理并发请求，在每个请求来临后(accept返回后），可以通过fork来创建子进程来处理这个连接，主进程只负责listening。关键之处就在这里了，fork后子进程共享父进程已经打开的file descriptor！（CSAPP原话！）即fork出的子进程会与父进程共享listening fd，那么此时就是2个process在同时listening on serverIP:Port。有意思~再继续思考，假设子进程处理完了请求，它和父进程都在运行中，此时又新来了一个请求，既然两个进程都在监听同一个端口，那么问题来了，到底哪个进程负责处理到来的这个请求呢？这不就是昨晚看到的那个问题：thundering herd problem。
+那回到Apache prefork module，是不是可以这么理解，既然是子进程负责处理请求，那么每到来一个请求后，父进程fork一个子进程来处理，然后就又多了一个进程一起listening...
+//pesudo code for perfork
+int confd = accept();
+//a request arrived, fork a child process to handle it
+pid_t pid = fork();
+if (pid == 0) {//child process
+  HanldeRequest();
+}
+else if (pid > 0){//parent process
+  //do nothing
+}
+else{//error
+  //error
+}
+
+[My Questions]
+1. 既然多个process去监听同一port会有thundering herd problem，即便是两个也有，那为什么不只用一个process去监听呢？感觉它监听到后立马分配给线程去handle，然后继续listening就好了啊，这个理论上讲，应该也够极大的并发吧？没有什么潜在的耗时操作吧。。
+2. 
+
+
+
+29.[many damn terminologies]
+proxy server: A proxy server is essentially a middle computer that sits between the client and the primary server. A发请求出去，不直接连到服务端C，而是连到代理B，当B有结果返回时，C代替B返回给A，A不知道到底是谁在服务。
+用途: 
+1. content control：URL、DNS等控制
+2. filtering of encrypted data：代理能知道客户端私钥，相当于https中的the man in the middle attack
+-【网关】A proxy server that passes unmodified requests and responses is usually called a gateway or sometimes a tunneling proxy.
+-【正向代理】A forward proxy is an Internet-facing proxy used to retrieve from a wide range of sources (in most cases anywhere on the Internet).
+-【反向代理】A reverse proxy is usually an internal-facing proxy used as a front-end to control and protect access to a server on a private network. A reverse proxy commonly also performs tasks such as load-balancing, authentication, decryption or caching.
+正向和反向的区别：
+1. 正向代替客户端，反向代替服务器；
+2. 正向面向internet，反向面向内网；
+3. 正向代理如ISP运营商、能访问Google的代理，反向如服务器集群的前置服务器(如Nginx)用来做负载均衡、分发请求到内部的真正处理请求的服务器。
+
+
+30.[html]iframe, browsing context
+browsing context：一个tab、windows，或者是嵌在页面中的iframe。
+每个browsing context都有origin（scheme://host:port），同源（same origin）就是指origin一样。每个browsing context都有自己的session history(window.history，表示当前加载的page，可通过history接口达到浏览器的前进、后退效果)、document（DOM入口）。
+在两个browsing context之间通信受严格限制。
+30-1.Referrer
+2014.06增加的规范，用于规定Request Header中是否携带Referer信息。Referer是一个URL，表示到达当前页面的上一个页面URL。
+
+
+31.Web Workers
+---Redis（REmote Dictionary Server）--------------------------------------------------------------------------------------------------------------
+2018.10.24当前稳定版本：5.0.0 /redis/
+历史：2010年左右，意大利人（应该是）采用传统DB在分析日志时遇到性能瓶颈，自己开发了一种带数据格式的数据库，读/写数据都只在内存中完成，在disk上存储数据，disk上的数据主要用来在系统启动时，由Redis方便在内存中重建数据结构。Redis没有传统RDBM的那种查询、聚合等特性，数据按结构存储，操作也是针对ADT（Abstract Data Type）进行。Redis大量使用fork（系统调用），parent fork为后续client服务，子fork将数据的copy写到磁盘。
+The Redis implementation makes heavy use of the Fork (system_call), in order to duplicate the process holding the data, so that the parent process continues to serve clients, while the child process creates a copy of the data on disk.
+Redis特点
+1.相比传统关系型数据库用tabular来存储，Redis用key-value存储，同时还支持list、set、sorted set、hash table、hyperloglogs等数据结构。
+2.数据读写都在内存完成，保存在磁盘，每次系统启动时从disk重构数据放到内存（Durability持久化，就是说写了之后丢不了）；
+3.支持备份replica，master-slave模式
+通常Redis至少每2秒会写一次磁盘。
+经典用例：session caching, full page cache, message queue applications, leaderboards, counting among others.
+
+32. 依赖注入 Dependency Inversion
+p.s. 其实感觉就是设计模式中的“策略模式”，A类引用B具体类的公共接口，B具体类负责实现。
+
+33. Gateway
+网关用于连接两个不同通信协议的网络（即做协议转换用）。与路由（routers）或交换机（switches: network switch, also called switching hub）不同点在于，网关连接的网络可以是不同的协议，而且网关可以在OSI的任意一层来实现。
+网关也可以泛指（loosely refer to）实现网关任务的计算机程序，如默认网关（default gateway）或路由（router）。
+在公司网络中，网关也可以扮演代理服务器、防火墙的角色。
+
+34. Math.round, Math.floor, Math.ceil, parseFloat, parseInt
+Math.round: 返回整型，<0.5则取绝对值小的方向，>0.5取大的，==0.5则向正无穷方向round。-20.5=>20
+Math.floor: 向下取整，5.05=>5, -5.05=>-6
+Math.ceil: 向上取整
+
+35. HTTP状态码
+2** - 成功
+3** - 重定向
+4** - 客户端错误，请求包含语法错误或无法完成请求
+5** - 服务器错误，服务器在处理请求过程中发生了错误
+
+200-请求成功
+301-资源被永久转移到其他URL
+302-临时移动，与301类似
+304-Not Modified，通常是访问的资源未修改过，服务端返回304时通常不会返回任何资源，因客户端已缓存
+305-Use Proxy，所请求的资源应该使用代理访问
+307-Temporary Redirect，临时重定向，与302类似
+400-Bad Request
+401-Unauthorized，请求要求用户身份认证
+403-Forbidden，服务器理解客户端请求，但拒绝执行
+500-Internal Server Error，服务器内部错误，无法完成请求
+502-Bad Gateway，作为网关或者代理工作的服务器尝试执行请求时，从远程服务器接收到了一个无效的响应
+503-Service Unavailable，由于超载或系统维护，服务器暂时无法处理请求
+
+36. HTTP/1.1 keep-alive
+
+37. HTTP/2
+
+38. websocket vs socket
+
+39. 排序算法
+shell sort：
+
+40.[terminology]微服务
+服务能被独立更新。通过HTTP、RESTful API。
+单体应用只能水平扩展，当体量增大时变得复杂。[ref:http://www.sohu.com/a/227348782_355137]
+Monolithic(单体应用)，API Gateway。
+
+41.[terminology]SOAP（Simple Object Access Protocol，简单对象访问协议）
+一种使用XML作为消息格式，应用层采用HTTP或SMTP（Simple Mail Transfer Protocol）的specification。
+42.[terminology]RESTful
+
+43. web worker
+
+44. [HTML5]WebGL
+Web Graphics Library，是可以在浏览器中进行2D、3D图形绘制的javascript API。只要浏览器支持，就不用再像以前一样依赖于图形插件了。
+-----------一些小东西-------
+1. <!DOCTYPE html>
+必须出现在所有document的顶部，告知浏览器尽可能按照w3c标准渲染文档。如果没有，则可能切换至怪异模式（quirks mode），即按照各自浏览器自身的标准解析。
+2. 各浏览器内核
+IE: Trident
+Chrome: Blink（Webkit核心的一个fork版，2013.04由Google宣布）
+Safari: Webkit（注意，是Apple的！与Blink一样，都是来自于KDE（back then called the K(ool) Desktop Environment）中的KHTML和KJS）
+FireFox: Gecko
+
+45. new
+代码'new Foo()'执行时，将会做以下几件事：
+a. 创建一个从Foo.prototype继承的对象
+b. 调用function Foo，并将this绑定为a中创建的对象
+c. function Foo所return的值便是整个new表达式的值，如果没有显式return，则默认return this。
+
+46. with(deprecated)
+语法：with(expression) { statements }
+修改作用域，将给定的expression添加到head of scope chain，{ }中的代码执行时，所有变量都会首先从expression指定的作用域中查找，如果没有则继续在scope chain中查找。如
+var obj = {a : 1, b: 2};
+with(obj) { alert(a); alert(b); alert(c); }
+在{ }中的作用域就是obj，所以不用写alert(obj.a)，直接alert(a)。但注意alert(c)执行时，先会在with限定的作用域obj中找看是否有c属性，对于with { }内的所有变量，都会先在obj中找。这样如果不属于obj的，就继续在scope chain中查找，有了这个with就浪费一次lookup。（因为不管啥变量，都要先在obj中找）
+Pros优点:
+修改obj属性方便，不用每次显式引用obj：obj.a = 3; obj.b = 4;
+而是可以：with(obj) { a = 3; b = 4}
+Cons缺点：。
+
+47. [ES2015]Computed property names
+可以在[]中书写表达式，表达式的值将作为object的property name。
+如ES2015之前，
+var prop = 'name';
+var tempObj = {};
+tempObj[prop] = 'xiyu';
+alert(tempObj); //{name:xiyu}
+/* -----Starting with ES2015----- */
+var tempObj = {[prop]: 'xiyu'};
+
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#Method_definitions
+
+48. [ES6]Destructuring_assignment解构
+react经常见到这种写法：const { a, b } = obj;
+//obj = {a: 1, b:2}，将“与=左侧变量相同的属性名的值”赋值给对应变量。
+//log(a) == 1
+//log(b) == 2
+
+49. [设计模式]前端中的设计模式
+单例、观察者、工厂、命令、代理（比如每张图片加载完成之前设置个loading）、职责链（比如根据薪资计算税率、订单购买）
+职责链模式定义：使多个对象都有机会处理请求，从而避免请求的发送者和接收者之间的耦合关系，将这些对象连成一条链，并沿着这条链传递该请求，直到有一个对象处理它为止。（大函数分割成一个个小函数，清晰，各司其职）
+[ref]https://www.cnblogs.com/smlp/p/9776789.html
+
+50*. 【Demo】实现一个使用了Nodejs、React、Express、数据库存储等知识所构建的小应用：TodoList。
+
+51. [ES8, ECMA2017]async...await
+用来将一连串Promise异步的写法，改为同步的编码风格，让可读性更好的一种语法。
+a. async用来声明一个function是async function，只有在async function内才能写'await expression'语法；
+b. await语句将会阻塞async function的执行，即此函数是在event loop的不断循环周期内异步执行的；
+c. await后面跟的expression要求是一个Promise，若非则隐式转为a resolved promise；
+d. 'await expression'的返回值：当promise resolved，则返回resolved值；当promise rejected或抛出异常(对于promise异常，内部其实是等同于rejected），则这条语句将“以异常的形式，把rejected值抛出”（需要用try-catch来捕获这个rejected"值"，此时catch(e)中的e，是"值"，而不是异常）。
+function resolveAfter2Seconds(){
+  return new Promise(resolve=>{setTimeout(()=>{resolve('resolved')}, 2000)});
+}
+e. async function的返回值是一个Promise：如果函数有return值，则作为resolved promise值；如果函数内部抛出异常，则是一个rejected promise。
+async function asyncCall(){
+  //start
+  var res = await resolveAfter2Seconds();//block here until the Promise done
+  console.log('只有在上面异步任务执行完后，才会继续执行这条语句')
+  console.log(res);//'resolved'
+}
+
+52. [+3][ES6, ECMA2015]generator yield
+定义：
+     Generator，是用function*声明的一个Generator function，这个函数返回一个Generator对象。
+     yield expression，在每次调用Generator.prototype.next()时，返回值是一个形如{value: xxx, done: xxx}的对象。'value'是yield后面expression经过计算后的值，'done'表示迭代是否结束(值为true或false)。
+
+语法：
+function* generatorName(i){
+  yield i
+  yield i+1
+}
+var gen = generatorName(0)
+gen.next()  //{value: 0, done: false}
+gen.next()  //{value: 1, done: false}
+gen.next()  //{value: undefined, done: true}
+
+tips：
+a. function*函数被调用时，函数体并不立即执行，而是返回一个遵循(conforms to)iterable protocol和iterator protocol的一个Generator对象;
+b. 当调用next()时，函数体开始执行到下一个yield语句，而后停在这里，直到下一次调用next()时才会继续向下执行；
+c. 如果在function*函数中有return，则在next()执行时遇到return后，Generator函数就此结束，返回对象的value值是return语句的值，done就设定为true；
+d. 如果在function*函数执行过程中发生异常，则Generator函数终止，CPU回到caller继续执行，caller调用的next()抛出异常。此后再调用next，由于Generator已经结束，因此返回值都是{value:undefined, done:true}
+e*[后面的Q就都可以解释了:D]. 如果在调用next时有传参数next(param)，则function*的执行过程为：首先将用传入的参数param替换"当前暂停的yield表达式"，然后再继续向下执行。注意：首次调用next(param)当然不会替换了，因为还没有上次暂停的yield，相当于next()。
+
+Q:疑惑，到底这几句什么意思？
+ When the iterator's next() method is called, the generator function's body is executed until the first yield expression, which specifies the value to be returned from the iterator
+    'until the first yield expression'，这个怎么定义，包括yield表达式？【包括】那如果表达式嵌套呢？如console.log(1, yield i++)【思考下编译器的处理，编译器处理时先计算log的第一个参数，而后第二个...，最后执行console.log输出。那么这条语句可以相当于是：
+  evaluate 1
+  evaluate yield i++  //paused immediately after evaluation of this line
+  evaluate console.log()
+即，碰到yield i++执行后就暂停了，console.log()还没等到执行。当下次next调用时，console.log方才输出。
+】
+
+Calling the next() method with an argument will resume the generator function execution, replacing the yield expression where execution was paused with the argument from next(). 
+    yield expression，是指整句还是只是"yield expression"？【用参数替换这个形式：yield expression】还是仅仅"expression"？【否】比如console.log(yield i++); 或 var j = yield i*2;
+  'replacing the yield expression'，next传入的参数替换'yield expression'？【是的，替换当前yield暂停的地方】
+
+If an optional value is passed to the generator's next() method, that value becomes the value returned by the generator's current yield operation.【current yield expression是指当前暂停的yield，也就是上次next执行后暂停的地方】
+function* logGenerator(){
+    var i = 1;
+    console.log(i)
+    yield i++;//#1
+    console.log(yield i++)//当第二次next调用时，为什么不输出'replacing the yield expression'?【第二次调用时，传入参数替换的是***当前yield expression***，即当前暂停处，因此替换的是#1】
+    return 'end of function body'
+}
+
+var gen = logGenerator()
+gen.next()
+gen.next('replacing the yield expression')
+
+53. try-catch中的throw new Exception vs throw new Error
+
+
+
+---Node.js--------------------------------------------------------------------------------------------------------------
+2018.10.26当前稳定版本：8.12.0
+2019.01.31LTS10.15.1
+简要介绍：Node.js是运行时异步事件驱动（event loop，和js一样）的javascript，用于构建可扩展的network applications。它不像其他经典的系统使用线程来做并发，认为并发在网络中并不高效，而且不方便使用。（os：目前我也不知道它是咋做的）Node.js几乎没有直接和IO打交道的函数，不存在lock。所有的异步操作底层都调用的libuv（focus on asynchronous I/O）。
+Nodejs作为web server，只有当发生事件时才执行一些操作，否则就只是空闲，静等事件发生。that’s what event-driven means: the server only reacts when an event occurs. That could be a request, a file being loaded, or a query being executed — it really doesn’t matter.
+1.V8
+一个用C++写的效率高得疯狂的js引擎，用在Chrome浏览器、Nodejs等之中。它可以单独运行，或者嵌入到C++应用程序之中。
+V8 is Google’s open source high-performance JavaScript and WebAssembly engine, written in C++. It is used in Google Chrome, the open source browser from Google, and in Node.js, among others. It implements ECMAScript and WebAssembly, and runs on Windows 7 or later, macOS 10.12+, and Linux systems that use x64, IA-32, ARM, or MIPS processors. V8 can run standalone, or can be embedded into any C++ application.
+2.Docker
+Docker Container用在应用部署方面，Nodejs Application及其依赖被部署在Docker容器中，不同的Applications可以共享底层的bin、libs等，容器之间是相互独立的。
+3.REPL
+the 'repl' module provides Read-Eval-Print-Loop, 交互式解释器，类似cmd/shell，可即时运行代码。
+4.express
+一个framework，封装对请求的处理，不用自己手工写很多判断GET、POST、路径等等，可能写法更优雅
+5.router
+同上，一个意思
+6.nodejs+express+ejs
+ejs: Embedded JavaScript templating，一种js语法，用于生成HTML
+<%flow-control；<%=输出HTML转义后的值；<%-输出未HTML转义的值；<%#注释；%>endtag
+
+7.中间件middleware
+
+关键知识点
+1. Understanding HTTP Transaction in Nodejs
+2. EventEmitter
+All objects that emit events are instances of the EventEmitter class.
+当object触发事件时，所有绑定的event handler会同步执行。
+
+---Nginx--------------------------------------------------------------------------------------------------------------
+历史：2002年俄罗斯的一个家伙为解决C10k问题而开发，2011年11月获得$3million成立Nginx公司提供商用。2018年6月C轮融资$43million。
+[engine x], 可以用做反向代理、负载均衡的web server。据调查前100k个网站中有一半都用的Nginx。
+核心：采用异步事件驱动的方式来响应请求（而不是用threads）。
+特性：
+1.在一个HTTP连接上可以同时处理10k个请求，并消耗很低的内存资源（2.5MB/10k）
+2.处理静态文件、index文件
+3.反向代理、负载均衡等
+
+
+--2018.11.13周二，刘龙电信高交会在coco park附近布展几天，巴蜀风吃饭聊天--
+0.名词儿：spring cloud，jetty，Nginx，docker，angular，vue，k8s, Tengine(2017.08淘宝基于Nginx的开源web服务器)，NWSs(Next Generation Webserver，主要用于腾讯自建的CDN，基于Nginx)
+
+---面试题---------------------------------------------------------------------------------------------------------------------------------------------
+==面试题==
+1.android vs iOS移动端
+2*.viewpoint/knockout/hadoop/spark
+3.[比较全面了]https://blog.csdn.net/xiangzhihong8/article/details/78441626
+4.[也不错]https://blog.csdn.net/qq_20264891/article/details/79158495
+
+1.prototype vs __proto__
+2.viewport meta tag
+3.域名收敛
+网页资源加载时，pc端采用域名发散，利用并发下载资源；
+移动端网速关键，域名解析费时（2-4个还能接受，再多就慢了），故将静态资源放在统一域名下，节约DNS解析时间。
+Google引出了SPDY，HTTP2的前身。通过复用一个TCP连接，发送多个请求。
+4.float
+float元素display属性的computed value会被隐式修改为block。
+float元素脱离文档的normal flow（但仍保留为文档一部分。啥意思？），向左或右浮动直到碰到containing block的边缘，或是碰到其他float元素。
+Non-positioned、Non-floated的块级元素在布局时无视float元素（就好像float元素不存在一样）。
+when an element is floated, it is taken out of the normal flow of the document (though still remaining part of it). It is shifted to the left, or right, until it touches the edge of its containing box, or another floated element.
+Non-positioned, non-floated, block-level elements act as if the floated element is not there, since the floated element is out of flow in relation to other block elements
+
+5.前端优化策略
+  1.减少请求数：因为每个请求都要建立TCP连接（三次握手），以及TCP的慢启动。
+    实施途径：利用缓存、js/css压缩合并、css sprite(零散的图片整合成一张)
+6.jsonp vs jsonpCallback（跨域访问的解决方法之一）
+JSONP: 实际上是利用<script>可以通过src引入跨域资源的方式，发请求到跨域服务器，响应后生成动态脚本，会调用传过去的回调函数。
+如当前页面为domain-a.com，此时动态向DOM中添加<script type="text/javascript" src="http://domain-b.com/username?q=xiyu"></script>，由于<script>是不受Same Origin Policy限制的，这就向domain-b.com发送了一个请求。在domain-b.com响应时返回结果一般是JSON如"{name:xiyu, age:27, alone:yes}"。如何让domain-a.com脚本来使用这个响应呢？那就需要在domain-a.com中定义一个回调函数如foo(res){ alert(res) }，然后将foo追加到url中（即http://domain-b.com/username?q=xiyu&callback=foo），跨域请求后domain-b.com服务器从callback取到回调函数的名称foo，再将响应wrap一下：foo("{name:xiyu, age:27, alone:yes}")，最后将这个结果返回。那么当在domain-a.com中拿到响应后，实际就是一句foo函数表达式被执行。JSON with Padding，这就是JSONP的由来。。
+注意：JSONP仅支持GET方法。
+
+$.getScript
+
+实现CORS的jQuery方式。
+jsonp：指明在URL中QueryString中的key："callback"，默认为"callback=?"
+jsonpCallback: 指明JSONP的回调函数名。
+JSONP方式，服务器返回javascript，并在ajax的success回调之前，会将Response中的JSON传给jsonpCallback指明的回调函数，并调用该函数。
+If jsonp is specified, $.ajax() will automatically append a query string parameter of (by default) callback=? to the URL. The jsonp and jsonpCallback properties of the settings passed to $.ajax() can be used to specify, respectively, the name of the query string parameter and the name of the JSONP callback function. The server should return valid JavaScript that passes the JSON response into the callback function. $.ajax() will execute the returned JavaScript, calling the JSONP callback function, before passing the JSON object contained in the response to the $.ajax() success handler.
+7.CORS(Cross-Origin Resource Sharing)跨域
+<iframe>、<img>、<a>、<script>等是允许通过src来指定url访问跨域资源的。
+但浏览器不允许javascript发起跨域请求，不过也可能是请求的确发出了，但被浏览器拦截。（对！）
+CORS是一个允许服务器通过设置HTTP Response的Header，来告知浏览器可跨域访问的机制。即如果foo.example向bar.example发送跨域请求，此时bar.example可以通过设置Access-Control-Allow-Origin来告诉foo.example，表明是否可以访问我的资源。这个响应实际上是已经发出了，而且如果服务端没有拒绝，则通过抓包工具是可以看到Response有返回的，只不过是被***浏览器***拒绝了！这就是禁止了跨域。这其实是浏览器的机制！
+8.get vs post
+get: 数据通过url querystring发送给服务端，大小有限制（2k左右吧），一般服务器还会log下来，所以不适合存放敏感信息
+post: 数据放在http body，无大小限制
+9.Entity header
+An entity header is an HTTP header，用于描述消息body的。这个header可以用在HTTP request和HTTP response中。
+如Content-Length、Content-Language、Content-Encoding都是属于entity headers.
+
+
+==2018.10.12 21:21 腾讯电话面试==
+1.打开浏览器加载url的整个过程
+[step1]DNS解析输入的域名
+[step2]拿到主机地址后，客户端发起TCP连接
+[step3]三次握手成功后，向服务器发送HTTP请求
+[step4]客户端拿到HTTP响应，开始在浏览器中解析
+解析HTML文档，构造DOM树。遇到外部css时，浏览器发送另一个异步请求，并继续向下执行；如果遇到外部js，加载了js并执行后才会继续向下（如果script设置有效的defer属性）。
+
+OM的创建：
+1. http响应字节流(Bytes)->字符(Characters)->标记(Tokens)->节点(Nodes)->DOM
+2. http响应字节流(Bytes)->字符(Characters)->标记(Tokens)->节点(Nodes)->CSSOM
+
+Render-Tree construction渲染树的构建、布局、绘制
+处理 HTML 标记并构建 DOM 树。
+处理 CSS 标记并构建 CSSOM 树。
+将 DOM 与 CSSOM 合并成一个渲染树。
+根据渲染树来布局，以计算每个节点的几何信息。
+将各个节点绘制到屏幕上。
+[ref]https://developers.google.com/web/fundamentals/performance/critical-rendering-path/constructing-the-object-model
+要提升页面性能，在于优化"关键渲染路径"（即页面从创建DOM到渲染到屏幕上的5个步骤）。一旦修改DOM或CSSOM，就要重新执行这5个步骤。
+
+Render-Blocking CSS
+Both HTML and CSS are render blocking resources.就是说，因为要渲染树才能让浏览器绘制页面，而渲染树又来自于DOM和CSSOM的合并。没有CSSOM顶多是没有了样式，但不能没有DOM。所以浏览器绘制时，就要等这两个OM都加载好才行，DOM无论如何都要加载，跑不了。剩下就要等CSSOM了。如果CSSOM加载很慢，就会阻塞页面的整个渲染过程。（media types and media queries可将CSS标记为non-blocking，例如Media=print，则只有当打印时才会将这部分CSS构造到CSSOM中，但注意，不论blocking or non-blocking，浏览器都要下载CSS资源。\
+Finally, note that "render blocking" only refers to whether the browser has to hold the initial rendering of the page on that resource. In either case, the browser still downloads the CSS asset, albeit with a lower priority for non-blocking resources.
+
+Critical Rendering Path（CRP）-Adding Interactivity with JavaScript
+HTML解析程序在对DOM进行解析时，如果碰到js脚本(遇到<script>)，则会就地立即执行。HTML解析器将CPU控制权交给JavaScript引擎，当js执行完毕后再将控制权交回到HTML解析器，继而继续向下解析。
+This demonstrates an important property: our script is executed at the exact point where it is inserted in the document. When the HTML parser encounters a script tag, it pauses its process of constructing the DOM and yields control to the JavaScript engine; after the JavaScript engine finishes running, the browser then picks up where it left off and resumes DOM construction.
+
+所以javascript对于DOM解析的过程来说，它是一个parser blocking。对于用<script>引入的外部脚本而言，浏览器必须暂停解析，从disk或remote server获取脚本资源，这就导致额外的延迟时间(tens to thousands of milliseconds)被加到整个关键渲染路径上，继而影响到页面的渲染速度。
+可以为这种外部脚本在script tag上添加属性asnyc，则表示异步加载js资源。
+
+[myQ]疑问：google developer说，js要等CSSOM，js又会阻塞DOM，那如果js、link css在<head>，js又在link之前，那是怎么处理的呢？究竟link css是同步还是异步加载吗？
+
+2.页面在浏览器中的详细的生成过程
+  计算布局、大小、位置
+3.回流(reflow)和重绘(repaint)
+ repaint: 当修改了DOM表象的一些特性，比如background-color, visibility等时触发。
+ reflow: 当页面DOM布局发生变化，比如display:none，width，font-size等时触发，布局调整好后，最后再触发repaint。reflow is very expensive。
+4.怎么知道要缓存哪个文件的
+  我答到cookie去了。。服务器设置set-cookie类似的
+  [面试官]：服务器发来的响应报文头中那些控制字段来控制的，cache-control什么的
+  HTTP header中的Cache-Control，取值有private, public, max-age, no-cache等。max-age表示有效秒数，当失效后，需向服务器重新获取资源。
+  ETag，是为了解决资源虽然在**时间上**失效了，但服务器上其内容并没有发生变化，此时再向服务器请求就有点过分哈。所以在第一次服务器响应时，将ETag（通常是文件的hash）放在header中一并发给客户端。当缓存时间失效后，浏览器发送的HTTP header中将If-None-Match设置为那个hash值，服务器拿到后比较发现一样的话，就只返回header，body是空的，节省了带宽和时间。
+  
+5.HTTP2.0
+  我答SPDY有HTTP2.0的影子，扯到了提升前端性能，域名收敛。。额。。强答啊
+  SPDY(音SPeeDY)，是Google开发的一个协议，旨在通过解决HTTP1.1中的一些问题来提高网页的加载性能。主要通过引入binary frame layer来达到在一个TCP连接上，请求、响应复用的效果。
+  [HTTP/1.x的一些缺点]
+  客户端为实现并发、减少时延，需要发起多个TCP连接；未压缩的请求、响应头部，会导致不必要的网络开销；也不支持资源优先级，导致TCP连接效率低下。
+  Unfortunately, implementation simplicity also came at a cost of application performance: HTTP/1.x clients need to use multiple connections to achieve concurrency and reduce latency; HTTP/1.x does not compress request and response headers, causing unnecessary network traffic; HTTP/1.x does not allow effective resource prioritization, resulting in poor use of the underlying TCP connection; and so on.
+  [HTTP/2要解决的问题]
+  为提高网络资源使用效率、减少时延，HTTP/2引入header压缩、在同一个连接上交替进行请求、响应的发送，还支持请求优先级机制，让更重要的请求先完成。
+HTTP/2 enables a more efficient use of network resources and a reduced perception of latency by introducing header field compression and allowing multiple concurrent exchanges on the same connection… Specifically, it allows interleaving of request and response messages on the same connection and uses an efficient coding for HTTP header fields. It also allows prioritization of requests, letting more important requests complete more quickly, further improving performance.
+  [HTTP/2解决问题的方式]
+  引入binary framing layer。即不像HTTP1.1那样，request和response用回车换行来分隔，而且内容是纯文本(plaintext)。HTTP/2将其分隔到更小的消息中，每个消息都以二进制格式编码。
+
+google developer、mdn developer都已经用的是HTTP/2，老大就是屌的一笔
+[note]不细看了。。很多干货，也很细致。按黄正蔚的perception：深入钻研可能只会从80%到90%，不如用这些10%的精力去学习另一种新知识，从0到50%要比这10%可能更合适些吧。
+[ref]https://developers.google.com/web/fundamentals/performance/http2/
+
+6.闭包
+  它有什么用，主要用在哪里；利用了js的什么特性才有的这个闭包概念呢
+  我用for循环中设置事件的例子来举证。。[面试官]：你说的是可以用闭包来解决这个问题吧。[我]：嗯嗯！！
+  我一直脑海里徘徊的是lexical这个词儿，就是没想到作用域。。就说是利用内嵌函数可以访问到外层函数的变量，这样创建了私有性。
+  用处有单例模式，比如可以返回一个对象包含属性、方法等，将私有变量隐藏起来。
+7.有哪些攻击的，如XSS有了解吗，简单介绍下。
+  我答我发给人一串url，里面含有script，点击alert，不就hack了。。就记得这个弱智的例子了。。
+8.异步优化，ES7提出的新方法，promise、generator、还有个啥async好像(async...await)等，知道呗？
+  目前主流浏览器都已经支持ES7。[ref]http://kangax.github.io/compat-table/es2016plus/[/ref]
+  ES6-2015.06 (ECMA2015)
+  This update adds significant new syntax for writing complex applications, including classes and modules, but defines them semantically in the same terms as ECMAScript 5 strict mode. Other new features include iterators and for/of loops, Python-style generators, arrow functions, binary data, typed arrays, collections (maps, sets and weak maps), promises, number and math enhancements, reflection, and proxies (metaprogramming for virtual objects and wrappers).[29][30] The complete list is extensive.[31]
+  ES7-2016.06 (ECMA2016)
+    includes two new features: the exponentiation operator (**) and Array.prototype.includes.
+  ES8-2017.06 (ECMA2017)
+    includes async/await, which works using generators and promises. 
+  ES9-2018.06 (ECMA2018)
+    include rest/spread properties, asynchronous iteration, Promise.prototype.finally() and additions to RegExp.
+  [我]：ES7着实不知道。。异步用的ajax多一些，描述了下ajax的callback。(我说只了解了一点ES6，面试官说那你来讲讲呗。说了var/let, const，再憋不出来了。。）
+  [面试官]：其实呢callback这样写不是不可以，这样写多了的话会给代码易读性造成困难，所以有promise，以同步的语法方式来写异步调用代码，更优雅~
+  [我]：哦哦~~~跟你学习到了，谢谢！
+9.打包工具有用过吗
+  我就隐约感觉她会说webpack。我就说了用不到。。只是合并js压缩就上了。。我看前端的一些发展，人都有从头到尾的一套方法和工具，我们没机会用。。
+  [面试官]：（果然不出我所料）那webpack打包的有用过吗？
+10.我看看你的简历哈，看你这么多个项目，举一个你认为比较...的来说说吧
+  聊了下代发，就说业务流程多，我自己分模块class，在封装的每个页面对象上调用方法，自己的想法是可能会更独立些吧。
+  [面试官]那工作中用过什么框架呢？
+  [我]：老实说银行不让用什么开源的，我们就是js+jquery了。。像有些更好的React、Angular等管理DOM，我们只能纯js写了。工作中用不到，只是平时学习了解了一下。
+11.你有写过后端嘛？
+  [我]：（挺懵逼的）..
+  [面试官]：噢。。Node.js有用过吗？
+  [我]：（我真都是只听说/了解过，没真正写过）了解，从来没写过。。
+  (少顷...）
+  [我]：不过我可以学呀~
+  [面试官]：哈哈哈~ 嗯，没事，我们继续往下吧（感觉她好开心啊，经常这一句。。）
+11.[面试官]前端发展很快，有很多东西都可以去学习了解下的，自己平常也可以用用嘛
+  [我]：是的，我也觉得有些新东西想学习下，工作中难以用到。就想着换个环境，进步一下。
+  [面试官]：那好吧，今天面试就到这儿了，后面如果可以的话，会有另一个面试官联系你。
