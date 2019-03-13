@@ -76,3 +76,6 @@ $git branch -d <branch>
 
 21. 合并某分支到当前分支
 $git merge <some-branch>
+
+22. 用带参数的git log来查看分支合并情况
+$git log --graph --pretty=oneline --abbrev-commit
