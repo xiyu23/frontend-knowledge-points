@@ -67,3 +67,6 @@ $git checkout -b <branch-name>
 
 18. 查看当前所处分支，分支前面标'*'的就是当前分支
 $git branch
+
+19. 切换到某个分支
+$git checkout <branch-name>
