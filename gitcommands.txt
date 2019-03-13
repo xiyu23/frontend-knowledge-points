@@ -60,3 +60,10 @@ $git remote add origin git@github.com:xiyu23/frontend-knowledge-points.git
 
 //首次推送关联
 $git push -u origin master
+
+17. 创建分支
+//-b表示创建并切换到新分支
+$git checkout -b <branch-name>
+
+18. 查看当前所处分支，分支前面标'*'的就是当前分支
+$git branch
