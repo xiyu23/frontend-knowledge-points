@@ -20,6 +20,7 @@ $git log
 
 7. 查看提交日志-带hash的单行记录显示
 $git log --pretty=oneline
+$git log --pretty=oneline --abbrev-commit //更精简的显示
 
 8. 想要回退到上一个版本
 $git reset --hard HEAD^
@@ -67,6 +68,12 @@ $git checkout -b <branch>
 
 18. 查看当前所处分支，分支前面标'*'的就是当前分支
 $git branch
+$ git branch -a //查看所有分支
+* dev_2 //本地分支 *表示当前checkout的工作分支，即HEAD所指向的分支
+  master //本地分支
+  remotes/origin/dev //远程分支
+  remotes/origin/dev2 //远程分支
+  remotes/origin/master //远程分支
 
 19. 切换到某个分支
 $git checkout <branch>
@@ -79,3 +86,94 @@ $git merge <some-branch>
 
 22. 用带参数的git log来查看分支合并情况
 $git log --graph --pretty=oneline --abbrev-commit
+* 582d922 (HEAD -> master) add author //HEAD -> master表示本地分支的HEAD指向master分支
+* 8875536 add comment
+* d1be385 (origin/master) init hello //origin/master指明远程master位于dlbe385这个提交，即本地比远程快2个commit
+
+//如果是以下，则（HEAD -> master, origin/master）表示本地HEAD和远程相同，都在同一个commit上
+18079d6 (HEAD -> master, origin/master) add #22
+4ad33e2 merge
+53e31f5 change #17, add #19,#20
+ebadce9 add #19
+
+23. 剥离(暂存)工作区的修改，完成后工作区就是working clean tree
+$git stash
+
+24. 查看已剥离的内容
+$git stash list
+
+25. 恢复已剥离(暂存)的修改，使工作区恢复之前的开发状态
+//恢复，并删除stash内容
+$git stash pop
+
+//仅恢复，删除则需要$git stash drop
+$git stash apply
+
+26. 强行删除一个分支，注意是大写'D'
+$git branch -D <branch>
+
+27. 推送分支上的所有本地提交道远程仓库
+$git push <remote> <branch>
+$git push origin master
+$git push origin dev
+
+28. 克隆远程分支
+$git clone git@github.com:xiyu23/DamnHouse.git
+
+29. 克隆后切换分支时'git checkout dev'，报错error: pathspec 'dev' did not match any file(s) known to git
+原因是本地没有名叫dev的分支，或者远程分支也没有同名的（如果有，git会自动创建一个本地分支来track origin/dev）
+$git fetch
+$git checkout dev
+
+30. HEAD是什么
+HEAD是一个标明当前所在分支的指针，它指向当前分支。
+当使用$git branch列举出当前的所有分支时，某个分支前的'*'表示当前所在(checkout)的分支，也就是当前HEAD所指向的分支。
+
+31. 本地创建了一个分支dev_local，想推送到远程，和他人共享
+$git push origin <local_branch>:<remote_branch>
+$git push origin dev_local:dev
+如果远程没有叫做dev的分支，则会创建一个。
+Q:如果推送到远程另外一个已存在，名称却不相同的分支呢？
+
+32. 将本地分支与远程分支关联
+$git branch --set-upstream-to=origin/<branch> <local_branch>
+$git branch --set-upstream-to=origin/dev local_dev
+
+33. 请求将推送后的本地分支dev，与远程master进行合并
+
+34. 创建标签：tag其实就是某一commit的别名
+//默认在当前分支最新提交的commit(HEAD)上打tag
+$git tag <tag_name>
+$git tag v1.0
+
+35. 对指定的某一commit打标签
+$git tag <tag_name> <commit>
+$git tag v0.9 d234dbf
+
+36. 创建带有说明的标签
+$git tag -a <tag_name> -m <info> <commit>
+$git tag -a v0.8 -m "some tag info"
+
+37. 查看所有标签
+$git tag
+
+38. 查看某一标签
+$git show <tag>
+
+39. 删除本地标签
+$git tag -d v0.1
+
+40. 推送本地标签到远程，推送后tag就是相当于是一个release了
+$git push origin <tag_name>
+$git push origin v0.1
+
+41. 删除已推送到远程的标签
+$git tag -d v0.1 //第一步：先删除本地标签
+$git push origin :refs/tags/v0.1 //第二步：再推送删除远程标签
+
+42. github上fork别人的仓库到自己账号下，这样自己再从这个仓库clone到本地开发
+自己本地当然是不能push到别人仓库的，若想要别人接受你对这个仓库的修改，就需要发起一个pull request，由别人决定是否接受你的修改。
+
+43. .gitignore
+
+44. git finished
