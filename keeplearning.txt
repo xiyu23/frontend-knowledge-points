@@ -17,7 +17,10 @@ Secure: 表明cookie必须通过https发送。(Cookie to only be transmitted ove
 HttpOnly: 表明cookie不能被js访问（可抵抗XSS的反射攻击：阻止js访问cookie）。（cookies are inaccessible to JavaScript's Document.cookie API）
 CSRF(Cross-Site Request Forgery, C-surf)
 跨站请求注入，就是建立在用户已登录漏洞网站的前提下，hacker通过诱导或窃取用户session，伪装成用户发起并非他自己本意的恶意请求，服务器根本无法识别，因为在服务器看来这就好像是用户自己发起的。
-简单的例子：bank.com通过GET来服务用户转账，bank.com/transfer?to=Alice&amount=100。对于GET请求所有数据都在URL中，客户端的cookie会在每次请求时都会放在HTTP Header中发送给服务器。hacker发给受害者一个链接"bank.com/transfer?to=hacker&amount=100000"，这样当受害者在浏览器中点击时，就会被服务器执行。因为服务器无法知道这是不是用户本身的意图，就当做合法的请求执行了。对于POST，
+简单的例子：bank.com通过GET来服务用户转账，bank.com/transfer?to=Alice&amount=100。对于GET请求所有数据都在URL中，客户端的cookie会在每次请求时都会放在HTTP Header中发送给服务器。hacker发给受害者一个链接"bank.com/transfer?to=hacker&amount=100000"，这样当受害者在浏览器中点击时，就会被服务器执行。因为服务器无法知道这是不是用户本身的意图，就当做合法的请求执行了。
+抵抗方法：
+a. 服务器端在执行敏感用户操作时，再次要求核验用户身份，如再输入一次密码；
+b. 检查注入请求发起的源头是否合法，即检查HTTP Header中的Referer，它表明当前请求的来源（但这依赖于浏览器，若浏览器本身有漏洞则不安全）；
 
 Cross-site Scripting (XSS)
 定义：是将恶意代码注入到网站的跨站脚本攻击。
