@@ -171,7 +171,8 @@ $git push origin v0.1
 $git tag -d v0.1 //第一步：先删除本地标签
 $git push origin :refs/tags/v0.1 //第二步：再推送删除远程标签
 
-42. github上fork别人的仓库到自己账号下，这样自己再从这个仓库clone到本地开发
+42. pull request
+github上fork别人的仓库到自己账号下，这样自己再从这个仓库clone到本地开发
 自己本地当然是不能push到别人仓库的，若想要别人接受你对这个仓库的修改，就需要发起一个pull request，由别人决定是否接受你的修改。
 
 43. .gitignore

@@ -1,13 +1,49 @@
 1.[regexp]正则
 2.[js]prototype/prototype chain
 See [anchor id=13]prototype chain[/anchor]
-3.[js]is
-determines whether two values are the same value
-和==、===都不同
+3.[js]is, typeof, ==, ===
+==：如果类型不同，则会先做类型转换，然后再比较
+  -0==+0
+  NaN!=NaN
+  undefined == null
+  "" == 0 //相当于ToNumber("") === 0, 即Number("") === 0
+  
+  
+  //不同类型的比较转换规则
+  NumberA == StringB  => NumberA === ToNumber(B)
+  NumberA == BooleanB => NumberA === ToNumber(B)
+  NumberA == ObjectB  => NumberA == ToPrimitive(B)
+  
+  StringA == BooleanB => ToNumber(A) === ToNumber(B)
+  StringA == ObjectB  => StringA == ToPrimitive(B)
+  
+  Boolean == ObjectB  => ToNumber(A) == ToPrimitive(B)
+  
+  //ToNumber(B)：将参数转换为number，等价于"+B"（the unary + operator，一元+操作符)
+  //ToPrimitive(B)：试图调用object的方法A.toString和A.valueOf（可能有不同的调用顺序），将object转换为primitive
+  
+===：同==，区别在于不做类型转换，直接比较
+  -0===+0
+  NaN!==NaN 
+  
+is：可以认为它大致相当于===，只不过略有区别。
 +0.is(-0) => false
-+0.is(+0) => true
+-0.is(0)  => false
+NaN.is(NaN) => true
 
-+0 === -0 => true
+typeof：返回一个string，代表操作数的类型。操作数是一个object或者primitive
+typeof Undefined => "undefined"
+typeof Null 	 => "object"
+typeof Boolean   => "boolean"
+typeof Number    => "number"
+typeof String    => "string"
+typeof Function Object => "function"
+typeof Any other object => "object"
+typeof NaN 		 => "number"
+
+
+A primitive is data that is not an object and has no methods.
+在JavaScript中有6种primitive数据类型：string, number, boolean, null, undefined, symbol(ES2015).
 4.[html]常见的浏览器端的存储技术有哪些？
 cookie:（8KB）
 server通过http headers"Set-Cookie"来设置cookie，浏览器随后的请求都会将已保存的cookie携带在request的http header中，发送给server。
