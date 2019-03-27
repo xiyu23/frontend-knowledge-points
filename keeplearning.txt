@@ -41,6 +41,8 @@ typeof Function Object => "function"
 typeof Any other object => "object"
 typeof NaN 		 => "number"
 
+var a = Number("5");//这只是"5"转换为Number类型，并不创建一个Number对象
+var b = new Number("5");//创建一个Number对象
 
 A primitive is data that is not an object and has no methods.
 在JavaScript中有6种primitive数据类型：string, number, boolean, null, undefined, symbol(ES2015).
@@ -67,17 +69,35 @@ Reflected XSS Attacks: 用户点击url触发攻击，将恶意代码放在请求
 DOM Based XSS Attacks: 通过修改DOM形成XSS。页面中脚本执行时（比如创建DOM），从url中取的参数。这样的话，我（作为攻击者）修改url中参数的值为一段脚本。将这个链接发给小白用户，用户点击后，客户端脚本从url中取值，并试图创建DOM。那这段脚本就被注入到了小白用户的DOM中，继而被执行。比如wikipedia上举的例子，网站语言default=xx，xx是一个<select>的选项，如果修改url中的default=Chinese<script>alert(123);</script>，那么这个带有script值的就注入到了前端页面中，这个构造DOM的过程是在前端执行的。（其实也是服务端的bug啊）
 
 Replay Attack(重放攻击)
+中间人攻击的一种方式，截获发送的报文，不需要解密，直接将它完整地再发送给目的主机。这样会造成相同的操作进行了两次，便称之为重放攻击。
+案例：
+  如登录网站，密码经过md5后，经HTTP传输，服务端从数据库取密码进行对比，若一样则认为用户登录成功。
+  重放攻击加入，中间人监听到发送给服务端的报文，将报文原封不动（他不需要解密）再次发送给服务端，那么服务端当然会授权登录成功。
+抵御重放攻击的方案：
+1. 创建和时间相关的session key
+   服务端在接收到HTTP请求后，生成一个时间戳（或用sessionID），用户登录时，将md5后的密码和sessionID混合后再md5，然后将这个结果传输。
+   由于sessionID不同，则中间人重放该报文也无效。
+2. OTP(One-Time Password)一次性密码，每次交易用过就作废
+疑问：
+重放报文哪里来的sessionID？按OSI模型，HTTP在应用层，TCP/IP在下层，只要截获应用层的数据包，修改TCP/IP报文头源主机为中间人主机地址，那不就重放了？关sessionID什么事？HTTPS只不过是在TCP/IP之上有个TLS/SSL，截获加密后的HTTP报文，照样重放。
 
 
 [了解HTTP authentication]
+HTTP协议中定义了认证的模式，基于"Basic" schema。服务端返回401（未授权），要求客户端提供证明信息，客户端在HTTP Header中：Authorization: Basic <credentials>
+<credentials> = base64(<username>:<password>)
+e.g. Authorization: Basic eGl5dToxMjM0NTY=  (xiyu:123456)
 
+[常用的认证机制：session auth, basic auth, token auth, OAuth, OAuth2]
+basic auth: username+password，就像HTTP Basic Authentication一样
+token auth: 
+oauth2: 第三方应用(Client)向管理资源授权的服务器(Authorization Server)请求授权用户的资源访问，授权服务器询问用户(Resource Owner)是否同意授权(Authorization)，以授权第三方应用能访问位于资源服务器(Resource Server)上的用户资源。[Access token, Refresh token, Authorization code授权码]
 
 web storage分2种：（FF：10MB/domain，String in javascript are UTF-16，占2字节，即能存储5M个字符）
 基于OS或Browser的不同，一般都存储在文件中。
-cons.
+cons.(缺点)
 1.只能存储string，对于一些数据类型，我们必须序列化再存；
 2.无安全性，current domain页面中的js可以访问
-3.读写是同步的，不能喝web worker一起使用
+3.读写是同步的，不能和web worker一起使用
 4.大小仍然限制为10MB
 sessionStorage: 只要浏览器开着，浏览器关闭自动清空。
 localStorage：同上，只是数据没有过期时间，浏览器关闭也不会清空。
@@ -358,6 +378,26 @@ function Person(){
 23.[js][es6]what next?
 
 24.[network]http vs https
+不同点：
+1. http协议本身没有加密传输，https则是位于TLS/SSL之上的加密协议；
+2. 因为https建立连接时首先需要验证证书、确定加密秘钥，因此https较http慢一些；
+3. http采用80端口，https采用443端口；
+4. 证书要钱！
+
+https是http over TLS(Transport Layer Security)/SSL(Secure Sockets Layer)，是一种建立在安全传输层之上的http协议。
+实际上TLS/SSL并不属于传输层，而是位于传输层之上，为其上的应用层提供安全传输的服务。
+--OSI(Open System Interconnection)模型--
+应用层(Application Layer)[HTTP, FTP, SMTP, SOAP, POP3]
+表示层(Presentation Layer)[TLS, SSL]
+会话层(Session Layer)[used where application makes use of RPCs.]
+传输层(Transport Layer)[TCP, UDP]
+网络层(Network Layer)[IP, ARP]
+链路层(Data link Layer)[ARP, IEEE 02.11]
+物理层(Physical Layer)[USB, DSL]
+
+--RPC--
+Remote Procedure Call(远程程序调用)，客户端程序执行子程序，而子程序是由远程计算机来计算的，客户端不需要关心实现细节，最终结果返回给调用者-客户端。这样的模型即是RPC。
+
 25.[js]逻辑运算符：&&、||、!
 expr1 && expr2: 若expr1能转为false，则返回expr1；否则返回expr2
 expr1 || expr2: 若expr1能转为true，则返回expr1，否则返回expr2
