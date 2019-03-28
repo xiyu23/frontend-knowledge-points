@@ -86,29 +86,50 @@ Replay Attack(重放攻击)
 HTTP协议中定义了认证的模式，基于"Basic" schema。服务端返回401（未授权），要求客户端提供证明信息，客户端在HTTP Header中：Authorization: Basic <credentials>
 <credentials> = base64(<username>:<password>)
 e.g. Authorization: Basic eGl5dToxMjM0NTY=  (xiyu:123456)
+其他认证schemas：
+Bearer(/be/ n. 持票人，送信人，搬运工人): bearer tokens to access OAuth 2.0-protected resources.
+Digest, HOBA, Mutual...
+
 
 [常用的认证机制：session auth, basic auth, token auth, OAuth, OAuth2]
 basic auth: username+password，就像HTTP Basic Authentication一样
-token auth: 
+token auth: token-based,第一次向服务器证实自己使用usrname+password,服务器验证通过后发送给client一个token，这个token就表示了已验证的用户，
+可在随后访问服务器的请求中将此token带上，以执行经过授权的操作。
 oauth2: 第三方应用(Client)向管理资源授权的服务器(Authorization Server)请求授权用户的资源访问，授权服务器询问用户(Resource Owner)是否同意授权(Authorization)，以授权第三方应用能访问位于资源服务器(Resource Server)上的用户资源。[Access token, Refresh token, Authorization code授权码]
 
-web storage分2种：（FF：10MB/domain，String in javascript are UTF-16，占2字节，即能存储5M个字符）
+web storage分2种：sessionStorage、localStorage：同上，只是数据没有过期时间，浏览器关闭也不会清空。（FF：10MB/domain，String in javascript are UTF-16，占2字节，即能存储5M个字符）
+window.sessionStorage: 对每个域名分别存储，只要浏览器开着，浏览器关闭自动清空。
+window.localStorage：同上，只是数据没有过期时间，浏览器关闭也不会清空。
+
 基于OS或Browser的不同，一般都存储在文件中。
 cons.(缺点)
 1.只能存储string，对于一些数据类型，我们必须序列化再存；
 2.无安全性，current domain页面中的js可以访问
 3.读写是同步的，不能和web worker一起使用
 4.大小仍然限制为10MB
-sessionStorage: 只要浏览器开着，浏览器关闭自动清空。
-localStorage：同上，只是数据没有过期时间，浏览器关闭也不会清空。
 【综上】适用于存储非敏感信息、不超过10MB的字符串。
 
-
 indexedDB: (web storage只能存储少量的数据，而本尊可以存储大量结构化的数据(structured data)，包括file/blob)
+是一种可以将数据永久存储在用户浏览器中的方法。（IndexedDB is a way for you to persistently store data inside a user's browser。）
 note-powerful but complicated, you'd better use library instead. If you'd prefer a simple API, try libraries such as localForage, dexie.js, ZangoDB, PouchDB, and JsStore that make IndexedDB more programmer-friendly.
+关键点：
+1. indexedDB存储key-value，value可以使复杂的结构、对象；
+2. indexedDB建立在事务模型上（transactional database model）；
+3. indexedDB API大多数是异步的（即读写数据时都需要给个回调）；
+4. etc... 大致了解下，80%的知识实际中都没用到，用到再细学，精力总是有限的，应该关注那些在实际中80%都会用到的20%知识！
 
 [JSON Web Tokens (JWTs)]
+用户首次认证后，服务端签发token给客户端，服务端不保存任何状态。因此这种验证方式属于服务器无状态的验证机制。
+由于签名时混合了服务器自身的秘钥，因此当有请求带着这个签发的token来访问资源时，服务器可以根据签名的计算公式对比，以检查token是否有被篡改。这种方式看起来天衣无缝啊，要保证token在传输中是安全的、不被偷窃就行。但缺点是，Payload中不能放敏感信息，因为它本身是明文传输的（当然，用HTTPS的话随你）。token一旦签发，服务器没办法去主动地废弃某个token，只有等它自然过期了。
 
+服务器签发给前端的token=Header.Payload.Signature
+Header表明签名所使用的hash算法，Payload包含一些令牌的信息，Signature是结合服务器端的秘钥，对前两个数据进行签名的结果。
+Signature=HMAC-SHA256(base64urlEncoding(header)+'.'+base64urlEncoding(Payload)+secret)
+
+当客户端与服务器通信时，将此token添加到HTTP Header中的Authorization中，用的schema是Bearer！
+e.g. Authorization: Bearer <token>
+
+[href]http://www.ruanyifeng.com/blog/2018/07/json_web_token-tutorial.html
 
 5.[js]构造函数
 6.[js]iief
@@ -126,7 +147,8 @@ a.两者都会被hoisting，但let声明的变量如果没有初始化就引用�
 b.var声明后会被初始化为undefined, let声明后则不会被初始化，直到执行到它的初始化语句。
 c.var在global声明的变量会作为window object的一个property, window.myVar = 5。而let不会。
 d.const和let类似，const声明时必须初始化，作用域为块级，也存在临时性死区temporal dead zone
-[Temporal dead zone]临时性死区：由于let被hoisting但它不像var会被默认初始化为undefined，let在作用域顶部到为它赋值的语句这一段区域都是未初始化的，此时若引用let变量则会抛出Reference error。
+[Temporal dead zone]
+临时性死区：由于let被hoisting但它不像var会被默认初始化为undefined，let在作用域顶部到为它赋值的语句这一段区域都是未初始化的，此时若引用let变量则会抛出Reference error。
 [ref]https://scotch.io/tutorials/understanding-hoisting-in-javascript#toc-es5
 知识点：hoisting
 var foo = function(x, y){
