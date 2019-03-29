@@ -195,7 +195,8 @@ So, basically the browser is kind of constrained by what you're doing javaScript
 [ref]https://2014.jsconf.eu/speakers/philip-roberts-what-the-heck-is-the-event-loop-anyway.html
 [ref]http://davidshariff.com/blog/what-is-the-execution-context-in-javascript/
 9.[js]closure
-[explain]A closure is the combination of a function and the lexical environment within which that function was declared. 就是说在函数声明所在的scope，结合函数本身，形成一个闭包的概念。实际上利用函数访问作用域的概念，经典容易犯错的如for loop中为不同的按钮事件赋event handler. 最终这些handler引用的都是循环最后一个局部变量。对于性能问题，MDN建议没必要用闭包的地方，就不要再在function中声明function，这样在每次创建object都会reassign，应在prototype上添加function。
+[explain]A closure is the combination of a function and the lexical environment within which that function was declared. 就是说在函数声明所在的scope，结合函数本身，形成一个闭包的概念。实际上利用函数访问作用域的概念，经典容易犯错的如for loop中为不同的按钮事件赋event handler.因为for中声明的如果是var，而var只有function scope和global scope两个概念，所以for中的这个var相当于是一个enclosing variable（即好比在for表达式块外面的作用域声明的），那当for循环内的代码执行完后，其实都引用的是同一个变量。怎么让他各自引用单次迭代时的变量呢？把var换成let即可（因为let声明的变量是block scope，即每次迭代引用的就是当前迭代内变量的值）；或者使用闭包（每次迭代将var变量传入闭包）。
+对于性能问题，MDN建议没必要用闭包的地方，就不要再在function中声明function，这样在每次创建object都会reassign，应在prototype上添加function。
 闭包可用来实现Module Pattern[anchor=#11]，其实就是把一些方法、属性模块化到一个object(这个object一般是单例)，由iife返回。这样可以减少global scope pollution，而且还创建了privacy。
 Having all this, how should we tell the parser that what we really want, is to call a function immediately after its creation? The answer is obvious. It’s should be a function expression, and not a function declaration. And the simplest way to create an expression is to use mentioned above grouping operator. Inside it always there is an expression. Thus, the parser distinguishes a code as a function expression (FE) and there is no ambiguity. Such a function will be created during the execution stage, then executed, and then removed (if there are no references to it).
 [ref]http://benalman.com/news/2010/11/immediately-invoked-function-expression/
@@ -317,6 +318,7 @@ Function.prototype.bind = function(scope){
 [ref]https://www.smashingmagazine.com/2014/01/understanding-javascript-function-prototype-bind/
 
 confused me a lot:
+//MDN: slice虽然是Array.prototype上的方法，但是它也同样可以在Array-like object上调用。
 //slice是call的bound function，而这个bound function中，this指向的是Array.prototype.slice这个函数。
 //Array.prototype.slice虽然定义在Array的prototype上，Array及其子类可以直接使用。但slice执行时，this实际上指向对象Instance。且只要这个对象是个array-like object就可以。故，为了能对array-like object使用slice方法，则就要想办法把slice执行时的this，指向那个object。slice内部执行时，就是调用了的myArrayLikeObject.slice。
 //这就有了call/apply，可以this绑定为通过thisArg传入的array-like object。
@@ -359,9 +361,12 @@ executor中关键在于，当任务完成时（正常/出错），分别调用re
 当调用了resolve/reject后，此时会执行传给then的回调函数。
 
 对于then，then的执行是异步的，即使promise中的任务不是异步，立即就执行完的，但.then的任务是会被挂起，当promise确定要执行回调时，该任务会被放在event loop中的队列中，直到当current execution完毕，js引擎才有空去检查、并执行队列中的任务。So the code after .then ends up always running before the Promise’s subscribers, even in the case of an immediately-resolved Promise.
-cleanRoomPromise. then(alert);
+cleanRoomPromise.then(alert);
 console.log('always run before alert');
-我的理解是这可能开了一个定时器线程，轮询检查promise的状态，然后根据status调用resolve/reject callback。
+//[deleted]我的理解是这可能开了一个定时器线程，轮询检查promise的状态，然后根据status调用resolve/reject callback。
+//感觉不需要定时器的，Promise内部可能有个队列，像多米诺骨牌，第一次new Promise时开始执行异步任务，执行完成后，调用resolve或reject，Promise对象内部对应地取队列中下一个需要执行的任务（即按顺序.then的），对应地执行onResolveCallback或onRejectCallback。
+then的callback需要return值，而后链式调用。
+但如果想用Promise then个一连串的ajax异步请求，那then的callback中，就得return一个新的Promise了，这个Promise开始构造时就执行异步请求，虽然return了，但此时return的是一个pending状态的Promise，当然不会继续第二个then的执行。
 [ref]https://javascript.info/promise-basics (感觉比MDN、Google Developer写得更简单易懂。。)
 
 3. 链式调用chaining

@@ -112,7 +112,7 @@ $git stash apply
 26. 强行删除一个分支，注意是大写'D'
 $git branch -D <branch>
 
-27. 推送分支上的所有本地提交道远程仓库
+27. 推送分支上的所有本地提交到远程仓库
 $git push <remote> <branch>
 $git push origin master
 $git push origin dev
@@ -140,6 +140,7 @@ $git branch --set-upstream-to=origin/<branch> <local_branch>
 $git branch --set-upstream-to=origin/dev local_dev
 
 33. 请求将推送后的本地分支dev，与远程master进行合并
+两种方式：a. 在远程仓库上执行合并操作(pull request) b. 如果有权限推到master的话，本地checkout master，然后把dev合并到本地master，再推送master到远程。
 
 34. 创建标签：tag其实就是某一commit的别名
 //默认在当前分支最新提交的commit(HEAD)上打tag
