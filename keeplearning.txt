@@ -401,13 +401,16 @@ function Person(){
 区别：arguments是object，restParamArgs是Array；arguments是传给函数的所有参数，而restParamArgs是除去实参剩余的部分，构成的一个数组。
 
 22.[js][es6]generator, yield, iterable protocol, iterator protocol, function*
+见52.
 
-23.[js][es6]what next?
+23.[network]GET vs POST
+get: 数据通过url querystring发送给服务端，大小有限制（2k左右吧），一般服务器还会log下来，所以不适合存放敏感信息
+post: 数据放在http body，无大小限制
 
 24.[network]http vs https
 不同点：
 1. http协议本身没有加密传输，https则是位于TLS/SSL之上的加密协议；
-2. 因为https建立连接时首先需要验证证书、确定加密秘钥，因此https较http慢一些；
+2. 因为https建立连接时首先需要验证证书、确定加密秘钥(TCP三次握手+SSL握手，RSA算法据说占到75%的时间，而之后传输所用的对称加密算法是很快的)，因此https较http慢一些；
 3. http采用80端口，https采用443端口；
 4. 证书要钱！
 
@@ -421,6 +424,44 @@ https是http over TLS(Transport Layer Security)/SSL(Secure Sockets Layer)，是�
 网络层(Network Layer)[IP, ARP]
 链路层(Data link Layer)[ARP, IEEE 02.11]
 物理层(Physical Layer)[USB, DSL]
+
+[HTTPS建立连接的过程]
+TCP三次握手阶段:
+1. client发请求建立TCP连接;
+2. server返回ACK;
+3. client再次ACK;
+SSL握手阶段：
+4. client用server的公钥（这个肯定是从预先已经从CA拿到的，或者在SSL握手开始时发现client没有server的公钥，则向CA请求，当然CA的公钥每台机器都是固有的）对自己的公钥加密，发给server；
+5. server解密拿到client公钥，然后商定xxx作为对称加密的秘钥，加密后发给client；
+细节：
+//错误
+server用自己的私钥加密，再用client公钥加密，发给client。
+错误原因：这个方式不对，client解密后拿到一坨加密的数据，client并不知道这是哪个服务器发给我的，也就不知道应该用哪个服务器的公钥去解密。为了让client知道这个数据是谁发的，在client私钥解密后，当然得有明文告诉client。
+
+//稍微正确一点儿的方法
+你可能会想，server在用client公钥加密前，再加入一条明文信息，表明这是我发的。而后再用client公钥加密传输。
+相当于：传输的数据 = client_public_key(server_private_key(rawData) + "I'am server xiyu")
+这似乎也没问题，但不是那么好的原因有两点：
+a. RSA非对称加密很慢，尽量不要对那么一大坨rawData进行RSA；
+b. RSA解密出来的rawData，怎么保证它没有可能被篡改过？
+对于b，你可能会说，变一个bit可能都会导致解密成乱码，但如果正好它不是乱码呢？也即，单靠RSA，我们不能保证数据没有被篡改过（或神奇的电路导致某bit变化）。
+那能否降低这种极为特殊情况的概率呢？当前只有一个因素RSA，如果我们再考虑加入一个因素，那么显然这种极端概率会变得更低。这个因素就是：签名。
+
+解决a：不对rawData进行RSA，而是只对rawData的hash结果进行RSA签名，这样速度会快很多（虽然都是RSA，但是hash结果是固定的位数，相比rawData不要好太多）。
+解决b：
+    如果rawData因某种原因变了，那么hash的结果一定不同于签过名的hash。client届时就可以不相信此数据。
+	如果rawData因某种原因变了，碰巧签名也变了，那么我们首先要碰巧到签名突变后解密也没乱码，然后对rawData哈希过的结果，还要碰巧和签名解密后的hash结果相同，那这两个变化必须要完全配合才成，想想都知道这个概率简直低得一批。
+因此，就有了下面的标准处理方法。
+
+//正确的方法
+server要发送的明文数据rawdata：商定的对称加密码秘钥xxx、metadata（如我是服务器xiyu.life、签名所使用的hash算法)等。
+server用rawdata中指定的hash算法，对rawdata进行hash，而后用自己的私钥对hash结果进行签名（实际上就是加密，因为只有用server的公钥才能解开，所以就能确定这个数据是由server xiyu.life发送的，相当于签名有效嘛）。最后，server用client的公钥对整体数据（rawdata+签名）进行加密，发送给client。
+
+6. client收到server约定的对称加密秘钥xxx，从此便决定以后的请求均使用对称加密进行，保证了HTTP的安全传输。
+细节：
+client先用自己的私钥解密，然后看到rawdata中的一些metadata（谁发给我的，用的什么hash算法）。client首先用写明的hash算法对rawdata哈希，得到结果为R'。然后看到这个是server xiyu.life发的，于是用该server的公钥对签名进行解密，拿到server对rawdata的哈希结果R。如果R == R'，则说明此数据真实有效如假包换，没有被篡改。
+
+7. 从此开始，client发送请求都会采用之前商定好的对称加密算法，与server进行通信。
 
 --RPC--
 Remote Procedure Call(远程程序调用)，客户端程序执行子程序，而子程序是由远程计算机来计算的，客户端不需要关心实现细节，最终结果返回给调用者-客户端。这样的模型即是RPC。
