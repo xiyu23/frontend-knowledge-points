@@ -587,14 +587,20 @@ proxy server: A proxy server is essentially a middle computer that sits between 
 
 
 30.[html]iframe, browsing context
-browsing context：一个tab、windows，或者是嵌在页面中的iframe。
+browsing context：一个tab、window，或者是嵌在页面中的iframe。
 每个browsing context都有origin（scheme://host:port），同源（same origin）就是指origin一样。每个browsing context都有自己的session history(window.history，表示当前加载的page，可通过history接口达到浏览器的前进、后退效果)、document（DOM入口）。
 在两个browsing context之间通信受严格限制。
 30-1.Referrer
 2014.06增加的规范，用于规定Request Header中是否携带Referer信息。Referer是一个URL，表示到达当前页面的上一个页面URL。
 
 
-31.Web Workers
+31.[HTML5?]Web Workers
+目的：能够在后台运行另一个工作线程，来执行相对费时的操作，以不至于阻塞负责UI的主线程。
+a. worker运行的脚本必须与主线程同源?
+b. worker中没有window，也即无法使用window默认的方法和属性等（如document）
+c. worker和主线程不在同一个context，通信必须使用postMessage来发消息、定义onmessage(message_event)事件来接收消息(消息内容为message_event.data)
+d. 
+
 ---Redis（REmote Dictionary Server）--------------------------------------------------------------------------------------------------------------
 2018.10.24当前稳定版本：5.0.0 /redis/
 历史：2010年左右，意大利人（应该是）采用传统DB在分析日志时遇到性能瓶颈，自己开发了一种带数据格式的数据库，读/写数据都只在内存中完成，在disk上存储数据，disk上的数据主要用来在系统启动时，由Redis方便在内存中重建数据结构。Redis没有传统RDBM的那种查询、聚合等特性，数据按结构存储，操作也是针对ADT（Abstract Data Type）进行。Redis大量使用fork（系统调用），parent fork为后续client服务，子fork将数据的copy写到磁盘。
