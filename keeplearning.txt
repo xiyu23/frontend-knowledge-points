@@ -260,19 +260,6 @@ Domain Sharding(shard: (玻璃等的)尖片），由于浏览器限制了对同�
 [SPeeDY]
 SPDY，是HTTP/2.0的前身。
 
-[HTTP/1.0 vs HTTP/1.1]
-HTTP 1.0 (1994)
-(1). 不支持长连接(keep-alive)，即当一个请求结束后，这个连接就关掉了，必须再另建立一个连接发起请求。也即不能在一个TCP连接上完成多个请求；
-正因为此，HTTP 1.0存在严重效率问题，这都是源于TCP的慢启动（瞧瞧多么专业的术语，好好复习下吧！）。
-
-HTTP 1.1 (1996-2015)
-(1). 支持长连接（客户端在请求时设置Request Header：Connection: Keep-Alive）；
-(2). 要求在Request Header中加入Host Header（当不同host指向同一IP时，服务器可以根据host来分辨客户端的意图，即想访问哪个host的资源，同一台机器上充当多域名）；
-(3). 缓存方面，增加了'entity tag'(E-Tag)，标记资源相当于hash；（扩展下：Caching知识点）
-(4). 100 Continue status状态码，当客户端不清楚服务器能否响应请求时、或者客户端是否有权限发起某个请求时，与其发送大量的数据不如仅发送一个Request Header，来试探下。如果服务器返回HTTP/1.1 100，则意味着一切OK，可以正式地发送请求。
-(5). much much more...
-[ref]https://stackoverflow.com/questions/246859/http-1-0-vs-1-1
-
 [HTTP Caching]
 只有GET请求会缓存，用URI进行对比。
 Cache-Control是个通用的指令，Request和Response的Header都可以用。
@@ -645,6 +632,34 @@ Math.ceil: 向上取整
 503-Service Unavailable，由于超载或系统维护，服务器暂时无法处理请求
 
 36. HTTP/1.1 keep-alive
+[HTTP/1.0 vs HTTP/1.1]
+HTTP 1.0 (1994)
+(1). 不支持长连接(keep-alive)，即当一个请求结束后，这个连接就关掉了，必须再另建立一个连接发起请求。也即不能在一个TCP连接上完成多个请求；
+正因为此，HTTP 1.0存在严重效率问题，这都是源于TCP的慢启动（瞧瞧多么专业的术语，好好复习下吧！）。以及当服务端主动关闭TCP后会处于TIME_WAIT状态，还需要经过2MSL才能真正地关闭socket（因为TCP是可靠的传输协议，一个TCP包在网络中的最大生存时间就是MSL即从源到目的地。如果这个包没有到达，则会触发重传。如果没有等2MSL的时间而是直接关闭，此时若又新开一个相同的socket，很可能在网络中游离的“上一个socket报文包”正好被新的连接收到，TCP不允许这样的紊乱情况出现。）。
+可以看到，HTTP 1.0时代，一次HTTP请求所占用的时间=TCP三次握手+请求/响应+TCP四次挥手+2MSL。
+
+HTTP 1.1 (1996-2015)
+(1). 支持长连接（客户端在请求时设置Request Header：Connection: Keep-Alive）；
+(2). 要求在Request Header中加入Host Header（当不同host指向同一IP时，服务器可以根据host来分辨客户端的意图，即想访问哪个host的资源，同一台机器上充当多域名）；
+(3). 缓存方面，增加了'entity tag'(E-Tag)，标记资源相当于hash；（扩展下：Caching知识点）
+(4). 100 Continue status状态码，当客户端不清楚服务器能否响应请求时、或者客户端是否有权限发起某个请求时，与其发送大量的数据不如仅发送一个Request Header，来试探下。如果服务器返回HTTP/1.1 100，则意味着一切OK，可以正式地发送请求。
+(5). much much more...
+[ref]https://stackoverflow.com/questions/246859/http-1-0-vs-1-1
+[ref]https://www.cnblogs.com/freefish12/p/5394876.html
+
+[HTTP/1.0 keep-alive]
+其实keep-alive分为两种：HTTP keep-alive和TCP keep-alive。
+HTTP keep-alive: 服务器在HTTP Header中设置Connection: Keep-Alive来表示此TCP连接将可能将为HTTP请求复用多次。
+keepalive_timeout：意为在最近的一次HTTP请求响应发送后，此TCP连接保持多久。如设置keepalive_timeout=60s，则在最近的一个HTTP响应发出后的1min内，还可以复用这个socket来进行HTTP请求。如果1min过去了都没有请求到来，则服务端就发起主动关闭TCP连接。
+
+TCP keep-alive: 假设HTTP keep-alive设置的3600s即1个小时，如果客户端已经宕机了呢？或者因网络故障已经不可达，那服务端完全没必要再keep-alive了，而是应该关闭连接，释放socket资源。因此，TCP keep-alive应运而生。
+
+它定义了三个参数：
+tcp_keepalive_time: TCP连接"保活"时间，超过则开始发送"探针"即心跳包
+tcp_keepalive_intvl: 心跳包的发送间隔时间
+tcp_keepalive_probes: 总共发送多少次心跳包，如果连续这么多次都未响应，则认为对方已经挂了
+
+在TCP连接闲置了[tcp_keepalive_time]时间后（当然了，这个值应该要小于HTTP keep-alive定义的值才有意义），服务端开始每隔[tcp_keepalive_intvl]时间向客户端发送"探针"即心跳包，以测试目标主机的连接状态。如果尝试了[tcp_keepalive_probes]次都认为是失效的状态，则服务端就决定关闭此连接。
 
 37. HTTP/2
 
