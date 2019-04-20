@@ -661,6 +661,31 @@ tcp_keepalive_probes: 总共发送多少次心跳包，如果连续这么多次�
 
 在TCP连接闲置了[tcp_keepalive_time]时间后（当然了，这个值应该要小于HTTP keep-alive定义的值才有意义），服务端开始每隔[tcp_keepalive_intvl]时间向客户端发送"探针"即心跳包，以测试目标主机的连接状态。如果尝试了[tcp_keepalive_probes]次都认为是失效的状态，则服务端就决定关闭此连接。
 
+[TCP四次挥手]
+TCP连接的客户端或服务端均可以发起终止连接的请求。主动发起FIN的一方最后将进入TIME_WAIT状态。以client发起FIN为例。
+1. client发送FIN，以表明关闭client到server的单向连接，随后client进入FIN_WAIT1状态；server收到FIN后返回对FIN的ACK，并随后进入CLOSE_WAIT状态（这个状态是否意味着，服务端知道客户端要关了，服务端也准备关闭，但需要一定时间来把最后的数据发送完，所以这个时间段就称之为CLOSE_WAIT？）；
+2. client收到server的ACK，进入FIN_WAIT2状态，等待server关闭FIN的到来（因为server端要在CLOSE_WAIT状态把剩余的数据发送完）；
+3. server传送完最后的数据后，发送FIN给client，为了等待client对server这个FIN的确认，server进入LAST_ACK状态；
+4. client收到server的FIN后，表明服务器也打算关闭了，发送ACK给server，此时server收到ACK后就真正进入CLOSED状态，即TCP连接关闭。***但client发送ACK后不是立即关闭，而是等待2MSL的时间，如果没有收到server对FIN的重传，才进入CLOSED状态。***
+[为什么要等2MSL]
+MSL是在网络中一个报文到达另一端的最大生存时间，一个往返时间就是2MSL。（即如果server的FIN有重传的话，client一定在<2MSL的时间内就收到，这样client就可以重新对FIN进行ACK，再次进入TIME_WAIT状态）
+如果client发送ACK后径直关闭，又起了一个新的socket连接（1个socket连接由唯一的一对socket pair指明，clientIP:port <=> serverIP:port）到server，server端socket肯定是一样的，client端如果clientport不同还好，但万一port和刚才关闭的socket port相同，在网络中游荡的还尚未到达server端的报文，就可能恰好被新的socket连接收到，服务端还以为是这些报文是新socket连接客户端发来的，从而可能造成紊乱。TCP是可靠的传输协议！
+[查看本机网络连接状态]
+netstat -ano|findstr 1991
+server PID对应一个进程，每个连接应该是使用一个线程新建connect_fd来和client socket进行连接。
+e.g. unoserver进程4356，127.0.0.1:1991处于LISTENING，而已连接的其他2个socket连接同属于4356PID，对应的client socket为：
+127.0.0.1:60186
+127.0.0.1:60861
+这两个连接的状态为ESTABLISHED。
+相应地可以看到本机chrome浏览器对这两个连接放在了一个进程里PID15268：
+127.0.0.1:60186 127.0.0.1:1991 ESTABLISHED 15268
+127.0.0.1:60861 127.0.0.1:1991 ESTABLISHED 15268
+
+[为什么是三次握手，而不是两次、四次？]
+如果是两次：1. 首先A给B发信息 2. B返回对A的应答。 这样只有A能确认给B发信息是能收到的，但是B在发送了ACK后，无法确定A是否收到。
+
+三次：在两次基础上，在A收到B的ACK后，A再发送对这个ACK的ACK，让B知道A收到了他的消息。如此一来，B就知道第二步发送的消息A可以收到，B->A的单向连接就建立成功。
+
 37. HTTP/2
 
 38. websocket vs socket
