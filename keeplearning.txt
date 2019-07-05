@@ -59,6 +59,7 @@ CSRF(Cross-Site Request Forgery, C-surf)
 抵抗方法：
 a. 服务器端在执行敏感用户操作时，再次要求核验用户身份，如再输入一次密码；
 b. 检查注入请求发起的源头是否合法，即检查HTTP Header中的Referer，它表明当前请求的来源（但这依赖于浏览器，若浏览器本身有漏洞则不安全）；
+The Document.referrer property returns the URI of the page that "linked" to this page.
 
 Cross-site Scripting (XSS)
 定义：是将恶意代码注入到网站的跨站脚本攻击。
@@ -259,6 +260,19 @@ Domain Sharding(shard: (玻璃等的)尖片），由于浏览器限制了对同�
 
 [SPeeDY]
 SPDY，是HTTP/2.0的前身。
+SPDY(音SPeeDY)，是Google开发的一个协议，旨在通过解决HTTP1.1中的一些问题来提高网页的加载性能。主要通过引入binary frame layer来达到在一个TCP连接上，请求、响应复用的效果。
+  [HTTP/1.x的一些缺点]
+  客户端为实现并发、减少时延，需要发起多个TCP连接；未压缩的请求、响应头部，会导致不必要的网络开销；也不支持资源优先级，导致TCP连接效率低下。
+  Unfortunately, implementation simplicity also came at a cost of application performance: HTTP/1.x clients need to use multiple connections to achieve concurrency and reduce latency; HTTP/1.x does not compress request and response headers, causing unnecessary network traffic; HTTP/1.x does not allow effective resource prioritization, resulting in poor use of the underlying TCP connection; and so on.
+  [HTTP/2要解决的问题]
+  为提高网络资源使用效率、减少时延，HTTP/2引入header压缩、在同一个连接上交替进行请求、响应的发送，还支持请求优先级机制，让更重要的请求先完成。
+HTTP/2 enables a more efficient use of network resources and a reduced perception of latency by introducing header field compression and allowing multiple concurrent exchanges on the same connection… Specifically, it allows interleaving of request and response messages on the same connection and uses an efficient coding for HTTP header fields. It also allows prioritization of requests, letting more important requests complete more quickly, further improving performance.
+  [HTTP/2解决问题的方式]
+  引入binary framing layer。即不像HTTP1.1那样，request和response用回车换行来分隔，而且内容是纯文本(plaintext)。HTTP/2将其分隔到更小的消息中，每个消息都以二进制格式编码。
+
+google developer、mdn developer都已经用的是HTTP/2，老大就是屌的一笔
+[note]不细看了。。很多干货，也很细致。按黄正蔚的perception：深入钻研可能只会从80%到90%，不如用这些10%的精力去学习另一种新知识，从0到50%要比这10%可能更合适些吧。
+[ref]https://developers.google.com/web/fundamentals/performance/http2/
 
 [HTTP Caching]
 只有GET请求会缓存，用URI进行对比。
@@ -478,7 +492,7 @@ isNaN(1 + undefined) // true
 负载均衡：1台apache作为门面，在前端用负载均衡把请求发送给跟在后面的若干个tomcat应用服务器
 负载均衡带来的问题：会话问题
 会话处理：
-1. session粘性：固定发给第一次访问的服务器
+1. session粘性：固定发给第一次访问的服务器(如负载均衡，上次访问服务器A的，这次还导向访问A）
 2. session同步：任意一台服务器session发生变化，同步到所有服务器
 3. session共享：多台服务器共享同一个session服务器（采用redis或memcached）（访问disk慢）
     应用程序连session服务器用分布式缓存系统，后面再跟数据库。
@@ -668,7 +682,7 @@ TCP连接的客户端或服务端均可以发起终止连接的请求。主动�
 3. server传送完最后的数据后，发送FIN给client，为了等待client对server这个FIN的确认，server进入LAST_ACK状态；
 4. client收到server的FIN后，表明服务器也打算关闭了，发送ACK给server，此时server收到ACK后就真正进入CLOSED状态，即TCP连接关闭。***但client发送ACK后不是立即关闭，而是等待2MSL的时间，如果没有收到server对FIN的重传，才进入CLOSED状态。***
 [为什么要等2MSL]
-MSL是在网络中一个报文到达另一端的最大生存时间，一个往返时间就是2MSL。（即如果server的FIN有重传的话，client一定在<2MSL的时间内就收到，这样client就可以重新对FIN进行ACK，再次进入TIME_WAIT状态）
+MSL是在网络中一个报文到达另一端的最大生存时间，一个往返时间就是2MSL。（即如果server的FIN有重传的话（即服务端没收到来自client对FIN的确认，服务端认为是丢了，会重发FIN）client一定发送ACK后的<2MSL的时间内就收到，这样client就可以重新对FIN进行ACK，再次进入TIME_WAIT状态）
 如果client发送ACK后径直关闭，又起了一个新的socket连接（1个socket连接由唯一的一对socket pair指明，clientIP:port <=> serverIP:port）到server，server端socket肯定是一样的，client端如果clientport不同还好，但万一port和刚才关闭的socket port相同，在网络中游荡的还尚未到达server端的报文，就可能恰好被新的socket连接收到，服务端还以为是这些报文是新socket连接客户端发来的，从而可能造成紊乱。TCP是可靠的传输协议！
 [查看本机网络连接状态]
 netstat -ano|findstr 1991
@@ -689,6 +703,8 @@ e.g. unoserver进程4356，127.0.0.1:1991处于LISTENING，而已连接的其他
 37. HTTP/2
 
 38. websocket vs socket
+不是一回事儿，websocket是服务器主动向客户端发送消息，html标准
+socket unix网络接口通信的概念。
 
 39. 排序算法
 shell sort：
@@ -745,6 +761,103 @@ var tempObj = {[prop]: 'xiyu'};
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#Method_definitions
 
 48. [ES6]Destructuring_assignment解构
+The destructuring assignment syntax is a JavaScript expression that makes it possible to unpack values from arrays, or properties from objects, into distinct variables。
+[href=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment]
+[数组解构]
+e.g 1.声明的时候解构赋值
+var foo = ['one', 'two', 'three'];
+
+var [one, two, three] = foo;
+console.log(one); // "one"
+console.log(two); // "two"
+console.log(three); // "three"
+
+e.g 2.先声明变量，随后再使用此语法
+var a, b;
+
+[a, b] = [1, 2];
+console.log(a); // 1
+console.log(b); // 2
+
+e.g 3.忽略某些值
+var [a, , b] = [1,2,3];
+console.log(a); // 1
+console.log(b); // 3
+
+e.g 4.结合'...rest'语法，将剩余的值赋值给rest
+var [a, ...b] = [1, 2, 3];
+console.log(a); // 1
+console.log(b); // [2, 3]
+
+[对象解构]
+e.g 5.基本用法
+var o = {p: 42, q: true};
+var {p, q} = o;
+
+console.log(p); // 42
+console.log(q); // true
+
+e.g 6.声明后再使用，注意需要为整个表达式加()
+var a, b;
+
+({a, b} = {a: 1, b: 2});//valid
+{a, b} = {a: 1, b: 2};//syntax error
+
+e.g 7.赋值给新的变量名
+var o = {p: 42, q: true};
+var {p: foo, q: bar} = o;
+ 
+console.log(foo); // 42 
+console.log(bar); // true
+
+e.g 8.默认值，以防从object解构时，变量为undefined
+var {a = 10, b = 5} = {a: 3};
+
+console.log(a); // 3
+console.log(b); // 5
+
+e.g 9.可以为function的参数设置默认值，注意ES2015的形参写法（也可以不写右侧的"={}"，这样就无法处理不传实参的情况）
+//ES5 version
+function drawES5Chart(options){
+  options = options === undefined ? {} : options;
+  var size = options.size === undefined ? 'big' : options.size;
+  var coords = options.coords === undefined ? {x: 0, y: 0} : options.coords;
+  var radius = options.radius === undefined ? 25 : options.radius;
+  // do sth...
+}
+
+//ES2015 version
+function drawES2015Chart({size = 'big', coords = {x: 0, y: 0}, radius = 25} = {}) {
+  // do sth...
+}
+
+e.g 10. for...of 形式的解构
+var people = [
+  {
+    name: 'Mike Smith',
+    family: {
+      mother: 'Jane Smith',
+      father: 'Harry Smith',
+      sister: 'Samantha Smith'
+    },
+    age: 35
+  },
+  {
+    name: 'Tom Jones',
+    family: {
+      mother: 'Norah Jones',
+      father: 'Richard Jones',
+      brother: 'Howard Jones'
+    },
+    age: 25
+  }
+];
+for (var {name:n, family:{father: f}} of people}){
+  console.log('Name: ' + n + ', Father: ' + f);
+}
+
+
+
 react经常见到这种写法：const { a, b } = obj;
 //obj = {a: 1, b:2}，将“与=左侧变量相同的属性名的值”赋值给对应变量。
 //log(a) == 1
@@ -756,6 +869,8 @@ react经常见到这种写法：const { a, b } = obj;
 [ref]https://www.cnblogs.com/smlp/p/9776789.html
 
 50*. 【Demo】实现一个使用了Nodejs、React、Express、数据库存储等知识所构建的小应用：TodoList。
+
+50.5 promise原理
 
 51. [ES8, ECMA2017]async...await
 用来将一连串Promise异步的写法，改为同步的编码风格，让可读性更好的一种语法。
@@ -826,6 +941,111 @@ gen.next('replacing the yield expression')
 都是Throwable从派生而来。
 
 54. 
+
+
+---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
+1. CSS选择器
+A + B //选择B，当B是A的兄弟节点、且必须跟在A后面
+A ~ B //选择B，当B是A的兄弟节点、且跟在A后面就行，但不一定是第一个
+A > B //选择B，当B是A的直接孩子节点时
+A   B //选择B，当B是A的孩子节点，不管有多深的层级
+
+//pseudo-classes伪类
+:link //应用于一个没有被访问过元素：<a>, <area>, <link href=xxx>
+:visited //应用于访问过的链接
+:hover //在鼠标移动到元素之上时应用此样式。CSS4允许此样式应用于伪元素上。
+:active //正在处于激活状态，如鼠标左键在元素上（如<button>或<a>）按下时
+//以上这四个定义的顺序遵从LVHA原则(爱恨原则，LoVe and HAte)
+
+:checked //当radio/checkbox/option元素为checked，或转变为'on'状态时应用此样式
+
+//pseudo-elements伪元素
+::after(:after) 
+::after是CSS3的语法，引入两个冒号来区分伪元素和伪类。，:after是CSS2的。
+为所选择的元素创建一个伪元素，作为这个元素的最后一个孩子。创建的伪元素默认为inline。通过content来描述内容。经典案例可以结合content:attr(data-descr);来创建tooltip！注意，可以将css函数'attr()'应用于css中。也可以用于伪元素上，则attr()将取伪元素所在的元素的attribute。
+The attr() CSS function is used to retrieve the value of an attribute of the selected element and use it in the stylesheet.
+语法：attr(<attr-name> <type-or-unit>? [,<attr-fallback>])
+
+::before(:before)
+::cue (:cue) //WebVTT(Web Video Text Tracks Format)，貌似是用来修饰视频的字幕轨道的。。
+::first-letter (:first-letter) //应用于块级元素内第一行的第一个字符，但第一个字符的界定也比较特殊。
+::first-line (:first-line) //应用于块级元素内的第一行。注意：仅有一小部分的css可以写在此伪元素中。
+::selection //CC3草稿，CSS4正式。用于选择文档中被用户选中的文本
+
+2. CSS优先级（css specificity）
+!important-10000
+style-1000
+ID-100
+class/attribute/psuedo class-10
+type/pseudo element-1
+
+3. CSS样式的各类值概念
+specified value: 是指在考虑到书写的CSS规则、继承、以及可能的默认值后得到的值；
+computed value: 将CSS指定的规则值转换为最终绝对值，或受其他CSS属性影响后得到的值。如position:absolute会将元素的display属性计算为block；如果font-size当前为16px，那么padding-top:2em将会得到computed value为padding-top:32px。
+used value/actual value: 最终使用的值，如有的浏览器只能渲染整数像素的border，那么就可能将很细（如0.6px）的border进行round，或0或1吧。
+
+---Layout---
+1. 块格式上下文：Block formatting context
+它是块级元素和float元素呆的地方。(It is the region in which the layout of block boxes occurs and in which floats interact with other elements.)
+A block formatting context is created by at least one of the following:
+<html>
+floats(元素的float属性不为none)
+绝对定位元素(position为absolute或fixed)
+inline-blocks(元素display:inline-block)
+block elements(overflow属性不为visible)
+display:flow-root(CSS2, but NOT supported by Safari)
+flex items（即带有display:flex或display:inline-flex元素的直接孩子节点元素）
+
+非常重要：A block formatting context contains everything inside of the element creating it.
+即BFC将所有定义在它内部的元素包裹起来。
+
+确定float和clear float，都是针对BFC的，不会影响在其他BFC内的内容。（所以当float元素超出了一个普通的div时，为了不让float“溢出”，可让div创建一个BFC来阻止float元素“溢出”。旧的办法是设置overflow:auto，但这种比较tricky，而且当内容较多时容易产生scroll bar。）
+margin合并也是针对的是在相同BFC内的块级元素之间进行。
+
+2. 盒模型：Box model
+box-sizing: content-box(default), border-box
+line-height：指定元素中line-box的最小高度。
+  normal默认值一般是1.2；
+  不带单位的数字(1.2)则需乘以元素font-size（建议此种方式）；
+  带长度单位的数字(20px, 1.2em)直接应用（em不建议用，因为has poor inheritance behavior）；
+  百分比(120%)也是相当于font-size的（不建议用，因为has poor inheritance behavior)；
+
+3. Containing block
+
+
+4. flex布局
+flex: flex-grow(<number>) | flex-shrink(<number>) | flex-basis(<width>)
+flex: 2 2 10%;
+flex: 1 2 30px;
+
+flex-grow: 指明item是否伸展，以占据flex容器空闲的空间（如当容器扩大时），默认0；
+flex-shrink：指明item是否收缩，以容纳在flex容器中（如当容器缩小时），默认1；
+flex-basis：指明item初始的size，即content-box的宽度（当flex-direction:column时，就是高度），默认auto。
+
+5. css函数：linear-gradient() //gradient:坡度，斜率，倾斜度，梯度变化曲线
+它创建一个image，由2个或以上的颜色约束，并沿着一条梯度线渐变色的图片。它是一个特殊的<image>，因此可以用在任何<image>的地方。
+linear-gradient([ to <side-or-corner> | <angle> ]? <color-stop-list>)
+                \Definition of the gradient line/  \List of color stops/
+<side-or-corner>如：to bottom, to top, to left, to right。分别等价于指定<angle>：180deg，0deg, 270deg, 90deg。
+<angle>：0deg相当于to top。
+//to xxx，应该是starting point的指向，如to bottom就是starting point在正上方，linear-gradient垂直向下指。
+//角度按顺时针旋转，即垂直向上为0deg，向右旋转90deg就是to right。
+
+background: linear-gradient(#e66465, #9198e5); //正确
+background-color: linear-gradient(#e66465, #9198e5); //错误，因为它是一个image，而不是一个color
+
+gradient line由包含此背景图片的box的中心点，以及角度来确定。
+color stops，即在这条线上有多个颜色的stop point。starting point是box corner到gradient line的垂线的交点；ending point正好和starting point对称。
+
+perpendicular line垂直线，正交线
+intersection 十字路口，交叉路口，交点
+quadrant 四分之一圆，象限
+gradient line 梯度线
+
+6.
+
+
+
 
 
 ---Node.js--------------------------------------------------------------------------------------------------------------
@@ -963,19 +1183,7 @@ This demonstrates an important property: our script is executed at the exact poi
   
 5.HTTP2.0
   我答SPDY有HTTP2.0的影子，扯到了提升前端性能，域名收敛。。额。。强答啊
-  SPDY(音SPeeDY)，是Google开发的一个协议，旨在通过解决HTTP1.1中的一些问题来提高网页的加载性能。主要通过引入binary frame layer来达到在一个TCP连接上，请求、响应复用的效果。
-  [HTTP/1.x的一些缺点]
-  客户端为实现并发、减少时延，需要发起多个TCP连接；未压缩的请求、响应头部，会导致不必要的网络开销；也不支持资源优先级，导致TCP连接效率低下。
-  Unfortunately, implementation simplicity also came at a cost of application performance: HTTP/1.x clients need to use multiple connections to achieve concurrency and reduce latency; HTTP/1.x does not compress request and response headers, causing unnecessary network traffic; HTTP/1.x does not allow effective resource prioritization, resulting in poor use of the underlying TCP connection; and so on.
-  [HTTP/2要解决的问题]
-  为提高网络资源使用效率、减少时延，HTTP/2引入header压缩、在同一个连接上交替进行请求、响应的发送，还支持请求优先级机制，让更重要的请求先完成。
-HTTP/2 enables a more efficient use of network resources and a reduced perception of latency by introducing header field compression and allowing multiple concurrent exchanges on the same connection… Specifically, it allows interleaving of request and response messages on the same connection and uses an efficient coding for HTTP header fields. It also allows prioritization of requests, letting more important requests complete more quickly, further improving performance.
-  [HTTP/2解决问题的方式]
-  引入binary framing layer。即不像HTTP1.1那样，request和response用回车换行来分隔，而且内容是纯文本(plaintext)。HTTP/2将其分隔到更小的消息中，每个消息都以二进制格式编码。
-
-google developer、mdn developer都已经用的是HTTP/2，老大就是屌的一笔
-[note]不细看了。。很多干货，也很细致。按黄正蔚的perception：深入钻研可能只会从80%到90%，不如用这些10%的精力去学习另一种新知识，从0到50%要比这10%可能更合适些吧。
-[ref]https://developers.google.com/web/fundamentals/performance/http2/
+  
 
 6.闭包
   它有什么用，主要用在哪里；利用了js的什么特性才有的这个闭包概念呢
@@ -1014,3 +1222,63 @@ google developer、mdn developer都已经用的是HTTP/2，老大就是屌的一
 11.[面试官]前端发展很快，有很多东西都可以去学习了解下的，自己平常也可以用用嘛
   [我]：是的，我也觉得有些新东西想学习下，工作中难以用到。就想着换个环境，进步一下。
   [面试官]：那好吧，今天面试就到这儿了，后面如果可以的话，会有另一个面试官联系你。
+  
+  
+//注重基础
+1. css 清除浮动
+2. this 指向
+3. css 实现垂直居中
+4. 实现 BFC
+5. web 安全：跨域，xss，各种攻击
+6. 性能优化：前端优化、后端优化
+7. this指向
+8. 打包工具
+9. nodejs
+10. http状态码
+11. prototype chain
+12. 闭包、作用域
+13. 缓存: cookie, sessionStorage
+14. url加载网页全过程
+15. http/1.0 vs http/2.0
+16. es6: class, proxy, promise及原理; es7, es8 etc.
+17. websocket
+18. canvas
+19. https vs http
+20. 将一个对象里的原型链上的属性过滤掉
+21. flex
+22. async/await
+23. 1000瓶酒中只有一瓶有毒，如何用最少的小白鼠找出毒酒？小白鼠喝酒后24小时死亡则说明有毒，否则无毒。
+
+==腾讯面试，2019.05.21 18:45-19:18 这个男面试官思维很清晰，问题是分类问的，稳得一批==
+1.http的method有哪些，区别。主要get vs post
+2.http vs https（非对称vs对称，如何保证数据的真实性（hash，用非对称思想对hash值加密））
+3.js中的this
+4.promise vs setTimeout(xx, 0)
+5*.浏览器中的微任务vs宏任务
+微任务：Promise.then, MutationObserver
+宏任务：setTimeout, setImmediate, MessageChannel
+浏览器有两个时间队列，分别是微任务队列和宏任务队列。
+微任务队列就是将任何属于微任务的异步代码(Promise.then、MutationObserver)放入微任务事件队列中；宏任务队列类似。
+浏览器首先将执行栈上的同步代码执行完，然后**将所有微任务队列中的事件按顺序执行完毕**，然后再查看宏任务队列。如果有，则取第一个宏任务执行，***执行完这个任务后，再查看微任务队列中是否有微任务需要执行，如有则再执行所有的微任务，否则继续取第一个宏任务来执行。
+实际上这里就是一个浏览器执行代码的周期，在一个周期中，执行所有待执行的微任务，然后再取第一个宏任务执行，然后继续向下走，直到进入下一个处理周期。
+
+6.js中的垃圾回收机制
+实际和操作系统中的原理类似，答这方面应该就行了。
+引用计数，标记清除。
+
+7.React中的Virtual DOM
+8.repaint（重绘） vs reflow（回流）
+9.css问了一些比较简单的问题
+ 9.1 类选择器、id选择器怎么写
+ 9.2 选直接孩子呢，A + B啥意思呢
+ 9.3 display:inline vs display:block
+ 9.4 position:absolute vs position:fixed
+ 9.5 如何隐藏一个元素
+10.平时有没有学习什么新技术，前沿的一些东西
+==总体感觉，比较顺畅，平常心嘛。而且其实他问这些东西的时候，自己大部分都是能答上来的，相信自己==
+==两种结果都能接受，那就坦然了。Anyway，都要自己学习进步==
+
+对简历，腾讯李刘鹏给的建议：
+1. 代发数据无法体现出和前端相关的东西；
+2. iOS、小程序，自己不擅长的不用写；
+3. 
