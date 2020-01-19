@@ -113,6 +113,21 @@ $git stash pop
 //仅恢复，删除则需要$git stash drop
 $git stash apply
 
+//删除所有stash
+$git stash clear
+
+//删除指定stash
+$git stash drop stash@{<stash_index>}
+$git stash drop stash@{0} // 删除第0个stash，通过stash list获取当前stash列表
+
+//应用指定stash-并仍让它保存在stash list中
+$git stash apply stash@{<stash_index>}
+$git stash apply stash@{1}
+
+//应用指定stash-并将它从stash list中移出
+$git stash pop stash@{<stash_index>}
+$git stash pop stash@{2}
+
 26. 强行删除一个分支，注意是大写'D'
 //删除本地分支
 $git branch -d <branch>
