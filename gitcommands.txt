@@ -114,7 +114,16 @@ $git stash pop
 $git stash apply
 
 26. 强行删除一个分支，注意是大写'D'
+//删除本地分支
+$git branch -d <branch>
+
+//强行删除本地分支（不管它是否merge回upstream branch）
 $git branch -D <branch>
+
+//删除远程分支
+$git push -d <remote> <branch>
+$git push -d origin feature/1.2.0/big_join_button
+
 
 27. 推送分支上的所有本地提交到远程仓库
 $git push <remote> <branch>
