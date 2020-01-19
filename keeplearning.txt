@@ -1,4 +1,4 @@
-1.[regexp]正则
+﻿1.[regexp]正则
 2.[js]prototype/prototype chain
 See [anchor id=13]prototype chain[/anchor]
 3.[js]is, typeof, ==, ===
@@ -1282,3 +1282,11 @@ This demonstrates an important property: our script is executed at the exact poi
 1. 代发数据无法体现出和前端相关的东西；
 2. iOS、小程序，自己不擅长的不用写；
 3. 
+
+---刚入职腾讯碰到的需要学习的内容---
+1. promise
+2. await
+3. module.exports
+4. require
+5. js打包
+6. class
