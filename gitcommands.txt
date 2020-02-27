@@ -261,6 +261,8 @@ feature1 changes this line
 只要编辑这个文件，修改后保存即可。（当然要删除git帮我们标记的<<<HEAD和>>>啦）
 
 46. rebase
+$ git rebase [feature_you_want_to_rebase_on]
+
 // 假设当前是feature/1.0/hi分支，基于master的A，且当前分支已经提交了1个commit C，而远程master也已经有人推送了，导致前进了B个commit
 $ git rebase master // 令feature/1.0/hi不再基于A，而是基于B（记得本地master已经pull过，保持和远程相同）
 // 解决可能存在的冲突...
@@ -276,3 +278,31 @@ A --- B
 C
 rebase后直接push --force会导致变成：（wwb的提交W丢掉了）
 A --- B --- C
+
+47. 合并多个commit为一个commit
+$ git rebase -i commitID // commitID之后的所有commit都会被合并
+或
+$ git rebase -i HEAD~N // 最近N个commit都会被合并
+
+
+// 假设我基于master的一个commitM，拉了个分支，提交了一个feautre，包含commit1~commit3
+// 目标：我想把这些commit合并下，这样分支的功能就可以在一个commit看到，整齐方便。
+$ git rebase -i commitM // 基于commitM，它之后的提交commit1~commit3都会被合并
+// 跳出文本编辑界面，列出了形如如下的内容（由上到下，按提交顺序，也就是时间来排的）
+// 第一列表示操作，pick表示把这个commit应用到新的base上，squash表示把这个commit合并到上一个commit里
+pick 27da64e mix media & set version to 1.1.5
+pick 5eb24ad add switcher for easy debug
+pick 0429237 add debug prompt
+
+// 因为我们要合并上面这3个，所以写完后可以变成（修改后面的2个操作，改为s）：
+pick 27da64e mix media & set version to 1.1.5
+s 5eb24ad add switcher for easy debug
+s 0429237 add debug prompt
+
+// 改好后保存，接着会再弹出一个文本编辑窗口，这次就是说，要为合并好的commit写一个总的message吧（#开头的不用管，这里面列出的都是以前这3个commit各自的提交备注信息，删掉即可，随便找一行写这次总的commit的message即可）：
+# This is a combination of 3 commits.
+# This is the 1st commit message:
+feature A implemented!
+...
+
+// 上面提交消息写好后，保存关闭编辑框，回到git cmd，正常可以看到successfully，本地已合并ok，push即可。
