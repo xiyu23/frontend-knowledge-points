@@ -260,3 +260,19 @@ feature1 changes this line
 "======="分隔了冲突内容，上面HEAD表示本地修改的，下面表示远程的。
 只要编辑这个文件，修改后保存即可。（当然要删除git帮我们标记的<<<HEAD和>>>啦）
 
+46. rebase
+// 假设当前是feature/1.0/hi分支，基于master的A，且当前分支已经提交了1个commit C，而远程master也已经有人推送了，导致前进了B个commit
+$ git rebase master // 令feature/1.0/hi不再基于A，而是基于B（记得本地master已经pull过，保持和远程相同）
+// 解决可能存在的冲突...
+// 其实这里rebase时，会将N个commit一个个地apply到新的base B上，所以每次apply都可能会有冲突要去解决
+// 当一次apply冲突解决完后，敲下 $git rebase --continue 命令来继续应用下一commit
+$ git add fileA.js  // 将新的changes add到stage，准备commit
+$ git commit -m "改为基于master的B"
+$ git push --force-with-lease origin feature/1.0/hi // 因为本地已经rebase了，而远程则还是基于A的，即已经分叉（diverge）。我们需要用本地的强行替换掉远程的，让远程也更新为rebase后的版本
+// 这里用 --force-with-lease 的原因是它会提示。假设另一个人wwb也在这个分支上开发，他基于A push了一个commit W，那我覆盖远程版本的时候，如果用--force则会把他的W丢掉，变成了A->B->C。
+A --- B
+| \
+|  W
+C
+rebase后直接push --force会导致变成：（wwb的提交W丢掉了）
+A --- B --- C
