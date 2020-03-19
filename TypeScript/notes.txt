@@ -1,0 +1,49 @@
+1. TypeScript(微软推出)是javascript的超集，相当于是js的语法糖，好处就是js类型松散，而ts可以是强类型利于编译时静态检查避免出错，另外面向对象方面ts具备面向对象语言的几乎全部特性写起来规范。但.ts需要编译成.js才能运行。
+
+2. 安装TypeScript
+$ npm install -g typescript
+
+3. 编译.ts为.js
+$ tsc hello.ts
+
+3. 2种类型如果其内部结构兼容，则这两种类型就可称之为兼容的
+In TypeScript, two types are compatible if their internal structure is compatible. This allows us to implement an interface just by having the shape the interface requires, without an explicit implements clause.
+
+interface Person {
+  firstName: string;
+  lastName: string;
+}
+
+// 1 - 兼容
+let user = {
+  firstName: "Yu",
+  lastName: "Hui",
+  another: "Xi"
+};
+
+// 2 - 不兼容，编译时报错，因为缺少Person定义lastName丢失
+let user = {
+  firstName: "Yu",
+  another: "Xi"
+};
+
+4. class的构造函数参数列表中，参数前增加public表示使该参数也成为类成员变量
+As of note, the use of public on arguments to the constructor is a shorthand that allows us to automatically create properties with that name.
+
+5. what is 'gulp'
+gulp(/ɡʌlp/, 大口吞咽饮料或食物，often audibly(/ˈɔːdəbli/))
+整天手工、重复且耗时的工作，让这个workflow变得自动又高效的小工具。
+gulp is a toolkit for automating painful or time-consuming tasks in your development workflow, so you can stop messing around and build something.
+
+1. 安装gulp
+$ npm install gulp-cli -g
+
+2. 写入dependencies
+把gulp写入devDependencies(开发环境)，因为只是开发过程中依赖它，用于打包整理等，生产环境并不需要它
+$ npm install gulp -D 或 $ npm i gulp -D (i是install的简写)
+
+把gulp写入dependencies(生产环境)，只是个例子对比，不要这么做。
+$ npm install gulp -S
+
+3. 安装npx并新建一个gulpfile.js文件
+$ npx -p touch nodetouch gulpfile.js
