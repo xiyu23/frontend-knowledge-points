@@ -35,15 +35,34 @@ gulp(/ɡʌlp/, 大口吞咽饮料或食物，often audibly(/ˈɔːdəbli/))
 整天手工、重复且耗时的工作，让这个workflow变得自动又高效的小工具。
 gulp is a toolkit for automating painful or time-consuming tasks in your development workflow, so you can stop messing around and build something.
 
-1. 安装gulp
-$ npm install gulp-cli -g
+  1. 安装gulp
+  $ npm install gulp-cli -g (-g表示全局安装)
 
-2. 写入dependencies
-把gulp写入devDependencies(开发环境)，因为只是开发过程中依赖它，用于打包整理等，生产环境并不需要它
-$ npm install gulp -D 或 $ npm i gulp -D (i是install的简写)
+  2. 写入dependencies
+  把gulp写入devDependencies(开发环境)，因为只是开发过程中依赖它，用于打包整理等，生产环境并不需要它
+  $ npm install gulp -D 
+  或 
+  $ npm i gulp -D (i是install的简写)
+  或
+  $ npm install gulp --save-dev (-D是--save-dev的缩写)
 
-把gulp写入dependencies(生产环境)，只是个例子对比，不要这么做。
-$ npm install gulp -S
+  把gulp写入dependencies(生产环境)，只是个例子对比，不要这么做。
+  $ npm install gulp -S
+  或
+  $ npm install gulp --save (-S是--save的缩写)
 
-3. 安装npx并新建一个gulpfile.js文件
-$ npx -p touch nodetouch gulpfile.js
+  3. 安装npx并新建一个gulpfile.js文件
+  $ npx -p touch nodetouch gulpfile.js
+
+  4. gulp-typescript
+  是一个管理ts编译工作流的gulp插件，插件通过ts的API，把ts编译选项暴露给gulp使用。
+  A gulp plugin for handling TypeScript compilation workflow. The plugin exposes TypeScript's compiler options to gulp using TypeScript API.
+  如ts.createProject('your-tsconfig.json-file')
+
+6. tsconfig.json
+  6.1 noImplicitAny: true
+  如果表达式/声明中有隐式的Any类型，则警告。Raise error on expressions and declarations with an implied any type
+  6.2 onEmitOnError: true
+  如果tsc编译有错，则不要生成output。Do not emit outputs if any errors were reported.
+  6.3 compileOnSave: true
+  保存时自动编译ts。makes it easy to update your code in a running web app.
