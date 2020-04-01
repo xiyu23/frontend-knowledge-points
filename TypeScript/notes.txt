@@ -66,3 +66,12 @@ gulp is a toolkit for automating painful or time-consuming tasks in your develop
   如果tsc编译有错，则不要生成output。Do not emit outputs if any errors were reported.
   6.3 compileOnSave: true
   保存时自动编译ts。makes it easy to update your code in a running web app.
+
+7. Browserify
+把我们所有模块打包成一个js文件，放到浏览器中运行。This is exactly what Browserify does.
+  7.1 安装
+  $ npm i -D browserify tsify vinyl-source-stream
+  tsify和gulp-typescript类似，都是提供访问ts compiler选项的插件
+  vinyl-source-stream是一个能将browserify输出的结果逆向回gulp能理解的格式（有点像reverse-source-map?）
+  7.2 debug
+  browserify有个属性debug开关，打开的话，生成的bundle.js中包含了source map信息，这样可以在浏览器里调试到源代码的具体位置。

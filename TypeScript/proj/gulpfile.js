@@ -1,5 +1,33 @@
 // gulp my tedious workflow!
+// lesson3: using browserify to bundle modules
 var gulp = require('gulp');
+var browserify = require('browserify');
+var source = require('vinyl-source-stream');
+var tsify = require('tsify');
+var paths = {
+  pages: ['src/*.html']
+};
+
+gulp.task('copy-html', function(){
+  return gulp.src(paths.pages)
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('default', gulp.series(gulp.parallel('copy-html'), function() {
+  return browserify({
+    basedir: '.',
+    debug: true, // tsify会在打包后的js文件中产生source map
+    entries: ['src/main.ts'],
+    cache: {},
+    packageCache: {}
+  })
+  .plugin(tsify)
+  .bundle() // bundle all shits into a single javascript file
+  .pipe(source('bundle.js')) // name our output as 'bundle.js'
+  .pipe(gulp.dest('dist'));
+}));
+
+/*var gulp = require('gulp');
 var ts = require('gulp-typescript');
 
 // 返回一个project，本意是用于如下方式，在task之外创建project
@@ -14,4 +42,4 @@ gulp.task('default', function () {
 
     // js是ICompileStream的一个readable stream property，而ICompileStream是一个继承了NodeJS.ReadWriteStream的接口
     .js.pipe(gulp.dest('dist'));
-})
+})*/
