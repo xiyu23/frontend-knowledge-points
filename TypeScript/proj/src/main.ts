@@ -5,7 +5,7 @@ function showHello(divName: string, name: string) {
   elem.innerText = sayHello(name);
 }
 
-showHello('greeting', 'yuhui is learning ts suit!');
+showHello('greeting', 'yuhui is learning ts suit. watchify test3!');
 
 //console.log(sayHello('TypeScript'));
 

@@ -74,4 +74,16 @@ gulp is a toolkit for automating painful or time-consuming tasks in your develop
   tsify和gulp-typescript类似，都是提供访问ts compiler选项的插件
   vinyl-source-stream是一个能将browserify输出的结果逆向回gulp能理解的格式（有点像reverse-source-map?）
   7.2 debug
-  browserify有个属性debug开关，打开的话，生成的bundle.js中包含了source map信息，这样可以在浏览器里调试到源代码的具体位置。
+  browserify有个属性debug开关，打开的话，生成的bundle.js中包含了source map信息，这样可以在浏览器里调试到源代码的具体位置（即在打包之前的源代码中放置一个断点，刷新页面后会跳到源代码的位置便于调试）。
+  bundle.js中含有类似于:
+  sourceMappingURL=xxxx
+
+8. Watchify, Babel, Uglify
+  8.1 Watchify
+  运行过gulp后，它并不结束，而是继续保持运行状态，这样一旦保存文件，就会刷新。省的手动运行gulp了。
+
+  8.2 Babel
+  把ES6+的转换为ES5和ES3。
+
+  8.3 Uglify
+  压缩打包后的代码。
