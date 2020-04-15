@@ -1,5 +1,44 @@
 // gulp my tedious workflow!
+// lesson4: using uglify.js to compact output js
+var gulp = require('gulp');
+var browserify = require('browserify');
+var source = require('vinyl-source-stream');
+var tsify = require('tsify');
+var uglify = require('gulp-uglify');
+var sourcemaps = require('gulp-sourcemaps');
+var buffer = require('vinyl-buffer');
+var paths = {
+    pages: ['src/*.html']
+};
+
+// 把paths.pages文件copy到dist目录下
+gulp.task('copy-html', function () {
+  return gulp.src(paths.pages)
+      .pipe(gulp.dest('dist'));
+});
+
+// copy-html task完成后，执行browserify这个动作
+gulp.task('default', gulp.series(gulp.parallel('copy-html'), function () {
+  return browserify({
+    basedir: '.',
+    debug: true,
+    entries: ['src/main.ts'],
+    cache: {},
+    packageCache: {}
+  })
+  .plugin(tsify)
+  .bundle() // bundle all shits into a single javascript file
+  .pipe(source('bundle.js'))
+  .pipe(buffer())
+  .pipe(sourcemaps.init({loadMaps: true}))
+  .pipe(uglify())
+  .pipe(sourcemaps.write('./'))
+  .pipe(gulp.dest('dist'));
+}));
+
+
 // lesson3: using browserify to bundle modules
+/*
 var gulp = require('gulp');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
@@ -34,6 +73,7 @@ function bundle() {
 gulp.task('default', gulp.series(gulp.parallel('copy-html'), bundle));
 watchedBrowserify.on('update', bundle);
 watchedBrowserify.on('log', fancy_log);
+*/
 
 /*gulp.task('default', gulp.series(gulp.parallel('copy-html'), function() {
   return browserify({

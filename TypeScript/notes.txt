@@ -59,6 +59,16 @@ gulp is a toolkit for automating painful or time-consuming tasks in your develop
   A gulp plugin for handling TypeScript compilation workflow. The plugin exposes TypeScript's compiler options to gulp using TypeScript API.
   如ts.createProject('your-tsconfig.json-file')
 
+  5. src()
+  创建一个用于从文件系统读取Vinyl objects的stream
+  Vinyl: 描述文件信息的对象，最主要包含path、content属性。
+  src(['hello.js', 'hi.js', ...]); // 读这些源文件
+
+  6. dest()
+  创建一个用于将Vinyl objects写入文件系统的stream
+  dest('dist') // 将输出写到dist目录下
+
+
 6. tsconfig.json
   6.1 noImplicitAny: true
   如果表达式/声明中有隐式的Any类型，则警告。Raise error on expressions and declarations with an implied any type
@@ -73,10 +83,15 @@ gulp is a toolkit for automating painful or time-consuming tasks in your develop
   $ npm i -D browserify tsify vinyl-source-stream
   tsify和gulp-typescript类似，都是提供访问ts compiler选项的插件
   vinyl-source-stream是一个能将browserify输出的结果逆向回gulp能理解的格式（有点像reverse-source-map?）
+
   7.2 debug
   browserify有个属性debug开关，打开的话，生成的bundle.js中包含了source map信息，这样可以在浏览器里调试到源代码的具体位置（即在打包之前的源代码中放置一个断点，刷新页面后会跳到源代码的位置便于调试）。
   bundle.js中含有类似于:
   sourceMappingURL=xxxx
+
+  7.3 browserify构造函数
+  basedir - 描述browserify开始打包的目录。is the directory that browserify starts bundling from for filenames that start with .
+  entries - 指明入口文件，和形参第一个参数files一致，可以是string/file object/array of thoes types
 
 8. Watchify, Babel, Uglify
   8.1 Watchify
@@ -86,4 +101,4 @@ gulp is a toolkit for automating painful or time-consuming tasks in your develop
   把ES6+的转换为ES5和ES3。
 
   8.3 Uglify
-  压缩打包后的代码。
+  压缩打包后的代码：get minified into an unreadable mess!
