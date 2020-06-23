@@ -138,4 +138,108 @@ computed: {
 }
 </pre>
 
-#### 5.3
+### 6. Class与Style绑定
+这俩属性比较特殊，绑定的表达式结果值可以是*字符串*、*对象*、*数组*。
+
+#### 6.1 Class对象语法
+
+`v-bind:class="{ active: isActive, 'text-danger': hasError }"`
+
+`active`这个样式类是否应用，取决于property`isActive`的值是否为`true`。
+
+同样地，`text-danger`也是一样，依赖于`hasError`的布尔值。
+
+不必内联将对象写到模板里，可以如此（注意`key`是*className*, `value`的值应该是布尔类型）：
+
+// 模板  
+
+`v-bind:class="classObject"`
+
+// 实例数据
+<pre>
+data: {
+  classObject: {
+    active: true,
+    <span style='color:#42b983'>'text-danger'</span>: true,
+  },
+}
+</pre>
+
+如此一来，最后应用的样式等价于
+
+`class='active text-danger'`
+
+**一种强大的模式：为`class`绑定一个是计算属性的对象：**
+
+（也就是当样式修改比较复杂时，可以考虑用计算属性来做）
+
+`v-bind:class='classObject'`
+
+<pre>
+data: {
+  isActive: true,
+  error: null,
+},
+computed: {
+  classObject: function() {
+    return {
+      active: this.isActive && !this.error,
+      'text-danger': this.error && this.error.type === 'fatal'
+    };
+  },
+}
+</pre>
+
+#### 6.2 Class数组语法
+
+`v-bind:class="[activeClass, errorClass]"`
+
+<pre>
+data: {
+  activeClass: 'active',
+  errorClass: 'error',
+},
+</pre>
+
+以上等价于
+
+`class='active error'`
+
+因为`v-bind:class`是一个表达式，因此里面可以写简单的逻辑，如
+
+`v-bind:class="[isActive ? activeClass : '', errorClass]"`
+
+即当`errorClass`固定会添加，而`activeClass`是否添加，是由`isActive`这个property决定的。
+
+也可以这么写（在数组语法中使用对象语法），
+
+`v-bind:class="[{ active: isActive }, errorClass]"`
+
+**自定义组件上写的`className`，最终会添加到自定义组件的*根元素*上，并且*不会被覆盖***
+
+#### 6.3 style对象语法
+
+`v-bind:style="{ color: someColor, 'font-size': fontSize + 'px' }"`
+
+*注意：css property可以用camelCase(`fontSize`)或者kebab-case，但注意kebab-case需要加上引号(`'font-size'`)*
+
+<pre>
+data: {
+  someColor: 'blue',
+  fontSize: 20,
+}
+</pre>
+
+等价于，
+
+`style="color: blue; font-size: 20px"`
+
+#### 6.4 style数组语法
+
+`v-bind:style="[baseStyles, overriddingStyles]"`
+
+### 7. v-if vs v-show
+
+`v-if`: 不需要频繁切换时使用(需要时Add,不需要时Remove)
+
+`v-show`: 需要频繁切换时使用(保持在DOM中,通过修改`display`实现)
