@@ -226,7 +226,7 @@ data: {
 <pre>
 data: {
   someColor: 'blue',
-  fontSize: 20,
+  fontSize: 20, // 或者'font-size'
 }
 </pre>
 
@@ -242,4 +242,12 @@ data: {
 
 `v-if`: 不需要频繁切换时使用(需要时Add,不需要时Remove)
 
-`v-show`: 需要频繁切换时使用(保持在DOM中,通过修改`display`实现)
+`v-show`: 需要频繁切换时使用(保持在DOM中,通过修改`display`实现，`display:none`)
+
+**对于隐藏而言，`v-if`比`v-show:false`代价要高！**
+
+因为`v-if`是条件渲染，不需要渲染时，根本就不插入DOM。
+
+而`v-show`因为是用`display:none`来控制的，`style`只是影响到样式的表现(CSSOM, 即CSS-Object-Model)，并不会影响DOM树。
+
+因此，`v-if`根本就不插入DOM，从而不会渲染；`v-show`则存在于DOM中，当需要隐藏时，渲染树得到`display:none`，最终渲染出来的`render tree`是不含这个元素节点的。
