@@ -273,7 +273,9 @@ data: {
 </template>
 ```
 
-如果希望不要复用`<input>`，则应给它指定一个`key`
+如果希望不要复用`<input>`，则应给它指定一个`key` attribute
+
+?? 这里的`key`为啥不是`v-bind:key`？和`v-for`中的`v-bind:key`有何区别？
 
 ```html
 <template v-if="loginType === 'username'">
@@ -286,4 +288,50 @@ data: {
 </template>
 ```
 
-### 8. 自定义指令
+### 8. 列表渲染：v-for
+
+遍历数组
+```html
+<li v-for='item in items' :key='item.uniqueKey'>{{ item.message }}</li>
+
+<li v-for='(item, index) in items' :key='item.uniqueKey'>{{ item.index - item.message }}</li>
+```
+
+遍历对象
+```html
+<li v-for='(value, prop, index) in someObject'>{{ index }}. {{ prop }} : {{ value }}</li>
+```
+
+#### 8.1 for...in vs for...of
+
+**```for...in```**
+
+遍历一个对象的所有**可枚举**属性，这些属性是用`String`来作为key区分的，且继承而来的属性也会被遍历到。
+
+<pre>
+const object = { a: 1, b:2, c:3 };
+for (const prop in object) {
+  // prop: 'a'/'b'/'c'
+  // value can get from object[prop]: 1/2/3
+}
+</pre>
+
+**最佳实践：**
+> 不要在遍历过程中Add/Modify/Delete属性。  
+> 不要为数组使用`for...in`(因为此语法是遍历可枚举的属性，并不保证顺序。而且遍历时的*variable*是**数组下标**！)  
+
+**```for...of```**
+
+遍历一个**可迭代**的对象，如内置的`Array`、`String`、`Array-Like Object`(e.g., arguments)、`Map`、`Set`等。
+
+可通过`break`、`return`跳出。
+
+<pre>
+for (let value of ['a', 'b', 'c']) {
+  // value: 'a'/'b'/'c'
+}
+
+for (let value of 'abc') {
+  // value: 'a'/'b'/'c'
+}
+</pre>
