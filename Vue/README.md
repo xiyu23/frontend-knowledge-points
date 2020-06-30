@@ -246,8 +246,44 @@ data: {
 
 **对于隐藏而言，`v-if`比`v-show:false`代价要高！**
 
-因为`v-if`是条件渲染，不需要渲染时，根本就不插入DOM。
+因为`v-if`是条件渲染，不需要渲染时，**根本就不插入DOM**。
 
 而`v-show`因为是用`display:none`来控制的，`style`只是影响到样式的表现(CSSOM, 即CSS-Object-Model)，并不会影响DOM树。
 
 因此，`v-if`根本就不插入DOM，从而不会渲染；`v-show`则存在于DOM中，当需要隐藏时，渲染树得到`display:none`，最终渲染出来的`render tree`是不含这个元素节点的。
+
+`v-if/v-else/v-else-if`
+
+#### 7.1 key
+
+以下HTML，如果没有`key`，则Vue的元素复用机制将会导致`v-if`切换时，input的值仍然残留。
+
+原因是Vue会尽可能复用相同元素，<i style='color:#006fff'>猜测</i>这里因为结构相同（都是`<label>`和`<input>`），所以切换时DOM元素仍保持在DOM树中，而仅仅更改节点元素的属性。
+
+*感觉像是DOM没变，只是用Object.assign修改了属性？*
+
+```html
+<template v-if="loginType === 'username'">
+  <label>Username</label>
+  <input placeholder="Enter your username">
+</template>
+<template v-else>
+  <label>Email</label>
+  <input placeholder="Enter your email address">
+</template>
+```
+
+如果希望不要复用`<input>`，则应给它指定一个`key`
+
+```html
+<template v-if="loginType === 'username'">
+  <label>Username</label>
+  <input placeholder="Enter your username" key="username-input">
+</template>
+<template v-else>
+  <label>Email</label>
+  <input placeholder="Enter your email address" key="email-input">
+</template>
+```
+
+### 8. 自定义指令
