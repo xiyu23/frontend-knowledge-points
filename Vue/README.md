@@ -262,6 +262,8 @@ data: {
 
 *感觉像是DOM没变，只是用Object.assign修改了属性？*
 
+**TODO: 看下源码吧!**
+
 ```html
 <template v-if="loginType === 'username'">
   <label>Username</label>
@@ -335,3 +337,15 @@ for (let value of 'abc') {
   // value: 'a'/'b'/'c'
 }
 </pre>
+
+#### 8.2 数组更新检测
+
+Vue覆盖(通过`Object.defineProperty`实现Array.prototype上方法的Modify)了几个数组方法，以达到为数组调用方法时能够更新视图的目的。
+
+如pop、push、shift、unshift、splice、sort、reverse等。
+
+翻源码看到array.js中修改以上方法时，value函数内部`this`上有个 **\_\_ob\_\_**，这是啥？
+
+Under the hood, Vue.js attaches a hidden property **\_\_ob\_\_** and recursively converts the object’s enumerable properties into getters and setters to enable dependency collection. Properties with keys that starts with $ or _ are skipped.
+
+**For the object that you want to be observed, Vue creates a `Observer` for it so that updates will be fired as soon as the object changes.**
