@@ -342,10 +342,24 @@ for (let value of 'abc') {
 
 Vue覆盖(通过`Object.defineProperty`实现Array.prototype上方法的Modify)了几个数组方法，以达到为数组调用方法时能够更新视图的目的。
 
-如pop、push、shift、unshift、splice、sort、reverse等。
+**变更数组的方法**如`pop`、`push`、`shift`、`unshift`、`splice`、`sort`、`reverse`等。
 
-翻源码看到array.js中修改以上方法时，value函数内部`this`上有个 **\_\_ob\_\_**，这是啥？
+**非变更数组的方法**如`filter`、`concat`、`slice`等。
 
-Under the hood, Vue.js attaches a hidden property **\_\_ob\_\_** and recursively converts the object’s enumerable properties into getters and setters to enable dependency collection. Properties with keys that starts with $ or _ are skipped.
+> Q: 以上有何区别？  
+> A:   
+> 变更数组的方法会将修改直接反应到View上（因为*修改*本身就更倾向于更新View的目的，所以Vue为其添加了Observer）；而非变更数组的方法，因为这些方法并不改变原数组，Vue并不知道你要做啥，你可能拿着返回的新数组do sth。  
+> 所以当需要用返回的新数组代替原数组时，直接替换即可，如：  
+> <pre>example1.items = example1.items.filter(function (item) {
+>   return item.message.match(/Foo/)
+> })</pre> 
+> `??` 不过，官网的这句存疑："所以用一个含有相同元素的数组去替换原来的数组是非常高效的操作。"
+
+**// 所有存疑的都用`??`来标识，日后都fix掉**
+
+`??` 翻源码看到array.js中修改以上方法时，value函数内部`this`上有个 **\_\_ob\_\_**，这是啥？
+
+Under the hood, Vue.js attaches a hidden property **\_\_ob\_\_** and recursively converts the object’s enumerable properties into getters and setters to enable dependency collection. Properties with keys that starts with `$` or `_` are skipped.
 
 **For the object that you want to be observed, Vue creates a `Observer` for it so that updates will be fired as soon as the object changes.**
+
