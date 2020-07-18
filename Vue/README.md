@@ -342,7 +342,7 @@ for (let value of 'abc') {
 
 Vue覆盖(通过`Object.defineProperty`实现Array.prototype上方法的Modify)了几个数组方法，以达到为数组调用方法时能够更新视图的目的。
 
-**变更数组的方法**如`pop`、`push`、`shift`、`unshift`、`splice`、`sort`、`reverse`等。
+**变更数组的方法**如`pop`、`push`、`shift`、`unshift`、`splice`、`sort`、`reverse`等。(splice修改数组，而slice不修改数组)
 
 **非变更数组的方法**如`filter`、`concat`、`slice`等。
 
@@ -362,4 +362,154 @@ Vue覆盖(通过`Object.defineProperty`实现Array.prototype上方法的Modify)�
 Under the hood, Vue.js attaches a hidden property **\_\_ob\_\_** and recursively converts the object’s enumerable properties into getters and setters to enable dependency collection. Properties with keys that starts with `$` or `_` are skipped.
 
 **For the object that you want to be observed, Vue creates a `Observer` for it so that updates will be fired as soon as the object changes.**
+
+#### 8.3 深入响应式原理
+
+> **WARNING**: Vue不能检测数组和对象的变化
+
+##### 8.3.1 修改数组
+
+<pre>
+vm.myArray[i] = newVal; // 👎非响应式</pre>
+
+当通过上面的方式修改数组时，Vue是无法感知到的（Vue只能通过上面所提到的"**变更数组的方法**"来实现劫持更新）。
+
+应当换成：
+
+方法一：  
+<pre>
+  vm.myArray.splice(i, 1, newVal); // 👍响应式
+</pre>
+
+方法二：  
+<pre>
+  Vue.set(vm.myArray, i, newVal); // 👍响应式
+  
+  // or，因为对象实例上的$set方法是全局方法Vue.set的一个别名
+  vm.$set(vm.myArray, i, newVal); // 👍响应式
+</pre>
+
+#### 8.3.2 修改对象
+
+> **WARNING**: 要想让数据变成响应式的，在创建Vue实例时需要直接将数据提前声明好，哪怕它的值还不确定。
+
+🤦‍: 为啥？
+
+👨: 你说为啥？
+
+👨: **因为在创建一个Vue对象时，Vue会对构造函数中的`data`属性遍历性地添加`getter`/`setter`来令它们成为响应式的。**
+
+🤦‍: 给你看看我代码
+<pre>
+var vm = new Vue({
+  data:{
+    a: 1,
+    b: {
+      favor: 'apple',
+    }
+  }
+})
+
+// `vm.a`、`vm.b.favar` 是响应式的
+
+vm.b.dislike = 'durain'; // 👎 `vm.b.dislike` 是非响应式的 `??`为啥测试的html可以。。
+
+vm.c = 2; // 👎 `vm.c` 是非响应式的
+</pre>
+
+🤦‍:
+新添加的属性为啥不是响应式的？
+
+我想为已经定义好的对象`b`，添加新的属性`dislike`为啥不行？  
+我还想为data新增一个**根级别**属性`c`为啥不行？
+
+👨:
+> 因为Vue不允许**动态添加**根级别的响应式属性(这里就是`c`)。
+> 
+> 但对于**嵌套对象**，是可以用`Vue.set(object, propertyName, value)`方法向它(如这里`b`是嵌套对象，因为`b`是一个对象，而不是一个字面量)添加响应式 property。
+
+所以，
+
+**向非根级别对象(也就是嵌套对象)添加属性的正确做法：**
+
+<pre>
+Vue.set(vm.b, 'dislike', 'durian'); // 向data的对象属性'b'添加一个新的属性'dislike'，它初始化为'durain'
+
+// or
+vm.$set(vm.b, 'dislike', 'durian');
+</pre>
+
+🤦‍: **如果要给`b`添加多个属性呢？** 这样行不行：
+<pre>
+Object.assign(vm.b, { dislike: 'durain', 'mostLike': 'banana' };
+</pre>
+
+👨: 不行，这样等价于
+<pre>
+vm.b.dislike = 'durain';
+vm.b.mostLike = 'banana';
+</pre>
+添加到`b`上的新属性`dislike`和`mostLike`不会成为响应式的。
+
+要么多写几次`Vue.set`，要么就重新给`b`设置一个新的对象吧：
+
+**正确的做法：**
+<pre>
+// 法一：通过Vue.set设置(当然也可以改为vm.$set)
+Vue.set(vm.b, 'dislike', 'durian');
+Vue.set(vm.b, 'mostLike', 'banana');
+
+// 法二：干脆重新给b赋值（因为b是响应式的）
+const newb = Object.assign({}, vm.b, { dislike: 'durain', 'mostLike': 'banana' });
+vm.b = newb;
+</pre>
+
+### 8.3.3 Vue是如何追踪变化的
+
+当把一个javascript对象作为`data`传给Vue实例时，Vue会遍历此对象的所有property，并使用`Object.defineProperty`将他们转为`getter`/`setter`。
+
+这样一来，`data`对象下的所有properties都会变成响应式的。
+
+<pre>
+const vm = new Vue({
+  data: {
+    a: 1,
+    b: {
+      favor: 'apple',
+      c: {
+        today: '2020-07-16',
+        time: '13:41',
+        location: 'Tencent Headquarters SZ',
+      }
+    },
+    dislike: ['orange', 'pineapple'],
+    students: [
+      { name: 'xiaohan', gender: 'female', favor: 'cherry' },
+      { name: 'yuhui', gender: 'male', favor: 'xiaohan' },
+    ],
+  },
+  ...
+});
+
+vm.a = 2; // 👍
+vm.b.favor = 'banana'; // 👍
+vm.b.c.today = '2020-07-17'; // 👍，修改c的属性
+vm.b.c = { Today: '2020-07-16' }; // 👍，重新修改了c
+vm.b.c.weather = 'sunny'; // 👎，你上面白学了？
+vm.$set(vm.b.c, 'weather', 'sunny'); // 👍，就你学的好
+vm.dislike.push('grape'); // 👍，push是数组的变更方法，Vue有劫持
+vm.dislike[0] = 'mango'; // 👎，好好想想！dislike本身这个属性是响应式的，但是因为它是一个数组，它里面的值并不是响应式
+vm.dislike.splice(0, 1, 'mango'); // 👍
+vm.students[0].favor = 'yuhui'; // 👍，容易迷惑！
+
+// 👍
+vm.students[0].favor = 'yuhui'; // first, change data
+vm.$set(vm.students, 0, vm.students[0]); // second, update using vm.$set
+
+
+</pre>
+
+
+
+
 
