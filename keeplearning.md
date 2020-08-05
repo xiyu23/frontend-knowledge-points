@@ -2037,6 +2037,10 @@ Range：可包含nodes以及*part of text_nodes*
 
 
 
+## 74. var a = Object.create(null) vs var a = {}
+var a = {}; // 从Object.prototype继承，a会有Object的一系列方法
+var a = Object.create(null); // 它没有
+
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
 A + B //选择B，当B是A的兄弟节点、且必须跟在A后面

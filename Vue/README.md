@@ -509,6 +509,99 @@ vm.$set(vm.students, 0, vm.students[0]); // second, update using vm.$set
 
 </pre>
 
+# 附: Vue源码学习
+## 0. Vue是如何初始化的？
+### 0.1 init
+1. 对象内部维护一个整型计数，`_uid`++
+2. 有提供`_isComponent`时调初始化内部component；否则合并options赋值给`$options`
+3. initLifecycle:
+4. initEvents:
+5. initRender:
+6. 调用生命周期钩子函数`beforeCreate`
+7. initState:
+8. initProvide:
+9. 调用生命周期钩子函数`created`
+10. 如果`$options.el`存在，则调用vm.$mount方法
+## 1. Vue是如何追踪数据变化的
+Vue创建一个实例时，会将传入的option.data对象，对其每一个属性，定义到vm._data上并使之成为响应式的：
+<pre>
+const keys = Object.keys(data)
+let i = keys.length
+while (i--) {
+  const key = keys[i]
+  proxy(vm, `_data`, key) // key是定义到_data上的，即vm._data.reactiveProp = 5;
+}
+</pre>
+
+## 2. Watcher
+Watcher是Vue中的一个类，它解析一个表达式、收集其依赖项，当表达式的值发生变化时，指定的回调函数会被执行。
+
+**目的：暂时没想到什么好的应用场景。**
+
+用于`$watch()`API和`指令`。
+
+### 2.1 `$watch()`API
+用法：在Vue创建实例给定选项`watch`，以监听表达式值的变化，从而触发回调函数执行。
+<pre>
+var app4 = new Vue({
+  data: {
+    a: 1,
+    b: 2,
+    c: 3,
+    d: 4,
+    e: {
+      f: {
+        g: 5
+      }
+    }
+  },
+  watch: {
+    a: function (val, oldVal) {
+      console.log('handler for a: ', val, ', ', oldVal)
+    },
+    // string method name
+    b: 'someMethod',
+    // the callback will be called whenever any of the watched object properties change regardless of their nested depth
+    c: {
+      handler: function (val, oldVal) { /* ... */ console.log('handler for c:',val, ', ', oldVal); },
+      deep: true
+    },
+    // the callback will be called immediately after the start of the observation
+    d: {
+      handler: 'someMethod',
+      immediate: true
+    },
+    // you can pass array of callbacks, they will be called one-by-one
+    e: [
+      'handle1',
+      function handle2 (val, oldVal) {
+        console.log('handle2: ',val, ', ', oldVal);
+        /* ... */
+      },
+      {
+        ar: function handle3 (val, oldVal) { 
+          /* ... */ 
+          console.log('handle3: ',val, ', ', oldVal);
+        }
+      }
+    ],
+    // watch vm.e.f's value: {g: 5}
+    'e.f': function (val, oldVal) { console.log('e.f') /* ... */ }
+  },
+  methods: {
+    someMethod: function() {
+      console.log('i am someMethod');
+    },
+    handle1: function() {
+      console.log('i am handle 1');
+    },
+  }
+})
+
+app4.a = 2; // handler for a...
+app4.b = 3; // i am someMethod
+// app4.c 因定义了deep=true，所以如果c是一个Object，只要内嵌属性发生变化就会触发
+</pre>
 
 
 
