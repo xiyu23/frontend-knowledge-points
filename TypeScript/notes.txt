@@ -102,3 +102,6 @@ gulp is a toolkit for automating painful or time-consuming tasks in your develop
 
   8.3 Uglify
   压缩打包后的代码：get minified into an unreadable mess!
+
+9. npm
+  see README.md    
