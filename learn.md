@@ -41,13 +41,114 @@ moduleA.sayHi('yuhui'); // #2 output: hi yuhui!
     $ taskkill /fi "imagename eq nginx.EXE" /f
 可以杀死名字为nginx.EXE的所有进程
 
+#### 2.4 一些命令
+启动nginx，直接运行nginx可执行文件即可。
+
+如果已经运行，则可使用如下命令：
+
+    nginx -s signal
+
+- stop - fast shutdown
+- quit - graceful shutdown
+- reload - reloading the configuration file
+- reopen - reopeningthe log files
+
+#### 2.5 80端口已被占用？
+查找被哪些进程占用
+
+    netstat -ano|findstr "80"
+
+找到进程PID，通过任务管理器，或命令行杀死
+
+    taskkill /PID pid
+
+e.g.
+
+    taskkill /PID 2620
+
+进程被清理完后，再尝试启动nginx
+
+    $ ./nginx.exe
+
+#### 2.6 nginx配置
+
+##### 2.6.1 location
+
+Once nginx decides which server processes a request, it tests the **URI specified in the request’s header** against the parameters of the location directives defined inside the server block.
+
+ps.
+>URI是更广泛的概念，URL(locator)、URN(name)则是表示URI的一种方式。URL是定位资源的位置，URN是标识资源的名字，都是URI。
+
+语法：
+
+    location [ = | ~ | ~* | ^~ ] uri { ... }
+    location @name { ... }
+
+e.g.
+
+    location /images {
+      root /data;
+    }
+
+location定义了URI前缀匹配规则为：`/images`，即如果请求头(Request Header)中的URI的前缀是`/images`，则此条location匹配成功。
+
+root定义了为请求服务的根目录。
+
+例如请求`http://example.com/images/water.png`，URI`/images/water.png`匹配`/images`前缀，nginx将*请求URI*直接拼接到location指定的`root`后面，即返回的资源路径为：`/data/images/water.png`。
+
+**当有多个location都匹配时，nginx会使用prefix最长的那个匹配**
+
+**location还可以写正则：以~\*开头的正则表示case-insensitive，~表示case-sensitive**
+
+补充：上下文结构
+
+    http {
+      server {
+        location ~*\.(png|jpg|bmp)$ {
+          [configuration A]
+        }
+      }
+    }
+
+##### 2.6.2 server
+定义了nginx需要将请求转发给对应的server来处理。
+
+下面定义2个`virtual server`：
+
+    http {
+      server {
+        listen 80;
+        server_name www.foo.example.com;
+      }
+
+      server {
+        listen 80;
+        server_name www.bar.example.com;
+      }
+    }
+
+
+### 2.6.3 nginx是如何处理一个请求的
+nginx拿着请求头中的`Host`在配置中匹配，找到应该由哪个server来处理，将请求转发给它。
+
+nginx tests only the request’s header field "`Host`" to determine which server the request should be routed to.
+
 ### 3. Vue脚手架的使用
 
 #### 3.1 安装vue项目脚手架
     $ npm install -g @vue/cli
 
-#### 3.2. 创建一个vue项目
+#### 3.2 创建一个vue项目
     $ vue create hello-world
+
+问题: `vue create`都做了些什么？
+
+#### 3.3 构建项目
+    $ npm run serve
+
+运行后，可以看到本地已经起了一个服务，这样就可以在浏览器中访问。
+
+问题: `npm run serve`都做了什么？
 
 ### 4. Vue项目中遇到的问题
 
@@ -183,10 +284,42 @@ bar(); // will log 'foo'
 参考Vue官方说明：
 > https://cn.vuejs.org/v2/api/index.html?#data
 
+#### 4.6 <%= BASE_URL %> 是什么意思？
+
+`BASE_URL`是Vue搞的一个环境变量，默认代表**当前项目的根目录**。
+
+环境变量可以用在`*.html`中，比如，
+
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+
+等价于
+
+    <link rel="icon" href="/favicon.ico">
+
+你可以通过下面的命令查看vue-cli对webpack的配置信息，将会输出到`output.js`中。
+
+    $ vue inspect > output.js
+
+在`output.js`中可以找到以下定义，看到`BASE_URL`定义为根目录。
+
+    plugins: [
+        /* config.plugin('vue-loader') */
+        new VueLoaderPlugin(),
+        /* config.plugin('define') */
+        new DefinePlugin(
+          {
+            'process.env': {
+              NODE_ENV: '"development"',
+              BASE_URL: '"/"'
+            }
+          }
+        ),
+    ],
+
 ### 5. NPM
 
 #### 5.1 npm run build
-用于构建生产环境的包。
+此命令用于构建生产环境的包。
 
 语法定义:
 ```js
@@ -203,4 +336,4 @@ npm run <command> [--silent] [--<args>...]
 比如`env`是`built-in`脚本，用于列举出环境变量(脚本中也可以用到)。
 
 
-#### 5.2 npm ?
+#### 5.2 npm more?
