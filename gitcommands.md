@@ -306,3 +306,30 @@ feature A implemented!
 ...
 
 // 上面提交消息写好后，保存关闭编辑框，回到git cmd，正常可以看到successfully，本地已合并ok，push即可。
+
+## 48. git submodule
+48.1 为当前项目添加一个**submodule**：
+
+    $ git submodule add <repository>
+
+e.g 远程仓库下面有2个repo（bar.git和foo.git），这俩是兄弟关系。现为bar.git添加foo.git作为其submodule。
+在bar工程下，运行如下命令：
+
+    $ git submodule add ../foo.git
+
+运行结果如下：
+![运行结果](Pics/gitcommands/01.PNG)
+
+可见多了2个内容:  
+1. git-submodule-tools 文件夹  
+这个就是所引用的submodule的全部内容。
+
+2. .gitmodules 文件
+这个文件是git自动生成的，用以track当前工程所依赖的所有submodules。具体可参见[文档](https://git-scm.com/docs/gitsubmodules)。
+
+![配置文件](Pics/gitcommands/02.PNG)
+
+此时修改require路径，即可引用到submodule中需要的文件：
+![修改require路径](Pics/gitcommands/03.PNG)
+
+48.2 submodule更新了，如何为当前项目(superproject)应用此更新呢？
