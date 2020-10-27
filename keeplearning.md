@@ -1,13 +1,14 @@
-﻿1.[regexp]正则
-2.[js]prototype/prototype chain
-See [anchor id=13]prototype chain[/anchor]
-3.[js]is, typeof, ==, ===
-==：如果类型不同，则会先做类型转换，然后再比较
-  -0==+0
-  NaN!=NaN
+﻿# 前端知识点
+## 1. 正则
+## 2. `prototype`, prototype chain
+See [13.prototype chain](#13)
+## 3. `is`, `typeof`, `==`, `===`
+- `==`：如果类型不同，则会先做类型转换，然后再比较
+  ```js
+  -0 == +0
+  NaN != NaN
   undefined == null
   "" == 0 //相当于ToNumber("") === 0, 即Number("") === 0
-  
   
   //不同类型的比较转换规则
   NumberA == StringB  => NumberA === ToNumber(B)
@@ -21,98 +22,197 @@ See [anchor id=13]prototype chain[/anchor]
   
   //ToNumber(B)：将参数转换为number，等价于"+B"（the unary + operator，一元+操作符)
   //ToPrimitive(B)：试图调用object的方法A.toString和A.valueOf（可能有不同的调用顺序），将object转换为primitive
+  ```
+- `===`：同`==`，区别在于不做类型转换，直接比较
+  ```js
+  -0 === +0
+  NaN !== NaN 
+  ```
+
+- `is`：可以认为它大致相当于`===`，只不过略有区别。
+  ```js
+  +0.is(-0) => false
+  -0.is(0)  => false
+  NaN.is(NaN) => true
+  ```
+
+- `typeof`: 返回一个*string*，代表操作数的类型。操作数是一个*object*或者*primitive*.
+  ```js
+  typeof Undefined => "undefined"
+  typeof Null 	 => "object"
+  typeof Boolean   => "boolean"
+  typeof Number    => "number"
+  typeof String    => "string"
+  typeof Function Object => "function"
+  typeof Any other object => "object"
+  typeof NaN 		 => "number"
+
+  var a = Number("5"); //这只是"5"转换为Number类型，并不创建一个Number对象
+  var b = new Number("5"); //创建一个Number对象
+  ```
+> A *primitive* is data that is not an *object* and has no methods.
+
+在JavaScript中有**6**种*primitive*数据类型：
+- string
+- number
+- boolean
+- null
+- undefined
+- symbol(ES2015)
+
+## 4. [html]常见的浏览器端的存储技术有哪些？
+### 4.1 cookie:（8KB）
+server通过http headers `Set-Cookie`来设置cookie，浏览器随后的请求都会将已保存的cookie携带在request的http header中，发送给server。
+
+浏览器关闭则cookie清空，否则可以通过在`Set-Cookie`中指明过期时间（相对于client，而非server），即使浏览器关闭，cookie也还在。
+
+这种方式的cookie叫"*permanent cookie*"。
+
+> Many login forms also offer a "remember me" checkbox to change this to a *persistent cookie* at the user's request，而之前称为*session cookie*。
+
+cookie相关：`Secure` and `HttpOnly`  
+- `Secure`: 表明cookie必须通过https发送。(Cookie to only be transmitted over secure protocol as https)
+
+- `HttpOnly`: 表明cookie不能被js访问（可抵抗XSS的反射攻击：阻止js访问cookie）。（cookies are inaccessible to JavaScript's `Document.cookie` API）
+
+安全相关：
+- `CSRF`(Cross-Site Request Forgery, `C-surf`): 跨站请求注入  
+  是指建立在用户已登录漏洞网站的前提下，hacker通过诱导或窃取用户session，伪装成用户发起并非他自己本意的恶意请求，服务器根本无法识别，因为在服务器看来这就好像是用户自己发起的。 
+ 
+  - 简单的例子：  
+  bank.com通过GET来服务用户转账：`bank.com/transfer?to=Alice&amount=100`。  
+  对于GET请求所有数据都在URL中，客户端的cookie会在每次请求时都会放在HTTP Header中发送给服务器。  
+  hacker发给受害者一个链接`bank.com/transfer?to=hacker&amount=100000`，这样当受害者在浏览器中点击时，就会被服务器执行。因为服务器无法知道这是不是用户本身的意图，就当做合法的请求执行了。  
+
+  - 抵抗方法：  
+    - a. 服务器端在执行敏感用户操作时，再次要求核验用户身份，如再输入一次密码；
+    - b. 检查注入请求发起的源头是否合法，即检查HTTP Header中的`Referer`，它表明当前请求的来源（但这依赖于浏览器，若浏览器本身有漏洞则不安全）；
+    > The `Document.referrer` property returns the URI of the page that "linked" to this page.
+
+- `XSS`(Cross-site Scripting): 跨站脚本攻击  
+  分为三种：Stored XSS Attacks, Reflected XSS Attacks, DOM Based XSS Attacks(less well-known)  
+  前两种都是服务端的flaw，攻击代码被注入在http response中。后一种称是Client Side XSS（也成为local XSS，应该是本地遭遇的，如开一个wifi然后利用网关监听所有HTTP请求，等真正server返回Response后，网关向Response中注入再返回给客户端。典型的例子比如http被运营商劫持，打开网页发现有运营商的广告）
+
+    - Stored XSS Attacks  
+    注入的恶意脚本在服务器上，这样当用户请求到这部分内容时，脚本会在benign用户这边执行。  
+      - 例子：
+      我在foo.com上留言，留言的内容是一段脚本(`<script>alert(1)</script>`)，保存到了服务器。  
+      当其他用户访问foo.com加载留言时，我这段脚本就被服务器发送给用户，继而在用户浏览器中被执行。
+
+      - 如何避免：  
+        - 过滤/转义危险输入
+        - ？
+
+    - Reflected XSS Attacks  
+    用户点击url触发攻击，将恶意代码放在请求中，服务端将部分输入作为响应返回给用户，在用户浏览器中被执行。  
+    这种最容易通过创建一个**恶意url**，邮件等方式发送给用户引诱点击。
+
+      - 例子：
+      比如一个网站从请求的url中取`name`，回显在页面上给用户看。  
+      如果hacker修改url发给用户，用户点击后这段恶意代码可能就被服务器放在了页面中返回给用户，进而用户被hijacked。  
+      如
+        ```js
+        weakless-site.com/q?name=<script>alert('heihei!');</script>
+        weakless-site.com/q?name=<script>var cookie = document.cookie; // send cookie to hacker's own server </script> // 把这个cookie发送给黑客的服务器
+        ```
+      - 如何避免：  
+        - 过滤/转义危险输入
+        - ？
+
+    - DOM Based XSS Attacks  
+    通过修改DOM形成XSS。  
+    假设页面中脚本执行时（比如创建DOM），从url中取参数。这样的话，我（作为攻击者）修改url中参数的值为一段脚本。  
+    将这个链接发给小白用户，用户点击后，客户端脚本从url中取值，并试图创建DOM。  
+    那这段脚本就被注入到了小白用户的DOM中，继而被执行。
   
-===：同==，区别在于不做类型转换，直接比较
-  -0===+0
-  NaN!==NaN 
-  
-is：可以认为它大致相当于===，只不过略有区别。
-+0.is(-0) => false
--0.is(0)  => false
-NaN.is(NaN) => true
+      - 例子：  
+      比如wikipedia上举的例子，网站语言`default=xx`，`xx`是一个`<select>`控件的选项。  
+      如果修改url中的`default=Chinese<script>alert(123);</script>`，那么这个带有script值的选项就注入到了页面中，这个构造DOM的过程是在前端执行的。（其实也是服务端的bug啊）
 
-typeof：返回一个string，代表操作数的类型。操作数是一个object或者primitive
-typeof Undefined => "undefined"
-typeof Null 	 => "object"
-typeof Boolean   => "boolean"
-typeof Number    => "number"
-typeof String    => "string"
-typeof Function Object => "function"
-typeof Any other object => "object"
-typeof NaN 		 => "number"
+      - 如何避免：  
+        - 过滤/转义危险输入
+        - ？
 
-var a = Number("5");//这只是"5"转换为Number类型，并不创建一个Number对象
-var b = new Number("5");//创建一个Number对象
+- `Replay Attack`：重放攻击
+中间人攻击的一种方式，截获发送的报文，不需要解密，直接将它完整地再发送给目的主机。这样会造成相同的操作进行了两次，便称之为*重放攻击*。  
 
-A primitive is data that is not an object and has no methods.
-在JavaScript中有6种primitive数据类型：string, number, boolean, null, undefined, symbol(ES2015).
-4.[html]常见的浏览器端的存储技术有哪些？
-cookie:（8KB）
-server通过http headers"Set-Cookie"来设置cookie，浏览器随后的请求都会将已保存的cookie携带在request的http header中，发送给server。
-浏览器关闭则cookie清空，否则可以通过在"Set-Cookie"中指明过期时间（相对于client，而非server），即使浏览器关闭，cookie也还在。这种方式的cookie叫"permanent cookie"（Many login forms also offer a "remember me"checkbox to change this to a persistent cookie at the user's request），而之前称为"session cookie"。
-"Secure" and "HttpOnly"
-Secure: 表明cookie必须通过https发送。(Cookie to only be transmitted over secure protocol as https)
-HttpOnly: 表明cookie不能被js访问（可抵抗XSS的反射攻击：阻止js访问cookie）。（cookies are inaccessible to JavaScript's Document.cookie API）
-CSRF(Cross-Site Request Forgery, C-surf)
-跨站请求注入，就是建立在用户已登录漏洞网站的前提下，hacker通过诱导或窃取用户session，伪装成用户发起并非他自己本意的恶意请求，服务器根本无法识别，因为在服务器看来这就好像是用户自己发起的。
-简单的例子：bank.com通过GET来服务用户转账，bank.com/transfer?to=Alice&amount=100。对于GET请求所有数据都在URL中，客户端的cookie会在每次请求时都会放在HTTP Header中发送给服务器。hacker发给受害者一个链接"bank.com/transfer?to=hacker&amount=100000"，这样当受害者在浏览器中点击时，就会被服务器执行。因为服务器无法知道这是不是用户本身的意图，就当做合法的请求执行了。
-抵抗方法：
-a. 服务器端在执行敏感用户操作时，再次要求核验用户身份，如再输入一次密码；
-b. 检查注入请求发起的源头是否合法，即检查HTTP Header中的Referer，它表明当前请求的来源（但这依赖于浏览器，若浏览器本身有漏洞则不安全）；
-The Document.referrer property returns the URI of the page that "linked" to this page.
-
-Cross-site Scripting (XSS)
-定义：是将恶意代码注入到网站的跨站脚本攻击。
-三种：Stored XSS Attacks, Reflected XSS Attacks, DOM Based XSS Attacks(less well-known)
-前两种都是服务端的flaw，攻击代码被注入在http response中。后一种称是Client Side XSS（也成为local XSS，应该是本地遭遇的，如开一个wifi然后利用网关监听所有HTTP请求，等真正server返回Response后，网关向Response中注入再返回给客户端）
-Stored XSS Attacks：注入的恶意脚本在服务器上，这样当用户请求到这部分内容时，脚本会在benign用户这边执行。[example]我在foo.com上留言，留言的内容是一段脚本，保存到了服务器。当其他用户访问foo.com加载留言时，我这段脚本就被服务器发送给用户，继而在用户浏览器中被执行。[避免：过滤/转义危险输入]
-Reflected XSS Attacks: 用户点击url触发攻击，将恶意代码放在请求中，服务端将部分输入作为响应返回给用户，在用户浏览器中被执行。这种最容易通过创建一个恶意url，邮件等方式发送给用户引诱点击。[避免：过滤/转义危险输入]。比如一个网站从请求的url中取name，回显在页面上给用户看。如果hacker修改url发给用户，用户点击后这段恶意代码可能就被服务器放在了页面中返回给用户，进而用户被hijacked。如1: weakless-site.com/q?name=<script>alert('heihei!');</script>, 2: weakless-site.com/q?name=<script>var cookie = document.cookie; /* 把这个cookie发送给黑客的网站 */</script>
-DOM Based XSS Attacks: 通过修改DOM形成XSS。页面中脚本执行时（比如创建DOM），从url中取的参数。这样的话，我（作为攻击者）修改url中参数的值为一段脚本。将这个链接发给小白用户，用户点击后，客户端脚本从url中取值，并试图创建DOM。那这段脚本就被注入到了小白用户的DOM中，继而被执行。比如wikipedia上举的例子，网站语言default=xx，xx是一个<select>的选项，如果修改url中的default=Chinese<script>alert(123);</script>，那么这个带有script值的就注入到了前端页面中，这个构造DOM的过程是在前端执行的。（其实也是服务端的bug啊）
-
-Replay Attack(重放攻击)
-中间人攻击的一种方式，截获发送的报文，不需要解密，直接将它完整地再发送给目的主机。这样会造成相同的操作进行了两次，便称之为重放攻击。
-案例：
-  如登录网站，密码经过md5后，经HTTP传输，服务端从数据库取密码进行对比，若一样则认为用户登录成功。
+  - 案例：  
+  如登录网站，密码经过md5后，经HTTP传输，服务端从数据库取密码进行对比，若一样则认为用户登录成功。  
   重放攻击加入，中间人监听到发送给服务端的报文，将报文原封不动（他不需要解密）再次发送给服务端，那么服务端当然会授权登录成功。
-抵御重放攻击的方案：
-1. 创建和时间相关的session key
-   服务端在接收到HTTP请求后，生成一个时间戳（或用sessionID），用户登录时，将md5后的密码和sessionID混合后再md5，然后将这个结果传输。
-   由于sessionID不同，则中间人重放该报文也无效。
-2. OTP(One-Time Password)一次性密码，每次交易用过就作废
-疑问：
-重放报文哪里来的sessionID？按OSI模型，HTTP在应用层，TCP/IP在下层，只要截获应用层的数据包，修改TCP/IP报文头源主机为中间人主机地址，那不就重放了？关sessionID什么事？HTTPS只不过是在TCP/IP之上有个TLS/SSL，截获加密后的HTTP报文，照样重放。
 
+  - 抵御重放攻击的方案：
+    - a. 创建和时间相关的`session_key`  
+      服务端在接收到HTTP请求后，生成一个时间戳（或用sessionID），用户登录时，将md5后的密码和sessionID混合后再md5，然后将这个结果传输。   
+    由于sessionID不同，则中间人重放该报文也无效。  
 
-[了解HTTP authentication]
-HTTP协议中定义了认证的模式，基于"Basic" schema。服务端返回401（未授权），要求客户端提供证明信息，客户端在HTTP Header中：Authorization: Basic <credentials>
-<credentials> = base64(<username>:<password>)
-e.g. Authorization: Basic eGl5dToxMjM0NTY=  (xiyu:123456)
+    - b. `OTP`(One-Time Password)一次性密码，每次交易用过就作废
+    - <span style='color:red'>疑问</span>：  
+      重放报文哪里来的sessionID？按OSI模型，HTTP在应用层，TCP/IP在下层，只要截获应用层的数据包，修改TCP/IP报文头源主机为中间人主机地址，那不就重放了？关sessionID什么事？HTTPS只不过是在TCP/IP之上有个TLS/SSL，截获加密后的HTTP报文，照样重放。
+
+了解HTTP authentication  
+HTTP协议中定义了认证的模式，基于`Basic` schema。  
+服务端返回401（未授权），要求客户端提供证明信息，客户端在HTTP Header中：
+```
+Authorization: Basic <credentials>
+where <credentials> = base64(<username>:<password>)
+```
+
+e.g. 
+```
+Authorization: Basic eGl5dToxMjM0NTY=  (xiyu:123456)
+```
+
 其他认证schemas：
-Bearer(/be/ n. 持票人，送信人，搬运工人): bearer tokens to access OAuth 2.0-protected resources.
-Digest, HOBA, Mutual...
+- `Bearer`(/be/ n. 持票人，送信人，搬运工人)  
+  bearer tokens to access OAuth 2.0-protected resources.
+- Digest
+- HOBA
+- Mutual
+- ...
 
 
-[常用的认证机制：session auth, basic auth, token auth, OAuth, OAuth2]
-basic auth: username+password，就像HTTP Basic Authentication一样
-token auth: token-based,第一次向服务器证实自己使用usrname+password,服务器验证通过后发送给client一个token，这个token就表示了已验证的用户，
-可在随后访问服务器的请求中将此token带上，以执行经过授权的操作。
-oauth2: 第三方应用(Client)向管理资源授权的服务器(Authorization Server)请求授权用户的资源访问，授权服务器询问用户(Resource Owner)是否同意授权(Authorization)，以授权第三方应用能访问位于资源服务器(Resource Server)上的用户资源。[Access token, Refresh token, Authorization code授权码]
+常用的认证机制：basic auth, session auth, token auth, OAuth, OAuth2  
+- basic auth  
+  `username`+`password`，就像HTTP Basic Authentication一样
 
-web storage分2种：sessionStorage、localStorage：同上，只是数据没有过期时间，浏览器关闭也不会清空。（FF：10MB/domain，String in javascript are UTF-16，占2字节，即能存储5M个字符）
-window.sessionStorage: 对每个域名分别存储，只要浏览器开着，浏览器关闭自动清空。
-window.localStorage：同上，只是数据没有过期时间，浏览器关闭也不会清空。
+- token auth
+  token-based, 第一次向服务器证实自己使用`usrname`+`password`,服务器验证通过后发送给client一个`token`，这个`token`就表示了已验证的用户。  
+  可在随后访问服务器的请求中将此`token`带上，以执行经过授权的操作。
 
-基于OS或Browser的不同，一般都存储在文件中。
+- OAuth2
+  第三方应用(Client)向管理资源授权的服务器(Authorization Server)请求授权用户的资源访问，授权服务器询问用户(Resource Owner)是否同意授权(Authorization)，以授权第三方应用能访问位于资源服务器(Resource Server)上的用户资源。[Access token, Refresh token, Authorization code授权码]  
+  - 例子：  
+    某第三方应用A提供了"使用微信授权"的登录方式。  
+    1. 用户打开第三方应用A，点击"使用微信授权登录"；
+    2. 第三方应用将用户重定向到微信服务器；
+    3. 微信服务器知道是应用A在向用户请求授权，展示微信的网页询问用户是否同意授权获取他**位于微信服务器上**的用户资源；
+    4. 用户同意，则微信的网页将重定向回第三方应用A，并且微信服务器将授权码发送给第三方应用的服务器，以使得第三方应用可以访问微信服务器上用户所授权的的资源；
+    5. 至此，用户就通过第三方（微信）登录的方式，登录了应用A。**这个过程就叫做OAuth2**。
+
+### 4.2 web storage
+- window.sessionStorage  
+  对每个域名分别存储，浏览器关闭后session清空。
+
+- window.localStorage
+  同上，只是数据没有过期时间，浏览器关闭也不会清空。（FF：10MB/domain）
+  > String in javascript are UTF-16，占2个字节
+
+基于OS或Browser的不同，一般都存储在文件中。  
 cons.(缺点)
-1.只能存储string，对于一些数据类型，我们必须序列化再存；
-2.无安全性，current domain页面中的js可以访问
-3.读写是同步的，不能和web worker一起使用
-4.大小仍然限制为10MB
+1. 只能存储string，对于一些数据类型，我们必须序列化再存；
+2. 无安全性，current domain页面中的js可以访问
+3. 读写是同步的，不能和web worker一起使用
+4. 大小仍然限制为10MB
+
 【综上】适用于存储非敏感信息、不超过10MB的字符串。
 
-indexedDB: (web storage只能存储少量的数据，而本尊可以存储大量结构化的数据(structured data)，包括file/blob)
-是一种可以将数据永久存储在用户浏览器中的方法。（IndexedDB is a way for you to persistently store data inside a user's browser。）
-note-powerful but complicated, you'd better use library instead. If you'd prefer a simple API, try libraries such as localForage, dexie.js, ZangoDB, PouchDB, and JsStore that make IndexedDB more programmer-friendly.
+- indexedDB
+  web storage只能存储少量的数据，而本尊可以存储大量结构化的数据(structured data)，包括file/blob  
+  这是一种可以将数据永久存储在用户浏览器中的方法。
+  > IndexedDB is a way for you to persistently store data inside a user's browser。  
+  > note-powerful but complicated, you'd better use library instead.  
+  > If you'd prefer a simple API, try libraries such as `localForage`, `dexie.js`, `ZangoDB`, `PouchDB`, and `JsStore` that make IndexedDB more programmer-friendly.
+
 关键点：
 1. indexedDB存储key-value，value可以使复杂的结构、对象；
 2. indexedDB建立在事务模型上（transactional database model）；
@@ -210,7 +310,7 @@ Having all this, how should we tell the parser that what we really want, is to c
 12.[js]strict mode
 限制了一些语法的使用，如
 a. 对于在function中的this，如果非严格模式下，this指向global object(即window)，严格模式下，this在进入运行作用域内时被设定，且不会再被改变(the value of this remains at whatever it was set to when entering the execution context)。
-13.[js][+2]prototypal inheritance
+## <span id='13'>[+2]prototypal inheritance</span>
 [explain]Each object has a private property which holds a link to another object called its prototype.
 __proto__ contains the object's constructor's prototype object.(__proto__是每个object都有的属性，指向其构造函数的原型对象prototype object)
 Let's say that xiyu is an instance of constructor Person. So xiyu.__proto__ is the Person's prototype. In the same way, xiyu.__proto__.__proto__ is the prototype of Object, which is Object itself. And xiyu.__proto__.__proto__.__proto__ is null.
