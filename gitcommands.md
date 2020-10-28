@@ -1,95 +1,113 @@
-1. 将一个目录初始化为git repo
-$git init
+### 1. 将一个目录初始化为git repo
+    $ git init
 
-2. 将文件添加到版本控制（从[工作区]添加到stage[暂存区]）
-$git add <file1> <file2>
-$git add keeplearning.txt
-$git add mydir/ myfile.txt
+### 2. 将文件添加到版本控制（从[工作区]添加到stage[暂存区]）
+    $ git add <file1> <file2>
+    $ git add keeplearning.txt
+    $ git add mydir/ myfile.txt
 
-3. 将stage暂存区的内容提交
-$git commit -m <message>
-$git commit -m "this is my first commit"
+### 3. 将stage暂存区的内容提交
+    $ git commit -m <message>
+    $ git commit -m "this is my first commit"
 
-4. 查看仓库当前状态
-$git status
+### 4. 查看仓库当前状态
+    
+    $ git status
 
-5. 查看上次修改
-$git diff keeplearning.txt
+### 5. 查看上次修改
+    
+    $ git diff keeplearning.txt
 
-6. 查看提交日志（命令显示从最近到最远的提交日志）
-$git log
+### 6. 查看提交日志（命令显示从最近到最远的提交日志）
 
-7. 查看提交日志-带hash的单行记录显示
-$git log --pretty=oneline
-$git log --pretty=oneline --abbrev-commit //更精简的显示
+    $ git log
 
-8. 想要回退到上一个版本
-$git reset --hard HEAD^
+### 7. 查看提交日志-带hash的单行记录显示
 
-9. 想要回退到上上个版本
-$git reset --hard HEAD^^
+    $ git log --pretty=oneline
+    $ git log --pretty=oneline --abbrev-commit //更精简的显示
 
-10. 想要回退到上N个版本
-$git reset --hard HEAD~N
+### 8. 想要回退到上一个版本
+    
+    $ git reset --hard HEAD^
 
-11. 想回到未来的某个版本
-$git reset --hard <hashID>
-$git reset --hard 658fbb613227161a957bcb2006a651114dc580e5
-//上述<hashID>不用输入那么长，开头几位就够了，git会自行寻找
-$git reset --hard 658fbb
+### 9. 想要回退到上上个版本
 
-12. 想要恢复到未来版本，但不知道未来版本的hashID。查看每一次git命令历史
-$git reflog
+    $ git reset --hard HEAD^^
 
-13. 想要丢弃对工作区文件所做的修改，还原到working tree clean状态
-$git checkout -- <file>
-$git checkout -- keeplearning.txt
-//如果修改1已经被git add到暂存区，而后又做了修改2但还未添加到暂存区，则此时git checkout只会将修改2丢弃，即恢复到上一次git add后的状态（有修改1，无修改2）
+### 10. 想要回退到上N个版本
 
-14. 想要将已通过git add添加到暂存区的修改撤回(Unstage)，此命令可将暂存区的修改撤销，重新放回工作区（工作区的修改仍在，只不过将此文件从git暂存区中移出，这样可以提交剩余的位于暂存区的修改）
-$git reset HEAD <file>
-$git reset HEAD keeplearning.txt
+    $ git reset --hard HEAD~N
 
-15. 删除文件（记得commit！删除和add其实都是修改而已）
-$git rm <file>
+### 11. 想回到未来的某个版本
 
-unstage the file to be committed:
-$git rm --cached <file>
+    $ git reset --hard <hashID>
+    $ git reset --hard 658fbb613227161a957bcb2006a651114dc580e5
+> 上述<hashID>不用输入那么长，开头几位就够了，git会自行寻找
+$ git reset --hard `658fbb`
 
-16. 先有本地库，如何与远程库关联：在remote机器上新建repo，并将本地现有的repo与之关联，完成remote repo的创建
-//首先在github上创建一个新的repo
-//而后本地输入命令以关联并推送
-//为<url>所在的仓库添加一个名为<name>的remote
-$git remote add <name> <url>
-$git remote add origin git@github.com:xiyu23/frontend-knowledge-points.git
+### 12. 想要恢复到未来版本，但不知道未来版本的hashID。查看每一次git命令历史
 
-//首次推送关联
-$git push -u origin master
+    $ git reflog
 
-17. 创建分支
-//-b表示创建并切换到新分支
-$git checkout -b <branch>
+### 13. 想要丢弃对工作区文件所做的修改，还原到working tree clean状态
 
-18. 查看当前所处分支，分支前面标'*'的就是当前分支
-$git branch
-$ git branch -a //查看所有分支
-* dev_2 //本地分支 *表示当前checkout的工作分支，即HEAD所指向的分支
-  master //本地分支
-  remotes/origin/dev //远程分支
-  remotes/origin/dev2 //远程分支
-  remotes/origin/master //远程分支
+    $ git checkout -- <file>
+    $ git checkout -- keeplearning.txt
 
-19. 切换到某个分支
-$git checkout <branch>
+> 如果修改1已经被git add到暂存区，而后又做了修改2但还未添加到暂存区，则此时git checkout只会将修改2丢弃，即恢复到上一次git add后的状态（有修改1，无修改2）
 
-20. 删除分支
-$git branch -d <branch>
+### 14. 想要将已通过git add添加到暂存区的修改撤回(Unstage)，此命令可将暂存区的修改撤销，重新放回工作区（工作区的修改仍在，只不过将此文件从git暂存区中移出，这样可以提交剩余的位于暂存区的修改）
 
-21. 合并某分支到当前分支
-$git merge <some-branch>
+    $ git reset HEAD <file>
+    $ git reset HEAD keeplearning.txt
 
-22. 用带参数的git log来查看分支合并情况
-$git log --graph --pretty=oneline --abbrev-commit
+### 15. 删除文件（记得commit！删除和add其实都是修改而已）
+
+    $ git rm <file>
+
+unstage the file to be committed:  
+
+    $ git rm --cached <file>
+
+### 16. 先有本地库，如何与远程库关联：在remote机器上新建repo，并将本地现有的repo与之关联，完成remote repo的创建
+1. 首先在github上创建一个新的repo
+2. 而后本地输入命令以关联并推送
+3. 为`url`所在的仓库添加一个名为`name`的remote  
+
+    $ git remote add <name> <url>  
+    $ git remote add origin git@github.com:xiyu23/frontend-knowledge-points.git
+
+4. 首次推送关联
+
+    $ git push -u origin master
+
+### 17. 创建分支
+-b表示创建并切换到新分支
+
+    $ git checkout -b <branch>
+
+### 18. 查看当前所处分支，分支前面标'*'的就是当前分支
+
+    $ git branch
+    $ git branch -a //查看所有分支
+    * dev_2 //本地分支 *表示当前checkout的工作分支，即HEAD所指向的分支
+      master //本地分支
+      remotes/origin/dev //远程分支
+      remotes/origin/dev2 //远程分支
+      remotes/origin/master //远程分支
+
+### 19. 切换到某个分支
+$ git checkout <branch>
+
+### 20. 删除分支
+$ git branch -d <branch>
+
+### 21. 合并某分支到当前分支
+$ git merge <some-branch>
+
+### 22. 用带参数的git log来查看分支合并情况
+$ git log --graph --pretty=oneline --abbrev-commit
 * 582d922 (HEAD -> master) add author //HEAD -> master表示本地分支的HEAD指向master分支
 * 8875536 add comment
 * d1be385 (origin/master) init hello //origin/master指明远程master位于dlbe385这个提交，即本地比远程快2个commit
@@ -100,115 +118,115 @@ $git log --graph --pretty=oneline --abbrev-commit
 53e31f5 change #17, add #19,#20
 ebadce9 add #19
 
-23. 剥离(暂存)工作区的修改，完成后工作区就是working clean tree
-$git stash
+### 23. 剥离(暂存)工作区的修改，完成后工作区就是working clean tree
+$ git stash
 
-24. 查看已剥离的内容
-$git stash list
+### 24. 查看已剥离的内容
+$ git stash list
 
-25. 恢复已剥离(暂存)的修改，使工作区恢复之前的开发状态
+### 25. 恢复已剥离(暂存)的修改，使工作区恢复之前的开发状态
 //恢复，并删除stash内容
-$git stash pop
+$ git stash pop
 
-//仅恢复，删除则需要$git stash drop
-$git stash apply
+//仅恢复，删除则需要$ git stash drop
+$ git stash apply
 
 //删除所有stash
-$git stash clear
+$ git stash clear
 
 //删除指定stash
-$git stash drop stash@{<stash_index>}
-$git stash drop stash@{0} // 删除第0个stash，通过stash list获取当前stash列表
+$ git stash drop stash@{<stash_index>}
+$ git stash drop stash@{0} // 删除第0个stash，通过stash list获取当前stash列表
 
 //应用指定stash-并仍让它保存在stash list中
-$git stash apply stash@{<stash_index>}
-$git stash apply stash@{1}
+$ git stash apply stash@{<stash_index>}
+$ git stash apply stash@{1}
 
 //应用指定stash-并将它从stash list中移出
-$git stash pop stash@{<stash_index>}
-$git stash pop stash@{2}
+$ git stash pop stash@{<stash_index>}
+$ git stash pop stash@{2}
 
-26. 强行删除一个分支，注意是大写'D'
+### 26. 强行删除一个分支，注意是大写'D'
 //删除本地分支
-$git branch -d <branch>
+$ git branch -d <branch>
 
 //强行删除本地分支（不管它是否merge回upstream branch）
-$git branch -D <branch>
+$ git branch -D <branch>
 
 //删除远程分支
-$git push -d <remote> <branch>
-$git push -d origin feature/1.2.0/big_join_button
+$ git push -d <remote> <branch>
+$ git push -d origin feature/1.2.0/big_join_button
 
 
-27. 推送分支上的所有本地提交到远程仓库
-$git push <remote> <branch>
-$git push origin master
-$git push origin dev
+### 27. 推送分支上的所有本地提交到远程仓库
+$ git push <remote> <branch>
+$ git push origin master
+$ git push origin dev
 
-28. 克隆远程分支
-$git clone git@github.com:xiyu23/DamnHouse.git
+### 28. 克隆远程分支
+$ git clone git@github.com:xiyu23/DamnHouse.git
 
-29. 克隆后切换分支时'git checkout dev'，报错error: pathspec 'dev' did not match any file(s) known to git
+### 29. 克隆后切换分支时'git checkout dev'，报错error: pathspec 'dev' did not match any file(s) known to git
 原因是本地没有名叫dev的分支，或者远程分支也没有同名的（如果有，git会自动创建一个本地分支来track origin/dev）
-$git fetch
-$git checkout dev
+$ git fetch
+$ git checkout dev
 
-30. HEAD是什么
+### 30. HEAD是什么
 HEAD是一个标明当前所在分支的指针，它指向当前分支。
-当使用$git branch列举出当前的所有分支时，某个分支前的'*'表示当前所在(checkout)的分支，也就是当前HEAD所指向的分支。
+当使用$ git branch列举出当前的所有分支时，某个分支前的'*'表示当前所在(checkout)的分支，也就是当前HEAD所指向的分支。
 
-31. 本地创建了一个分支dev_local，想推送到远程，和他人共享
-$git push origin <local_branch>:<remote_branch>
-$git push origin dev_local:dev
+### 31. 本地创建了一个分支dev_local，想推送到远程，和他人共享
+$ git push origin <local_branch>:<remote_branch>
+$ git push origin dev_local:dev
 如果远程没有叫做dev的分支，则会创建一个。
 Q:如果推送到远程另外一个已存在，名称却不相同的分支呢？
 
-32. 将本地分支与远程分支关联
-$git branch --set-upstream-to=origin/<branch> <local_branch>
-$git branch --set-upstream-to=origin/dev local_dev
+### 32. 将本地分支与远程分支关联
+$ git branch --set-upstream-to=origin/<branch> <local_branch>
+$ git branch --set-upstream-to=origin/dev local_dev
 
-33. 请求将推送后的本地分支dev，与远程master进行合并
+### 33. 请求将推送后的本地分支dev，与远程master进行合并
 两种方式：a. 在远程仓库上执行合并操作(pull request) b. 如果有权限推到master的话，本地checkout master，然后把dev合并到本地master，再推送master到远程。
 
-34. 创建标签：tag其实就是某一commit的别名
+### 34. 创建标签：tag其实就是某一commit的别名
 //默认在当前分支最新提交的commit(HEAD)上打tag
-$git tag <tag_name>
-$git tag v1.0
+$ git tag <tag_name>
+$ git tag v1.0
 
-35. 对指定的某一commit打标签
-$git tag <tag_name> <commit>
-$git tag v0.9 d234dbf
+### 35. 对指定的某一commit打标签
+$ git tag <tag_name> <commit>
+$ git tag v0.9 d234dbf
 
-36. 创建带有说明的标签
-$git tag -a <tag_name> -m <info> <commit>
-$git tag -a v0.8 -m "some tag info"
+### 36. 创建带有说明的标签
+$ git tag -a <tag_name> -m <info> <commit>
+$ git tag -a v0.8 -m "some tag info"
 
-37. 查看所有标签
-$git tag
+### 37. 查看所有标签
+$ git tag
 
-38. 查看某一标签
-$git show <tag>
+### 38. 查看某一标签
+$ git show <tag>
 
-39. 删除本地标签
-$git tag -d v0.1
+### 39. 删除本地标签
+$ git tag -d v0.1
 
-40. 推送本地标签到远程，推送后tag就是相当于是一个release了
-$git push origin <tag_name>
-$git push origin v0.1
+### 40. 推送本地标签到远程，推送后tag就是相当于是一个release了
+$ git push origin <tag_name>
+$ git push origin v0.1
 
-41. 删除已推送到远程的标签
-$git tag -d v0.1 //第一步：先删除本地标签
-$git push origin :refs/tags/v0.1 //第二步：再推送删除远程标签
+### 41. 删除已推送到远程的标签
+$ git tag -d v0.1 //第一步：先删除本地标签
+$ git push origin :refs/tags/v0.1 //第二步：再推送删除远程标签
 
-42. pull request
+### 42. pull request
 github上fork别人的仓库到自己账号下，这样自己再从这个仓库clone到本地开发
 自己本地当然是不能push到别人仓库的，若想要别人接受你对这个仓库的修改，就需要发起一个pull request，由别人决定是否接受你的修改。
 
-43. .gitignore
+### 43. .gitignore
 
-44. git finished
+### 44. git finished
 
-45. git实验记录
+### 45. git实验记录
 dev拉了2个feature分支，现有A、B两个txt文件。
 情况一：
 feature1改了A->A'，feature2改了B->B'。
@@ -260,14 +278,14 @@ feature1 changes this line
 "======="分隔了冲突内容，上面HEAD表示本地修改的，下面表示远程的。
 只要编辑这个文件，修改后保存即可。（当然要删除git帮我们标记的<<<HEAD和>>>啦）
 
-46. rebase
+### 46. rebase
 $ git rebase [feature_you_want_to_rebase_on]
 
 // 假设当前是feature/1.0/hi分支，基于master的A，且当前分支已经提交了1个commit C，而远程master也已经有人推送了，导致前进了B个commit
 $ git rebase master // 令feature/1.0/hi不再基于A，而是基于B（记得本地master已经pull过，保持和远程相同）
 // 解决可能存在的冲突...
 // 其实这里rebase时，会将N个commit一个个地apply到新的base B上，所以每次apply都可能会有冲突要去解决
-// 当一次apply冲突解决完后，敲下 $git rebase --continue 命令来继续应用下一commit
+// 当一次apply冲突解决完后，敲下 $ git rebase --continue 命令来继续应用下一commit
 $ git add fileA.js  // 将新的changes add到stage，准备commit
 $ git commit -m "改为基于master的B"
 $ git push --force-with-lease origin feature/1.0/hi // 因为本地已经rebase了，而远程则还是基于A的，即已经分叉（diverge）。我们需要用本地的强行替换掉远程的，让远程也更新为rebase后的版本
@@ -279,7 +297,7 @@ C
 rebase后直接push --force会导致变成：（wwb的提交W丢掉了）
 A --- B --- C
 
-47. 合并多个commit为一个commit
+### 47. 合并多个commit为一个commit
 $ git rebase -i commitID // commitID之后的所有commit都会被合并
 或
 $ git rebase -i HEAD~N // 最近N个commit都会被合并
@@ -321,10 +339,10 @@ e.g 远程仓库下面有2个repo（bar.git和foo.git），这俩是兄弟关系
 ![运行结果](Pics/gitcommands/01.PNG)
 
 可见多了2个内容:  
-1. git-submodule-tools 文件夹  
+### 1. git-submodule-tools 文件夹  
 这个就是所引用的submodule的全部内容。
 
-2. .gitmodules 文件
+### 2. .gitmodules 文件
 这个文件是git自动生成的，用以track当前工程所依赖的所有submodules。具体可参见[文档](https://git-scm.com/docs/gitsubmodules)。
 
 ![配置文件](Pics/gitcommands/02.PNG)
