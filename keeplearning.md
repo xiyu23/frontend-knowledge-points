@@ -1056,6 +1056,108 @@ SaaS: 软件即服务。有人给你准备了全套，直接用就可以。没�
 
 55. TLS/
 
+## 56. js类中定义静态变量/方法：`static`
+### 1. 如何定义？
+用`static`来修饰变量名或方法即可：
+```js
+class Fruit {
+  static staticProperty = 0;
+  static staticMethod() {
+    console.log('This is fruit');
+  }
+}
+```
+
+### 2. 如何在类外引用？
+在类外引用，当然是用类名：
+```js
+Fruit.staticProperty; // 0
+Fruit.staticMethod(); // This is fruit
+```
+
+### 3. 如何在类内的**静态函数**中引用？
+在类内的静态函数中引用，可以用`this`：
+```js
+class Fruit {
+  static staticProperty = 0;
+  static staticMethod() {
+    console.log('This is fruit');
+  }
+
+  anotherStaticMethod() {
+    console.log(this.staticProperty); // 0
+    this.staticMethod(); // This is fruit
+  }
+}
+```
+### 4. 如何在类内的**非静态函数**中引用？
+在类内的非静态函数中引用，仍然可以通过**类名**引用，或者作为构造函数`constructor`的属性来引用。
+
+不能用`this`，因为`this`被初始化为对象实例的引用，而静态方法并不定义在实例上。
+
+```js
+class Fruit {
+  static staticProperty = 0;
+  static staticMethod() {
+    console.log('This is fruit');
+  }
+
+  constructor() {
+    console.log(Fruit.staticProperty); // 0
+    console.log(this.constructor.staticProperty); // 0
+
+    Fruit.staticMethod(); // This is fruit
+    this.constructor.staticMethod(); // This is fruit
+  }
+
+  anotherMethod() {
+    console.log(Fruit.staticProperty); // 0
+    console.log(this.constructor.staticProperty); // 0
+
+    Fruit.staticMethod(); // This is fruit
+    this.constructor.staticMethod(); // This is fruit
+  }
+}
+```
+
+## 57. 关于`constructor`所应该知道的
+- `constructor`在`class`中只能定义一个，否则会抛出`SyntaxError`
+- 派生类的`.ctor`(构造函数的简写，看过`C++ primer`自然懂)中，需要先调用`super();`以初始化基类
+- 派生类中若不定义构造函数，则默认的构造函数会将派生类构造函数所传入的参数带给基类：
+  ```js
+  constructor(...args) {
+    super(...args);
+  }
+  ```
+
+## 58. 如何在js的类中定义私有变量/方法？
+:warning: 似乎是实验性的提案。
+
+定义：想要定义一个私有变量，则在其前方直接加`#`。  
+引用：当然只能在类方法中引用，注意引用时`#`也是变量名的一部分哦。
+
+```js
+class ClassWithPrivateField {
+  #privateField = 5;
+  publicField = 6;
+
+  log() {
+    console.log(this.#privateField); // 5
+  }
+
+  log2() {
+    console.log(this.publicField); // 6
+  }
+}
+
+const a = new ClassWithPrivateField();
+a.log(); // 5
+a.log2(); // 6
+a.publicField; // 6
+a.#privateField; // Uncaught SyntaxError: Private field '#privateField' must be declared in an enclosing class
+a.someFieldNotDeclared; // undefined
+```
+
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
 A + B //选择B，当B是A的兄弟节点、且必须跟在A后面
