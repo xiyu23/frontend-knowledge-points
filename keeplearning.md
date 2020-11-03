@@ -1133,8 +1133,8 @@ class Fruit {
 ## 58. 如何在js的类中定义私有变量/方法？
 :warning: 似乎是实验性的提案。
 
-定义：想要定义一个私有变量，则在其前方直接加`#`。  
-引用：当然只能在类方法中引用，注意引用时`#`也是变量名的一部分哦。
+定义：想要定义一个私有变量/方法，则在其前方直接加`#`。  
+引用：当然只能在类方法中引用，注意引用时`#`也是变量名/方法名的一部分哦。
 
 ```js
 class ClassWithPrivateField {
@@ -1148,6 +1148,14 @@ class ClassWithPrivateField {
   log2() {
     console.log(this.publicField); // 6
   }
+
+  #privateMethod() {
+    console.log('hello world');
+  }
+
+  publicMethod() {
+    this.#privateMethod();
+  }
 }
 
 const a = new ClassWithPrivateField();
@@ -1156,7 +1164,12 @@ a.log2(); // 6
 a.publicField; // 6
 a.#privateField; // Uncaught SyntaxError: Private field '#privateField' must be declared in an enclosing class
 a.someFieldNotDeclared; // undefined
+a.publicMethod(); // hello world
+a.#privateMethod(); // Uncaught SyntaxError: Private field '#privateMethod' must be declared in an enclosing class
+a.someMethodNotDeclared(); // a.someMethodNotDeclared is not a function
 ```
+
+## 59. what's next?
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
