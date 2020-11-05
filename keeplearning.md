@@ -1080,11 +1080,12 @@ Fruit.staticMethod(); // This is fruit
 ```js
 class Fruit {
   static staticProperty = 0;
+  defaultAsPublicProperty = 1;
   static staticMethod() {
     console.log('This is fruit');
   }
 
-  anotherStaticMethod() {
+  static anotherStaticMethod() {
     console.log(this.staticProperty); // 0
     this.staticMethod(); // This is fruit
   }
@@ -1131,7 +1132,7 @@ class Fruit {
   ```
 
 ## 58. 如何在js的类中定义私有变量/方法？
-:warning: 似乎是实验性的提案。
+:warning: 似乎是实验性的提案。[Private class fields](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_class_fields)
 
 定义：想要定义一个私有变量/方法，则在其前方直接加`#`。  
 引用：当然只能在类方法中引用，注意引用时`#`也是变量名/方法名的一部分哦。
@@ -1169,7 +1170,8 @@ a.#privateMethod(); // Uncaught SyntaxError: Private field '#privateMethod' must
 a.someMethodNotDeclared(); // a.someMethodNotDeclared is not a function
 ```
 
-## 59. what's next?
+## 59.在js中如何定义**私有构造函数**（类似于C++那样）？
+2020年11月5日13:52:56 还没找到方法。。
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
