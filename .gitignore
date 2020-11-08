@@ -1,1 +1,3 @@
 node_modules/
+Refactoring/*.js
+TypeScript/proj/src/*.js
