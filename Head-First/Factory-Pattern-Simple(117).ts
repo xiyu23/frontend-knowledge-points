@@ -79,13 +79,15 @@ class PizzaStore {
     return this.pizzaFactory.createPizza(type);
   }
 }
+// 客户代码 END
 
-// 测试：
-const simpleFactory = new SimpleFactory();
-const pizzaStore = new PizzaStore(simpleFactory);
+// 测试-简单工厂：
+const simpleFactory = new SimpleFactory(); // 创建一个工厂
+const pizzaStore = new PizzaStore(simpleFactory); // 客户代码用这个工厂
 pizzaStore.orderPizza('clam');
 pizzaStore.orderPizza('cheese');
 
-// 客户代码 END
 
-
+// 总结：
+// 简单工厂创建具体的产品，客户代码使用简单工厂来得到一个具体的产品，如果工厂新增了新产品，只需要修改简单工厂，而不需要修改客户代码。
+// 即"创建产品的代码"和"使用产品的代码"解耦了。
