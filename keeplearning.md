@@ -1249,6 +1249,54 @@ a.someMethodNotDeclared(); // a.someMethodNotDeclared is not a function
     // shorthand
     2**10; // 2^10 = 2014
     ```
+
+## 62.`require`的原理是什么？
+require并不是javascript中的概念，而是Nodejs的。
+
+Nodejs中有模块的概念，require用于加载模块。
+
+语法：
+require(id)，id是string，表示module name或路径。
+
+导入module、JSON或本地文件。
+若要从node_modules导入，可直接写module的名称，如require('crypto')
+若要导入本地模块，需指定文件的相对路径，如require('./path/to/my-module.js')。相对路径会结合环境变量'__dirname'拼接成最终绝对路径。
+
+比如，假设当前是在/user/work下的test.js中编写如下语句：
+
+const myLocalModule = require('./foo.js'); // module: /user/work/foo.js
+const myLocalModule2 = require('../work2/bar.js'); // module: /user/work2/bar.js
+
+__dirname: 等价于`path.dirname(path)`，表示**directory name** of a path。
+
+      path.dirname('/foo/bar/baz/asdf/quux');
+      // Returns: '/foo/bar/baz/asdf'
+
+即表示当前所在目录路径。
+
+require解析步骤：
+1. Resolving: to find out the absolute path of the file
+2. Loading: the determine the type of the file content
+3. Wrapping: to give the file its private scope. This is what makes both the require and module objects local to every file we require.
+4. Evaluating: This is what the VM eventually does with the loaded code.
+5. Caching: So that when we require this file again, we don’t go over all the steps another time.
+
+详细步骤：
+1. 解析文件的绝对路径，如果给定的是文件夹名称，则默认取文件夹下的`index.js`（这个行为也可以在`package.json`中配置默认入口）
+2. 加载文件，如果给定的不是路径，则默认先从working文件夹下的`node_modules`文件夹中查找，而后继续向外侧`node_modules`查找（都是找的`node_modules`文件夹），没找到则报错
+3. 在一个独立的scope中执行这个module，将`module.exports`的内容作为本module对外的输出结果，并缓存起来。当第二次`require`时，直接返回对应的`module.exports`
+
+如果出现循环引用(Circular dependency)，`Nodejs`允许这样做，且`require`的是**partial exports object with whatever was defined so far**。（即导出的是目前为止已经export的那些）
+
+> In order to prevent an infinite loop, an unfinished copy of the a.js exports object is returned to the b.js module
+
+This is an important feature. With it, "**partially done**" objects can be returned, thus allowing transitive dependencies to be loaded even when they would cause cycles.
+
+ref: 
+[modules_cycles](https://nodejs.org/api/modules.html#modules_cycles)
+[an article of require keyword](https://www.freecodecamp.org/news/requiring-modules-in-node-js-everything-you-need-to-know-e7fbd119be8/)
+
+
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
 A + B //选择B，当B是A的兄弟节点、且必须跟在A后面
