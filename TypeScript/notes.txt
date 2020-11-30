@@ -3,6 +3,13 @@
 2. 安装TypeScript
 $ npm install -g typescript
 
+- 更新typescript
+
+    $ npm update -g typescript
+
+tsc的版本过低(1.0.3)，但是安装的ts却高很多？
+检查一下是不是vs安装了ts1.0版本导致，可以去看下PATH，把vs的删掉，以让npm安装的优先级更高。（或许需要重启电脑生效）
+
 3. 编译.ts为.js
 $ tsc hello.ts
 
