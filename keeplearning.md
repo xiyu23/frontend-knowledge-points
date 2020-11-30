@@ -869,7 +869,7 @@ var tempObj = {[prop]: 'xiyu'};
 
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#Method_definitions
 
-## 48.[ES6]Destructuring_assignment解构
+## 48.[ES6]Destructuring assignment解构
 > The destructuring assignment syntax is a JavaScript expression that makes it possible to unpack values from `arrays`, or properties from `objects`, into distinct variables。
 
 数组解构: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
@@ -908,6 +908,12 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Obje
     console.log(b); // [2, 3]
     ```
 
+5. 交换两个变量
+    ```js
+    var a = 1, b = 2;
+    [a, b] = [b, a];
+    ```
+
 ### 48.2 对象解构
 1. 基本用法
     ```js
@@ -918,12 +924,12 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Obje
     console.log(q); // true
     ```
 
-2. 声明后再使用，注意需要为整个表达式加()
+2. 声明后再使用，**注意需要为整个表达式加()**
     ```js
     var a, b;
 
-    ({a, b} = {a: 1, b: 2}); //valid
-    {a, b} = {a: 1, b: 2}; //syntax error
+    ({a, b} = {a: 1, b: 2}); // valid
+    {a, b} = {a: 1, b: 2}; // syntax error
     ```
 
 3. 赋值给新的变量名
@@ -1198,6 +1204,51 @@ a.someMethodNotDeclared(); // a.someMethodNotDeclared is not a function
 
 ## 60.领域对象、领域类（于《重构》-P189发现）
 
+## 61. JS的一些小技巧
+
+1. 字符串转成数字
+
+    一般我们会用`parseInt()`来做，但更简单地可以直接在字符串前面加个`+`来实现：
+
+    ```js
+    // longhand
+    let total = parseInt('100', 10);
+    let sum = parseFloat('11.30');
+
+    // shorthand
+    let total = +'100';
+    let sum = +'11.30';
+    ```
+
+2. 重复一个字符串多次
+
+    不用循环了，用[repeat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/repeat)：
+    ```js
+    // longhand
+    let str = '';
+    for (let i = 0; i < 10; i++) {
+      str += 'hello';
+    }
+
+    // shorthand
+    let str = 'hello'.repeat(10);
+
+    // cases
+    'abc'.repeat(-1); // RangeError
+    'abc'.repeat(0); // ''
+    'abc'.repeat(2.5); // 'abcabc', 2.5 will be converted to integer
+    ```
+
+3. 指数幂
+
+    用`**`代替`Math.pow(a, n)`
+    ```js
+    // longhand
+    Math.pow(2, 10); // 2^10 = 1024
+
+    // shorthand
+    2**10; // 2^10 = 2014
+    ```
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
 A + B //选择B，当B是A的兄弟节点、且必须跟在A后面
