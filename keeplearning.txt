@@ -994,6 +994,13 @@ require解析步骤：
 
 如果出现循环引用(Circular dependency)，`Nodejs`允许这样做，且`require`的是**partial exports object with whatever was defined so far**。（即导出的是目前为止已经export的那些）
 
+> In order to prevent an infinite loop, an unfinished copy of the a.js exports object is returned to the b.js module
+
+This is an important feature. With it, "**partially done**" objects can be returned, thus allowing transitive dependencies to be loaded even when they would cause cycles.
+
+ref: 
+[modules_cycles](https://nodejs.org/api/modules.html#modules_cycles)
+[an article of require keyword](https://www.freecodecamp.org/news/requiring-modules-in-node-js-everything-you-need-to-know-e7fbd119be8/)
 
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
