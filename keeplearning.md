@@ -869,108 +869,131 @@ var tempObj = {[prop]: 'xiyu'};
 
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#Method_definitions
 
-48. [ES6]Destructuring_assignment解构
-The destructuring assignment syntax is a JavaScript expression that makes it possible to unpack values from arrays, or properties from objects, into distinct variables。
-[href=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment]
-[数组解构]
-e.g 1.声明的时候解构赋值
-var foo = ['one', 'two', 'three'];
+## 48.[ES6]Destructuring_assignment解构
+> The destructuring assignment syntax is a JavaScript expression that makes it possible to unpack values from `arrays`, or properties from `objects`, into distinct variables。
 
-var [one, two, three] = foo;
-console.log(one); // "one"
-console.log(two); // "two"
-console.log(three); // "three"
+数组解构: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
 
-e.g 2.先声明变量，随后再使用此语法
-var a, b;
+### 48.1 数组解构
+1. 声明的时候解构赋值
+    ```js
+    var foo = ['one', 'two', 'three'];
 
-[a, b] = [1, 2];
-console.log(a); // 1
-console.log(b); // 2
+    var [one, two, three] = foo;
+    console.log(one); // "one"
+    console.log(two); // "two"
+    console.log(three); // "three"
+    ```
 
-e.g 3.忽略某些值
-var [a, , b] = [1,2,3];
-console.log(a); // 1
-console.log(b); // 3
+2. 先声明变量，随后再使用此语法
+    ```js
+    var a, b;
 
-e.g 4.结合'...rest'语法，将剩余的值赋值给rest
-var [a, ...b] = [1, 2, 3];
-console.log(a); // 1
-console.log(b); // [2, 3]
+    [a, b] = [1, 2];
+    console.log(a); // 1
+    console.log(b); // 2
+    ```
 
-[对象解构]
-e.g 5.基本用法
-var o = {p: 42, q: true};
-var {p, q} = o;
+3. 忽略某些值
+    ```js
+    var [a, , b] = [1, 2, 3];
+    console.log(a); // 1
+    console.log(b); // 3
+    ```
 
-console.log(p); // 42
-console.log(q); // true
+4. 结合`...rest`语法，将剩余的值赋值给`rest`
+    ```js
+    var [a, ...b] = [1, 2, 3];
+    console.log(a); // 1
+    console.log(b); // [2, 3]
+    ```
 
-e.g 6.声明后再使用，注意需要为整个表达式加()
-var a, b;
+### 48.2 对象解构
+1. 基本用法
+    ```js
+    var o = { p: 42, q: true };
+    var { p, q } = o;
 
-({a, b} = {a: 1, b: 2});//valid
-{a, b} = {a: 1, b: 2};//syntax error
+    console.log(p); // 42
+    console.log(q); // true
+    ```
 
-e.g 7.赋值给新的变量名
-var o = {p: 42, q: true};
-var {p: foo, q: bar} = o;
- 
-console.log(foo); // 42 
-console.log(bar); // true
+2. 声明后再使用，注意需要为整个表达式加()
+    ```js
+    var a, b;
 
-e.g 8.默认值，以防从object解构时，变量为undefined
-var {a = 10, b = 5} = {a: 3};
+    ({a, b} = {a: 1, b: 2}); //valid
+    {a, b} = {a: 1, b: 2}; //syntax error
+    ```
 
-console.log(a); // 3
-console.log(b); // 5
+3. 赋值给新的变量名
+    ```js
+    var o = { p: 42, q: true };
+    var { p: foo, q: bar } = o; // 给p重新命名为foo，给q重新命名为bar
+    
+    console.log(foo); // 42 
+    console.log(bar); // true
+    ```
 
-e.g 9.可以为function的参数设置默认值，注意ES2015的形参写法（也可以不写右侧的"={}"，这样就无法处理不传实参的情况）
-//ES5 version
-function drawES5Chart(options){
-  options = options === undefined ? {} : options;
-  var size = options.size === undefined ? 'big' : options.size;
-  var coords = options.coords === undefined ? {x: 0, y: 0} : options.coords;
-  var radius = options.radius === undefined ? 25 : options.radius;
-  // do sth...
-}
+4. 默认值，以防从object解构时，变量为undefined
+    ```js
+    var { a = 10, b = 5 } = { a: 3 };
 
-//ES2015 version
-function drawES2015Chart({size = 'big', coords = {x: 0, y: 0}, radius = 25} = {}) {
-  // do sth...
-}
+    console.log(a); // 3
+    console.log(b); // 5
+    ```
 
-e.g 10. for...of 形式的解构
-var people = [
-  {
-    name: 'Mike Smith',
-    family: {
-      mother: 'Jane Smith',
-      father: 'Harry Smith',
-      sister: 'Samantha Smith'
-    },
-    age: 35
-  },
-  {
-    name: 'Tom Jones',
-    family: {
-      mother: 'Norah Jones',
-      father: 'Richard Jones',
-      brother: 'Howard Jones'
-    },
-    age: 25
-  }
-];
-for (var {name:n, family:{father: f}} of people}){
-  console.log('Name: ' + n + ', Father: ' + f);
-}
+5. *可以为function的参数设置默认值，注意ES2015的形参写法（也可以不写右侧的"={}"，这样就无法处理不传实参的情况）
+    ```js
+    //ES5 version
+    function drawES5Chart(options){
+      options = options === undefined ? {} : options;
+      var size = options.size === undefined ? 'big' : options.size;
+      var coords = options.coords === undefined ? {x: 0, y: 0} : options.coords;
+      var radius = options.radius === undefined ? 25 : options.radius;
+      // do sth...
+    }
 
+    //ES2015 version
+    function drawES2015Chart({size = 'big', coords = {x: 0, y: 0}, radius = 25} = {}) {
+      // do sth...
+    }
+    ```
 
+6. `for...of`形式的解构
+    ```js
+    var people = [
+      {
+        name: 'Mike Smith',
+        family: {
+          mother: 'Jane Smith',
+          father: 'Harry Smith',
+          sister: 'Samantha Smith'
+        },
+        age: 35
+      },
+      {
+        name: 'Tom Jones',
+        family: {
+          mother: 'Norah Jones',
+          father: 'Richard Jones',
+          brother: 'Howard Jones'
+        },
+        age: 25
+      }
+    ];
+    for (var { name: n, family: { father: f } } of people}){
+      console.log('Name: ' + n + ', Father: ' + f);
+    }
 
-react经常见到这种写法：const { a, b } = obj;
-//obj = {a: 1, b:2}，将“与=左侧变量相同的属性名的值”赋值给对应变量。
-//log(a) == 1
-//log(b) == 2
+    // react经常见到这种写法：
+    // 假设obj定义为：
+    const obj = { a: 1, b:2 };
+    const { a, b } = obj; // 这条解构语句的含义是：将"与=左侧变量相同的属性名的值"赋值给对应名称的变量
+
+    console.log(a); // 1
+    console.log(b); // 2
+    ```
 
 49. [设计模式]前端中的设计模式
 单例、观察者、工厂、命令、代理（比如每张图片加载完成之前设置个loading）、职责链（比如根据薪资计算税率、订单购买）
@@ -1172,6 +1195,8 @@ a.someMethodNotDeclared(); // a.someMethodNotDeclared is not a function
 
 ## 59.在js中如何定义**私有构造函数**（类似于C++那样）？
 2020年11月5日13:52:56 还没找到方法。。
+
+## 60.领域对象、领域类（于《重构》-P189发现）
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
