@@ -134,7 +134,7 @@ function doAnimation(isSlideLeft, state) {
     }
   }
 
-  var speed = 50;
+  var speed = 10;
   var move = 0;
   var timerID = setInterval(step, 1000);
 
@@ -144,7 +144,7 @@ function doAnimation(isSlideLeft, state) {
       move = 100;
     }
 
-    if (move <= 100) {
+    if (move < 100) {
       transLC.move(move);
       transMC.move(move);
       transRC.move(move);
@@ -192,16 +192,16 @@ function BlockTransformInfo(props) {
    */
   this.move = function(offset) {
     if (this.isFast()) {
-      console.log(`[move][fast] ${this.to + (this.to > this.from ? 2*offset : -2*offset)}`);
+      console.log(`[move][fast] ${this.from + (this.to > this.from ? 2*offset : -2*offset)}`);
       // this.component.setStyle({
-      //   transform: `translateX(${this.to + (this.to > this.from ? 2*offset : -2*offset)}%)`,
+      //   transform: `translateX(${this.from + (this.to > this.from ? 2*offset : -2*offset)}%)`,
       //   zIndex: '-1',
       //   position: 'relative',
       // });
     } else {
-      console.log(`[move] ${this.to + (this.to > this.from ? offset : -offset)}`);
+      console.log(`[move] ${this.from + (this.to > this.from ? offset : -offset)}`);
       // this.component.setStyle({
-      //   transform: `translateX(${this.to + (this.to > this.from ? offset : -offset)}%)`,
+      //   transform: `translateX(${this.from + (this.to > this.from ? offset : -offset)}%)`,
       // });
     }
   }
