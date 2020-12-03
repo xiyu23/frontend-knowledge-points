@@ -1,5 +1,59 @@
 ﻿# 前端知识点
 ## 1. 正则
+
+### 1.1 断言
+背景：怎么找出后面不跟`:`的`https`呢？
+
+答案：正则表达式-lookahead assertion。
+
+#### 1.1.1 Lookahead assertion(先行断言) 
+语法：
+
+      x(?=y)
+
+> Matches "x" only if "x" is followed by "y".
+
+例子：
+
+ `/Jack(?=Sprat)/` matches "Jack" only if it is followed by "Sprat".
+
+但是注意，断言并不会将"验证部分"作为匹配，即"Sprat"不会被作为匹配结果的一部分。
+
+#### 1.1.2 Negative lookahead assertion(先行否定断言)
+语法：
+
+    x(?!=y)
+
+> Matches "x" only if "x" is **not** followed by "y".
+
+例子：
+
+`/\d+(?!\.)/`匹配后面不跟小数点的数字，如匹配"3.14"中的3。
+
+#### 1.1.3 Lookbehind assertion(后行断言)
+语法：
+
+    (?<=y)x
+
+> Matches "x" only if "x" is preceded by "y".
+
+例子：
+
+`/(?<=Jack)Sprat/`匹配"JackSpart"中的Spart；
+
+`/(?<=Jack|Tom)Sprat/`匹配"JackSpart"中的Spart，也匹配"TomSpart"中的Spart。
+
+#### 1.1.4 Negative lookbehind assertion(后行否定断言)
+语法：
+
+    (?<!y)x
+
+> Matches "x" only if "x" is **not** preceded by "y".
+
+例子：
+
+`/(?<!-)\d+/`匹配前面不带`-`的数字，如匹配"123"，但不匹配"-123"。
+
 ## 2. `prototype`, prototype chain
 See [13.prototype chain](#13)
 ## 3. `is`, `typeof`, `==`, `===`
