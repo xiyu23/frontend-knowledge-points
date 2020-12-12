@@ -632,6 +632,9 @@ SSL 1994 netscape(v1.0)
 2008 TLS 1.2
 2018 TLS 1.3
 
+### websocket vs http
+
+
 25.[js]逻辑运算符：&&、||、!
 expr1 && expr2: 若expr1能转为false，则返回expr1；否则返回expr2
 expr1 || expr2: 若expr1能转为true，则返回expr1，否则返回expr2
