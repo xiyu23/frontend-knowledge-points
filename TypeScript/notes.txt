@@ -112,3 +112,20 @@ gulp is a toolkit for automating painful or time-consuming tasks in your develop
 
 9. npm
   see README.md    
+
+
+## 10.声明抽象类、抽象方法
+方式、意义和C++一样，在`class`前增加`abstract`修饰。
+```js
+abstract class Animal {
+  abstract makeSound(): void;
+
+  move(): void {
+    console.log("roaming the earth...");
+  }
+}
+```
+
+## 11.类方法、成员默认为`public`
+
+## 12.如何声明一个不允许被子类覆盖的父类方法？
