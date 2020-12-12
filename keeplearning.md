@@ -1,5 +1,59 @@
 ﻿# 前端知识点
 ## 1. 正则
+
+### 1.1 断言
+背景：怎么找出后面不跟`:`的`https`呢？
+
+答案：正则表达式-lookahead assertion。
+
+#### 1.1.1 Lookahead assertion(先行断言) 
+语法：
+
+      x(?=y)
+
+> Matches "x" only if "x" is followed by "y".
+
+例子：
+
+ `/Jack(?=Sprat)/` matches "Jack" only if it is followed by "Sprat".
+
+但是注意，断言并不会将"验证部分"作为匹配，即"Sprat"不会被作为匹配结果的一部分。
+
+#### 1.1.2 Negative lookahead assertion(先行否定断言)
+语法：
+
+    x(?!=y)
+
+> Matches "x" only if "x" is **not** followed by "y".
+
+例子：
+
+`/\d+(?!\.)/`匹配后面不跟小数点的数字，如匹配"3.14"中的3。
+
+#### 1.1.3 Lookbehind assertion(后行断言)
+语法：
+
+    (?<=y)x
+
+> Matches "x" only if "x" is preceded by "y".
+
+例子：
+
+`/(?<=Jack)Sprat/`匹配"JackSpart"中的Spart；
+
+`/(?<=Jack|Tom)Sprat/`匹配"JackSpart"中的Spart，也匹配"TomSpart"中的Spart。
+
+#### 1.1.4 Negative lookbehind assertion(后行否定断言)
+语法：
+
+    (?<!y)x
+
+> Matches "x" only if "x" is **not** preceded by "y".
+
+例子：
+
+`/(?<!-)\d+/`匹配前面不带`-`的数字，如匹配"123"，但不匹配"-123"。
+
 ## 2. `prototype`, prototype chain
 See [13.prototype chain](#13)
 ## 3. `is`, `typeof`, `==`, `===`
@@ -197,14 +251,13 @@ Authorization: Basic eGl5dToxMjM0NTY=  (xiyu:123456)
   同上，只是数据没有过期时间，浏览器关闭也不会清空。（FF：10MB/domain）
   > String in javascript are UTF-16，占2个字节
 
-基于OS或Browser的不同，一般都存储在文件中。  
-cons.(缺点)
-1. 只能存储string，对于一些数据类型，我们必须序列化再存；
-2. 无安全性，current domain页面中的js可以访问
-3. 读写是同步的，不能和web worker一起使用
-4. 大小仍然限制为10MB
+  以上两种总结：
+  1. 只能存储string，对于一些数据类型，我们必须序列化再存；
+  2. 无安全性，current domain页面中的js可以访问
+  3. 读写是同步的，不能和web worker一起使用
+  4. 大小仍然限制为10MB
 
-【综上】适用于存储非敏感信息、不超过10MB的字符串。
+  基于OS或Browser的不同，一般都存储在文件中。它们适用于存储非敏感信息、不超过10MB的字符串。  
 
 - indexedDB
   web storage只能存储少量的数据，而本尊可以存储大量结构化的数据(structured data)，包括file/blob  
@@ -213,28 +266,45 @@ cons.(缺点)
   > note-powerful but complicated, you'd better use library instead.  
   > If you'd prefer a simple API, try libraries such as `localForage`, `dexie.js`, `ZangoDB`, `PouchDB`, and `JsStore` that make IndexedDB more programmer-friendly.
 
-关键点：
-1. indexedDB存储key-value，value可以使复杂的结构、对象；
-2. indexedDB建立在事务模型上（transactional database model）；
-3. indexedDB API大多数是异步的（即读写数据时都需要给个回调）；
-4. etc... 大致了解下，80%的知识实际中都没用到，用到再细学，精力总是有限的，应该关注那些在实际中80%都会用到的20%知识！
+  关键点：
+  1. indexedDB存储key-value，value可以使复杂的结构、对象；
+  2. indexedDB建立在事务模型上（transactional database model）；
+  3. indexedDB API大多数是异步的（即读写数据时都需要给个回调）；
+  4. etc... 大致了解下，***80%的知识实际中都没用到，用到再细学，精力总是有限的，应该关注那些在实际中80%都会用到的20%知识！***
 
-[JSON Web Tokens (JWTs)]
-用户首次认证后，服务端签发token给客户端，服务端不保存任何状态。因此这种验证方式属于服务器无状态的验证机制。
-由于签名时混合了服务器自身的秘钥，因此当有请求带着这个签发的token来访问资源时，服务器可以根据签名的计算公式对比，以检查token是否有被篡改。这种方式看起来天衣无缝啊，要保证token在传输中是安全的、不被偷窃就行。但缺点是，Payload中不能放敏感信息，因为它本身是明文传输的（当然，用HTTPS的话随你）。token一旦签发，服务器没办法去主动地废弃某个token，只有等它自然过期了。
+### 4.3 [JSON Web Tokens (JWTs)]
+用户首次认证后，服务端签发token给客户端，服务端不保存任何状态。因此这种验证方式属于<u>服务器无状态的验证机制</u>。
+由于签名时混合了服务器自身的秘钥，因此当有请求带着这个签发的token来访问资源时，服务器可以根据签名的计算公式对比，以检查token是否有被篡改。
 
-服务器签发给前端的token=Header.Payload.Signature
-Header表明签名所使用的hash算法，Payload包含一些令牌的信息，Signature是结合服务器端的秘钥，对前两个数据进行签名的结果。
-Signature=HMAC-SHA256(base64urlEncoding(header)+'.'+base64urlEncoding(Payload)+secret)
+这种方式看起来天衣无缝啊，要保证token在传输中是安全的、不被偷窃就行。但缺点是，Payload中不能放敏感信息，因为它本身是明文传输的（当然，用HTTPS的话随你）。token一旦签发，服务器没办法去主动地废弃某个token，只有等它自然过期了。
 
-当客户端与服务器通信时，将此token添加到HTTP Header中的Authorization中，用的schema是Bearer！
-e.g. Authorization: Bearer <token>
+服务器签发给前端的token:
 
-[href]http://www.ruanyifeng.com/blog/2018/07/json_web_token-tutorial.html
+    Header.Payload.Signature
 
-5.[js]构造函数
-6.[js]iief
-[explain]javascript中的()不可以包含statement，因此将function括起来，当parser分析时就会认为()内的function是一个expression，而不是function declaration，这就是Immediately-invoked执行了。在一些必须是expression的地方，function写那里是不会有歧义的，因此function外围加不加parens都可以。在function后添加parentheses可以调用该函数。如
+`Header`表明签名所使用的hash算法;
+
+`Payload`包含一些令牌的信息;
+
+`Signature`是结合服务器端的秘钥`secret`，对前两个数据进行签名的结果。
+
+    Signature=HMAC-SHA256(base64urlEncoding(header)+'.'+base64urlEncoding(Payload)+secret)
+
+
+当客户端与服务器通信时，将此token添加到HTTP Header中的`Authorization`中，用的schema是Bearer！
+
+In HTTP Header:
+
+    Authorization: Bearer <token>
+
+参考：http://www.ruanyifeng.com/blog/2018/07/json_web_token-tutorial.html
+
+## 5. 构造函数
+## 6. iief
+
+javascript中的`()`不可以包含*statement*，因此将function括起来，当parser分析时就会认为`()`内的function是一个*expression*，而不是*function declaration*，这就是**Immediately-invoked**执行了。
+
+在一些必须是expression的地方，function写那里是不会有歧义的，因此function外围加不加parens都可以。在function后添加parentheses可以调用该函数。如
 var f = function(){return 5;}();//f == 5
 (function() { /* code */ } ());//way1
 (function() { /* code */ } )();//way2
@@ -561,6 +631,9 @@ SSL 1994 netscape(v1.0)
 2006 TLS 1.1(minior update to TLS 1.0)
 2008 TLS 1.2
 2018 TLS 1.3
+
+### websocket vs http
+
 
 25.[js]逻辑运算符：&&、||、!
 expr1 && expr2: 若expr1能转为false，则返回expr1；否则返回expr2
