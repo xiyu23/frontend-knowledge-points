@@ -129,3 +129,4 @@ abstract class Animal {
 ## 11.类方法、成员默认为`public`
 
 ## 12.如何声明一个不允许被子类覆盖的父类方法？
+C++中用`final`修饰，js中
