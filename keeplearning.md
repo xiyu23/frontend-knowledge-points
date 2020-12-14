@@ -455,17 +455,21 @@ Vary: 该指令用于指示缓存应服务于那些匹配的请求。有点绕�
 注意，这里响应2仍然是将客户端发来的请求2 foward到origin server，因为Vary指明Encoding必须相同才可利用缓存（这里Accept-Encoding不同，缓存的是gzip，而请求的是br）
 请求3：GET Accept-Encoding: br; 响应3*：这次匹配，命中Cache直接返回。
 
-17.[js]for...in vs for...of(for...of是es6)
-for...in：对object的所有enumerable的属性进行任意顺序的遍历，包含继承的属性。但注意对Array/String用for...in，遍历得到的每个value是index，而不是数组元素/每个字符。因为在javascript中，everything is an object！
-for...of：对iterable objects进行遍历（如内置的Array、Map均已实现，但Object是没有的），因此为了让Object也支持遍历，则应首先这个object得有@@iterator方法，即Object得有一个叫做"@@iterator"的属性，且这个属性可以通过常量"[Symbol.iterator]"来访问。
+## 17.[js]for...in vs for...of(for...of是es6)
+- `for...in`：对object的所有enumerable的属性进行任意顺序的遍历，包含继承的属性。但注意对Array/String用for...in，遍历得到的每个value是index，而不是数组元素/每个字符。因为在javascript中，everything is an object！
+- `for...of`：对iterable objects进行遍历（如内置的Array、Map均已实现，但Object是没有的），因此为了让Object也支持遍历，则应首先这个object得有@@iterator方法，即Object得有一个叫做"@@iterator"的属性，且这个属性可以通过常量"[Symbol.iterator]"来访问。
 [Symbol.iterator]：它是一个无参函数，返回一个实现了next接口的object。而next是一个无参函数，返回形如{value: somVal, done: boolean}的object（参见iterator protocol）。p.s.和C#的枚举类类比即可：类含有一个iterator用来遍历，这个iterator又实现了iterable接口。
 要让一个object支持iteration，需要加一个[Symbol.iterator]属性、且其值为一个可以返回迭代器（就是一个实现了next的object）的函数。
+```js
 var myIterator = {
     next: function() {
         // ...
     }
     [Symbol.iterator]: function() { return this }
 };
+```
+
+### 17.2 spread syntax
 [...myIterableObject]: spread syntax[ES6], allows an iterable such as an array expression or string to be expanded in places where zero or more arguments (for function calls) or elements (for array literals) are expected, or an object expression to be expanded in places where zero or more key-value pairs (for object literals) are expected.
 
 18.[js][+3]call vs apply vs bind(ES5)
@@ -1323,6 +1327,42 @@ a.someMethodNotDeclared(); // a.someMethodNotDeclared is not a function
     2**10; // 2^10 = 2014
     ```
 
+4. 提取唯一值
+
+    剔除数组中重复值，返回一个去重后的数组。
+    ```js
+    const arrHasRepeat = [1, 2, 2, 3, 3, 3, 4];
+    const arrWithoutRepeat = [...new Set(arrHasRepeat)];
+    // [1, 2, 3, 4]
+    ```
+
+    知识点：
+    1. `Set`
+    2. `...`(spread syntax，ES6中的展开语法)，见[spread syntax](#17.2-spread-syntax)
+
+5. 动态属性(ES6)
+
+    对象的属性名称可以指定为某个变量。
+    ```js
+    // before ES6
+    const key = 'name';
+    const person = {
+      age: 26,
+    };
+    person[key] = 'yuhui';
+    // { age: 26, name: 'yuhui' }
+
+    // with ES6
+    const prop = 'weather';
+    const obj = {
+      date: '2020/12/14',
+      [prop]: 'cold',
+    };
+    // { date: '2020/12/14', weather: 'cold' }
+    ```
+
+6. 
+
 ## 62.`require`的原理是什么？
 require并不是javascript中的概念，而是Nodejs的。
 
@@ -1369,6 +1409,50 @@ ref:
 [modules_cycles](https://nodejs.org/api/modules.html#modules_cycles)
 [an article of require keyword](https://www.freecodecamp.org/news/requiring-modules-in-node-js-everything-you-need-to-know-e7fbd119be8/)
 
+## 63. reduce
+
+    arr.reduce(callback( accumulator, currentValue, [, index[, array]] )[, initialValue])
+
+> 对数组中的每个元素执行`reducer`函数，`reduce`最终返回一个值，这个值就是最后一次`reducer`返回的结果。
+> `initialValue`如果不提供时，初始`accumulator`就是`arr[0]`。
+
+```js
+var a = [0,1,2,3];
+var res = a.reduce((acc, v, i, arr) => {
+    console.log(`\n
+        acc: ${acc}
+        val: ${v}
+        idx: ${i}
+        arr: ${JSON.stringify(arr)}
+    `);
+
+    return (acc + v) << 1; // 每次累加后*2，而后继续累加
+}, 5);
+
+// (5 + 0) * 2 = 10
+// (10 + 1) * 2 = 22
+// (22 + 2) * 2 = 48
+// (48 + 3) * 2 = 102
+console.log(res);
+
+// 不提供initial value
+res = a.reduce((acc, v, i, arr) => {
+    console.log(`\n
+        acc: ${acc}
+        val: ${v}
+        idx: ${i}
+        arr: ${JSON.stringify(arr)}
+    `);
+
+    return (acc + v) << 1; // 每次累加后，*2，而后继续累加
+});
+
+// (0 + 0) * 2 = 0
+// (0 + 1) * 2 = 2
+// (2 + 2) * 2 = 8
+// (8 + 3) * 2 = 22
+console.log(res);
+```
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
