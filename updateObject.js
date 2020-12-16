@@ -162,3 +162,44 @@ b = {
   video_on: '1'
 };
 updateObject.call({ propertyName: 'person' }, a, b);
+
+
+
+var s = '2020-12-16 17:08:23 1608128103775   1     [in-meeting] this is some logs';
+
+
+
+function extractLogLine(line) {
+    // e.g 
+    //      记录时间         行为触发时间戳 日志级别 日志内容
+    // 2020-12-16 17:08:23   1608128103775   1     [in-meeting] this is some logs
+    const reg = /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\s+|\d{13}\s*|[1-3]\s*|.+/g;
+    const res = line.match(reg);
+
+    if (!res || res.length < 1) {
+        console.warn(`cannot extract log for line: ${line}`);
+        return;
+    }
+
+    console.log(res);
+
+    // 期望是2个以上，并且检查一下数据是否合法
+    // 一定得有前两个
+    // [0] 2020-12-16 17:08:23   
+    // [1] 1608128103775   
+    // [2] 1     
+    // [3] [in-meeting] this is some logs
+    const reportTime = res[0];
+    const behaviorTs = res[1];
+    const logLevel = parseInt(res[2]) || 0; // 0 is default, means we dont have log level
+    const content = res[3] || '';
+
+    console.log(`
+        reportTime: ${reportTime}
+        behaviorTs: ${behaviorTs}
+        logLevel: ${logLevel}
+        content: ${content}
+    `);
+}
+
+extractLogLine(s);
