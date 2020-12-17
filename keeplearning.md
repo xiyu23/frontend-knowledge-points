@@ -304,24 +304,48 @@ In HTTP Header:
 
 javascript中的`()`不可以包含*statement*，因此将function括起来，当parser分析时就会认为`()`内的function是一个*expression*，而不是*function declaration*，这就是**Immediately-invoked**执行了。
 
-在一些必须是expression的地方，function写那里是不会有歧义的，因此function外围加不加parens都可以。在function后添加parentheses可以调用该函数。如
+在一些必须是*expression*的地方，function写那里是不会有歧义的，因此function外围加不加parens都可以。在function后添加parentheses可以调用该函数。如
+
+```js
 var f = function(){return 5;}();//f == 5
 (function() { /* code */ } ());//way1
 (function() { /* code */ } )();//way2
+```
+
 建议还是约定俗成，统一带上parens以明确地表示出这是一个iife：
+
+```js
 var f = (function(){return 5;})();
+```
+
 或
+
+```js
 var f = (function(){return 5;}());
-And because any function defined inside another function can access the outer function’s passed-in arguments and variables (this relationship is known as a closure, an Immediately-Invoked Function Expression can be used to “lock in” values and effectively save state.
-7.[js]var vs let
-a.两者都会被hoisting，但let声明的变量如果没有初始化就引用，则会显式地抛出Reference error，不像var不会抛出异常（认为var变量被初始化为undefined，不像let、const这俩都不会被默认初始化），var只有global/function scope，而let还可以限制在block scope，如{}、for()内。
-b.var声明后会被初始化为undefined, let声明后则不会被初始化，直到执行到它的初始化语句。
-c.var在global声明的变量会作为window object的一个property, window.myVar = 5。而let不会。
-d.const和let类似，const声明时必须初始化，作用域为块级，也存在临时性死区temporal dead zone
-[Temporal dead zone]
-临时性死区：由于let被hoisting但它不像var会被默认初始化为undefined，let在作用域顶部到为它赋值的语句这一段区域都是未初始化的，此时若引用let变量则会抛出Reference error。
+```
+
+And because any function defined inside another function can access the outer function’s passed-in arguments and variables (this relationship is known as a **closure**, an **Immediately-Invoked Function Expression** can be used to “lock in” values and effectively save state.
+
+## 7. `var` vs `let`
+
+- 两者都会被*hoisting*，但`let`声明的变量如果没有初始化就引用，则会显式地抛出*Reference error*，不像`var`不会抛出异常（认为`var`变量被初始化为`undefined`，不像`let`、`const`这俩都不会被默认初始化），`var`只有*global/function scope*，而`let`还可以限制在*block scope*，如`{}`、`for()`内。
+
+- `var`声明后会被初始化为`undefined`, `let`声明后则不会被初始化，直到执行到它的初始化语句。
+
+- `var`在global声明的变量会作为window object的一个property, window.myVar = 5。而`let`不会。
+
+- `const`和`let`类似，`const`声明时必须初始化，作用域为块级，也存在临时性死区Temporal dead zone
+
+### 7.1 [Temporal dead zone](https://scotch.io/tutorials/understanding-hoisting-in-javascript#toc-es5)
+
+> 临时性死区：由于`let`被*hoisting*但它不像`var`会被默认初始化为`undefined`，let在<u>作用域顶部到为它赋值的语句</u>这一段区域都是未初始化的，此时若引用`let`变量则会抛出*Reference error*。
+
+
 [ref]https://scotch.io/tutorials/understanding-hoisting-in-javascript#toc-es5
-知识点：hoisting
+
+### 7.2 hoisting(提升)
+
+```js
 var foo = function(x, y){
     return x - y;
 }
@@ -329,29 +353,35 @@ function foo(x, y){
     return x + y;
 }
 var num = foo(1, 2);
+```
 
-//会被javascript编译器处理为：
-//variable hoisting变量提升
-var foo;//foo#1
+会被javascript编译器处理为：
+
+```js
+// variable hoisting变量提升
+var foo; // foo#1
 var num;
 
-//function declaration hoisting函数声明提升
-function foo(x, y){//foo#2
+// function declaration hoisting函数声明提升
+function foo(x, y) { // foo#2
     return x + y;
 }
 
-//function expression NOT hoisted函数表达式不会被提升
-foo = function(x, y){//foo#3
+// function expression NOT hoisted函数表达式不会被提升
+foo = function(x, y) { // foo#3
     return x - y;
 }
 
-num = foo(1, 2);//这里使用foo#3
+num = foo(1, 2); // 这里使用foo#3
+```
 
-//规则
-1. 变量声明、函数声明都会被提升到作用域顶处；
-2. 当出现相同名称时，优先级为：变量声明(foo#1) < 函数声明(foo#2) < 变量赋值(foo#3)
+> 规则
+> 1. 变量声明、函数声明都会被提升到作用域顶处；
+> 2. 当出现相同名称时，优先级为：
+>
+>    变量声明(*foo#1*) < 函数声明(*foo#2*) < 变量赋值(*foo#3*)
 
-因此，num计算时是用的foo#3。
+因此，`num`计算时是用的*foo#3*，结果为-1。
 
 refs:
 1. https://developer.mozilla.org/en-US/docs/Glossary/Hoisting
@@ -359,50 +389,142 @@ refs:
 3. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function
 4. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/function
 5. https://stackoverflow.com/questions/40675821/what-happens-when-javascript-variable-name-and-function-name-is-the-same
-8.[js]event loop
-[explain]所有同步任务在主线程上执行，形成一个执行栈(execution context stack)；还有一个任务队列(stack queue)存放事件。当执行栈上的同步任务执行完后，主线程有空闲了，这时才会读取任务队列中的第一个事件并执行。
-理想状态下，浏览器每秒进行60次repaint，实际上Render也是一个回调函数，它也会在stack queue排队，只不过render的优先级要更高。所以当call stack不空时，render即便优先级再高，还是被阻塞，等空了才能优先执行render queue中的函数。
-So, basically the browser is kind of constrained by what you're doing javaScript, the browser would like to repaint the screen every 16.6 milliseconds, 60 frame a second is ideal, that's the fastest it will do repaints if it can. But it's constrained by what you're doing in JavaScript for various reasons, so it can't actually do a render if there is code on the stack, right. Like the render kind of call is almost like a callback in itself. It has to wait till the stack is clear. The difference is that the render is given a higher priority than your callback, every 16 milliseconds it's going to queue a rend, wait till the stack is clear before it can actually do that render.
-[ref]https://2014.jsconf.eu/speakers/philip-roberts-what-the-heck-is-the-event-loop-anyway.html
-[ref]http://davidshariff.com/blog/what-is-the-execution-context-in-javascript/
-9.[js]closure
-[explain]A closure is the combination of a function and the lexical environment within which that function was declared. 就是说在函数声明所在的scope，结合函数本身，形成一个闭包的概念。实际上利用函数访问作用域的概念，经典容易犯错的如for loop中为不同的按钮事件赋event handler.因为for中声明的如果是var，而var只有function scope和global scope两个概念，所以for中的这个var相当于是一个enclosing variable（即好比在for表达式块外面的作用域声明的），那当for循环内的代码执行完后，其实都引用的是同一个变量。怎么让他各自引用单次迭代时的变量呢？把var换成let即可（因为let声明的变量是block scope，即每次迭代引用的就是当前迭代内变量的值）；或者使用闭包（每次迭代将var变量传入闭包）。
+
+## 8. event loop
+
+所有同步任务在主线程上执行，形成一个**执行栈**(*execution context stack*)。
+
+还有一个**任务队列**(*stack queue*)存放事件。
+
+当**执行栈**上的同步任务执行完后，主线程有空闲了，这时才会读取**任务队列**中的第一个事件并执行。
+
+理想状态下，浏览器每秒进行**60**次*repaint*，实际上`Render`也是一个回调函数，它也会在*stack queue*排队，只不过`render`的优先级要更高。
+
+所以当*call stack*不空时，`render`即便优先级再高，还是被阻塞，等空了才能优先执行*render queue*中的函数。
+
+> So, basically the browser is kind of constrained by what you're doing javaScript, the browser would like to repaint the screen every 16.6 milliseconds, 60 frame a second is ideal, that's the fastest it will do repaints if it can. 
+>
+> But it's constrained by what you're doing in JavaScript for various reasons, so it can't actually do a render if there is code on the stack, right. Like the render kind of call is almost like a callback in itself. It has to wait till the stack is clear.
+>
+> The difference is that the render is given a higher priority than your callback, every 16 milliseconds it's going to queue a rend, wait till the stack is clear before it can actually do that render.
+
+refs:
+1. https://2014.jsconf.eu/speakers/philip-roberts-what-the-heck-is-the-event-loop-anyway.html
+2. http://davidshariff.com/blog/what-is-the-execution-context-in-javascript/
+
+## 9. closure
+
+> A closure is the combination of a function and the lexical environment within which that function was declared.
+
+就是说在函数声明所在的**scope**，结合函数本身，形成一个**闭包**的概念。
+
+实际上利用函数访问作用域的概念，经典容易犯错的如for loop中为不同的按钮事件赋event handler.
+
+因为for中声明的如果是`var`，而`var`只有*function scope*和*global scope*两个概念[<sup>[1]</sup>](##-7.-`var`-vs-`let`)，所以for中的这个`var`相当于是一个*enclosing variable*（即好比在for表达式块外面的作用域声明的），那当for循环内的代码执行完后，其实都引用的是同一个变量。
+
+怎么让他各自引用单次迭代时的变量呢？把`var`换成`let`即可（因为`let`声明的变量是*block scope*，即每次迭代引用的就是当前迭代内变量的值）；或者使用**闭包**（每次迭代将`var`变量传入闭包）。
+
 对于性能问题，MDN建议没必要用闭包的地方，就不要再在function中声明function，这样在每次创建object都会reassign，应在prototype上添加function。
-闭包可用来实现Module Pattern[anchor=#11]，其实就是把一些方法、属性模块化到一个object(这个object一般是单例)，由iife返回。这样可以减少global scope pollution，而且还创建了privacy。
-Having all this, how should we tell the parser that what we really want, is to call a function immediately after its creation? The answer is obvious. It’s should be a function expression, and not a function declaration. And the simplest way to create an expression is to use mentioned above grouping operator. Inside it always there is an expression. Thus, the parser distinguishes a code as a function expression (FE) and there is no ambiguity. Such a function will be created during the execution stage, then executed, and then removed (if there are no references to it).
-[ref]http://benalman.com/news/2010/11/immediately-invoked-function-expression/
-[ref]http://dmitrysoshnikov.com/ecmascript/chapter-5-functions/#question-about-surrounding-parentheses
-10.[js]enclosing function
-[explain]nested function的上一级function，即向外一层的那个function scope
-11.[js]Module Pattern
-[ref]https://coryrylan.com/blog/javascript-module-pattern-basics
-[explain]是一种js的设计模式，通常会通过iife创建一个单例object，而后供client代码调用。
-12.[js]strict mode
+
+闭包可用来实现[Module Pattern](##-11.-Module-Pattern)，其实就是把一些方法、属性模块化到一个object(这个object一般是单例)，由*iife*返回。这样可以减少global scope pollution，而且还创建了privacy。
+
+> Having all this, how should we tell the *parser* that what we really want, is to **call a function immediately after its creation**?
+> 
+> The answer is obvious.
+>
+> It’s should be a *function expression*, and not a *function declaration*. 
+>
+> And the simplest way to create an expression is to use mentioned above grouping operator. Inside it always there is an expression.
+>
+> Thus, the *parser* distinguishes a code as a *function expression* (**FE**) and there is no ambiguity.
+>
+> Such a function will be created during the *execution stage*, then executed, and then removed (if there are no references to it).
+
+refs:
+1. http://benalman.com/news/2010/11/immediately-invoked-function-expression/
+2. http://dmitrysoshnikov.com/ecmascript/chapter-5-functions/#question-about-surrounding-parentheses
+
+
+## 10. enclosing function
+*nested function*的上一级function，即向外一层的那个function scope。
+
+"我外面一层的作用域"。
+## 11. Module Pattern
+是一种js的设计模式，通常会通过*iife*创建一个单例object，而后供client代码调用。
+
+refs:
+1. https://coryrylan.com/blog/javascript-module-pattern-basics
+
+## 12. strict mode
 限制了一些语法的使用，如
-a. 对于在function中的this，如果非严格模式下，this指向global object(即window)，严格模式下，this在进入运行作用域内时被设定，且不会再被改变(the value of this remains at whatever it was set to when entering the execution context)。
-## <span id='13'>[+2]prototypal inheritance</span>
-[explain]Each object has a private property which holds a link to another object called its prototype.
-__proto__ contains the object's constructor's prototype object.(__proto__是每个object都有的属性，指向其构造函数的原型对象prototype object)
-Let's say that xiyu is an instance of constructor Person. So xiyu.__proto__ is the Person's prototype. In the same way, xiyu.__proto__.__proto__ is the prototype of Object, which is Object itself. And xiyu.__proto__.__proto__.__proto__ is null.
 
-prototype是构造函数(constructor)上的一个属性，它的值就是一个对象，存储了可以被子类（链）继承的properties和methods。
-定义在prototype上的properties和methods才会被子类继承。如Object.prototype.valueOf()会被继承，但Object.assign()就不会被继承。(They are methods/properties available just on the Object() constructor itself.)
-The prototype property's value is an object, which is basically a bucket for storing properties and methods that we want to be inherited by objects further down the prototype chain.
+对于在function中的`this`，如果非严格模式下，`this`指向global object(即`window`)，严格模式下，`this`在进入运行作用域内时被设定，且不会再被改变(the value of `this` remains at whatever it was set to when entering the *execution context*)。
+## 13. prototypal inheritance(原型继承)
+Each object has a private property which holds a link to another object called its ***prototype***.
 
-在constructor function的prototype属性上定义methods，在constructor中定义properties，这样代码更加易读。
-In fact, a fairly common pattern for more object definitions is to define the properties inside the constructor, and the methods on the prototype. This makes the code easier to read, as the constructor only contains the property definitions, and the methods are split off into separate blocks. 
-[note]prototype vs this[/note]
-每个object都有一个指向它prototype的指针，这个指针是js内部的一个对象（不过在多数主流浏览器下，可以通过__proto__来访问），prototype对象定义了一些你想要继承的成员变量/函数。
+每个对象都有一个私有属性，它维持了一个引用，指向另一个对象。
 
-this.name = 'xiyu';//这是在具体对象上定义了一个自有属性，而不是原型上的，不会被继承。
-Setting a property to an object creates an own property.
+这"另一个对象"就被称之为前面那个对象的***prototype***。
 
-Object.create(object) //ECMA5(2009), 用object作为新创建对象的prototype object，返回新建对象
-实现classes的关键字包括: class, constructor, static, extends, super.//ECMA6(2015)， that suit keywords is just a syntactical sugar...
+*`__proto__`* contains the object's constructor's prototype object.
 
-[ref]https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Object_prototypes
-[ref]https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain
-14.[js]how does this work?
+*`__proto__`* 是每个object都有的属性，指向其构造函数的原型对象prototype object.
+
+Let's say that *`xiyu`* is an instance of constructor `Person`. So *`xiyu.__proto__`* is the `Person`'s *prototype*.
+
+In the same way, *`xiyu.__proto__.__proto__`* is the *prototype* of `Object`, which is `Object` itself.
+
+And *`xiyu.__proto__.__proto__.__proto__`* is `null`.
+
+*prototype*是构造函数(constructor)上的一个属性，**它的值就是一个对象**，存储了可以被子类（链）继承的*properties*和*methods*。
+
+定义在*prototype*上的*properties*和*methods*才会被子类继承。
+
+如`Object.prototype.valueOf()`会被继承，但`Object.assign()`就不会被继承。
+
+> They are *methods*/*properties* available just on the `Object()` constructor itself.
+> 
+> The *prototype* property's value **is an object**, which is basically a ***bucket*** for storing properties and methods that we want to be inherited by objects further down the prototype chain.
+
+在constructor function的*prototype*属性上定义methods  
+在constructor中定义properties
+
+**这样代码更加易读。**
+
+> In fact, a fairly common pattern for more object definitions is to define the properties inside the *constructor*, and the methods on the *prototype*. 
+> 
+> This makes the code easier to read, as the *constructor* only contains the **property definitions**, and the **methods** are split off into separate blocks. 
+
+### 13.1 `prototype` vs `this`
+每个object都有一个指向它*prototype*的指针，这个指针是js内部的一个对象（不过在多数主流浏览器下，可以通过 *`__proto__`* 来访问），***prototype*对象定义了一些你想要继承的成员变量/函数**。
+
+```js
+// 这是在具体对象上定义了一个自有属性，而不是原型上的，不会被继承
+this.name = 'xiyu';
+
+// 这是定义在Person的prototype对象上，它可以被继承
+Person.prototype.sayHi = function() {
+  console.log(`say hi from ${this.name}`);
+}
+```
+
+> Setting a property to an object creates an own property.
+
+### 13.2 `Object.create` vs `{}`
+```js
+// ECMA5(2009), 用object作为新创建对象的prototype object，返回新建对象
+Object.create(object) 
+```
+
+ECMA6(2015)实现classes的关键字包括: `class`, `constructor`, `static`, `extends`, `super`
+
+> that suit keywords is just a *syntactical sugar*(语法糖)...
+
+refs:
+1. https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Object_prototypes
+2. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain
+
+## 14. how does `this` work?
 In most cases, the value of this is determined by how a function is called.
 如果想要传this，则可以通过Function原型对象上的call/apply方法。Function.prototype.call(arguments one by one)/Function.prototype.apply(arguments as an array-like)。
 15.[js]event bubbling
