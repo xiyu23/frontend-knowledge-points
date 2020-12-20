@@ -130,3 +130,25 @@ abstract class Animal {
 
 ## 12.如何声明一个不允许被子类覆盖的父类方法？
 C++中用`final`修饰，js中
+
+## 13. tsconfig.json
+遇到的坑：
+1. `tsc`不加任何参数时，ts编译器将会根据当前工程目录下的`tsconfig.json`来确定编译文件、选项等，即直接运行`tsc`会按`tsconfig.json`中指定的编译选项、源文件来进行编译。
+2. `Set`遍历时用`for...of`，在`tsconfig.json`中需要指定`ES6`<sup>[1]</sup>。因为如果经过`tsc my-set-test.ts`命令编译后，输出默认是`ES5`的形式，但是**有问题！！**看编译后的代码not working。
+```json
+{
+  "include": ["./*.ts"],
+  "compilerOptions": {
+      "noImplicitAny": true,
+      "target": "es6", // 1
+      "lib": ["es6", "dom"],
+  }
+}
+```
+3. 编译时，如果碰到你写的es6语法却报错时，可以增加选项`--lib es6`
+
+```
+$ tsc learn.ts --lib es6
+```
+
+4. 
