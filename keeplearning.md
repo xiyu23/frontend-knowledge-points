@@ -380,6 +380,7 @@ num = foo(1, 2); // 这里使用foo#3
 > 2. 当出现相同名称时，优先级为：
 >
 >    变量声明(*foo#1*) < 函数声明(*foo#2*) < 变量赋值(*foo#3*)
+> 3. 类声明**并不会提升**，必须声明后再引用<sup>[6]</sup>
 
 因此，`num`计算时是用的*foo#3*，结果为-1。
 
@@ -389,6 +390,7 @@ refs:
 3. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function
 4. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/function
 5. https://stackoverflow.com/questions/40675821/what-happens-when-javascript-variable-name-and-function-name-is-the-same
+6. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Hoisting
 
 ## 8. event loop
 
@@ -1575,6 +1577,14 @@ res = a.reduce((acc, v, i, arr) => {
 // (8 + 3) * 2 = 22
 console.log(res);
 ```
+
+## 64. 在继承体系中如何判断一个对象是子类实例还是父类实例？
+
+    ChildClass.prototype instanceof ParentClass
+先把这个学会了：
+https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance
+
+
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器

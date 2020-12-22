@@ -59,3 +59,17 @@ Mocha wrappedByMocha = new Mocha(coffee); // 放进装饰者里，被Mocha装饰
   - 被当做方法的参数而传递进来的对象
   - 此方法所创建或实例化的任何对象
   - 对象的任何`组件`<sup>1</sup>(1是指此对象所持有的成员变量)
+
+## 2.组合模式(迭代器模式中引入)
+
+![书上标准的类图](/Head-First/imgs/iterator-and-composite-a.png)
+
+![书上标准的类图](/Head-First/imgs/iterator-and-composite-b.png)
+
+看得出来，我们可以用树形结构去描述餐厅提供的餐点。
+
+叶子结点都是具体的菜单项，如豆浆、油条；
+
+内部节点都是管理一群具体菜单项的集合，如早餐、午餐、甜点。
+
+那么我们就有了下面这个继承体系。
