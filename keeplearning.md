@@ -528,62 +528,138 @@ refs:
 
 ## 14. how does `this` work?
 In most cases, the value of this is determined by how a function is called.
-如果想要传this，则可以通过Function原型对象上的call/apply方法。Function.prototype.call(arguments one by one)/Function.prototype.apply(arguments as an array-like)。
-15.[js]event bubbling
-16.[network]描述客户端和服务端之间进行通信的一些方式，网络协议等（IP, TCP, HTTP/S/2, UDP, RTC, DNS, etc.）
-[DNS]
+
+如果想要传this，则可以通过Function原型对象上的`call`/`apply`方法。
+
+    Function.prototype.call // (arguments one by one)
+    Function.prototype.apply // (arguments as an array-like)。
+
+## 15. event bubbling
+
+## 16. 描述客户端和服务端之间进行通信的一些方式，网络协议等（IP, TCP, HTTP/S/2, UDP, RTC, DNS, etc.）
+
+### DNS
+
 DNS将域名映射为IP，供浏览器向主机发起请求。
-(1). 浏览器输入www.example.com后，需要将此主机地址转换为实际的IP地址，先从浏览器缓存中查找；
-(2). 如果没有，则尝试从本机hosts文件中查找映射；
-(3). 如果没有，则尝试向本机配置的首选DNS发起请求，DNS在它本地存储的记录中查找；
-(4). 如果没有，则首选DNS服务器会向ISP发请求（如英特网服务提供商：电信）；
-(5). 如果没有，则ISP服务器应该会开始直接请求根域名（即root domain：.），全球有13台根域名服务器；
-(6). 此时进入迭代查询，根DNS将顶级域名（.com）服务器的IP地址返回给ISP；
-(6.1). ISP再向（.com）DNS发请求，（.com）DNS将（.example.com）的IP地址告诉返回；
-(6.2). 此时ISP已经拿到了www.example.com对应的主机地址，就可以进行下一步：发起TCP连接请求了。
 
-[域名发散]
-Domain Sharding(shard: (玻璃等的)尖片），由于浏览器限制了对同一域名的最大连接数（一般为6-10左右），在HTTP/1.1中每个连接对应一次请求，因此对于网页需要加载较多资源时很难满足快速的响应。为了利用并发性突破浏览器的连接数限制，人们想出了将资源分散到不同的域名下，这样就能大大提高并行连接的数量，因而提高网页的加载速度。这个思路便就是域名发散了。
-但遗憾的是，经过实际数据测试，在PC端表现尚可，移动端却非常缓慢（2G、3G、4G、WiFi）。数据显示在4G时加载www.taobao.com总耗时1733ms，当使用域名发散机制时，平均DNS解析时间需要2.32s（Safari，2-shard）、2.55s（Safari，4-shard）。
-所以移动端不适合域名发散，那只能乖乖地尽量将资源放在同一域名下。这就叫做域名收敛（其实就是最普通的做法而已，只不过并不一定严格地全部都放在同一域名下，可能数量较域名发散少些吧，寻找一个性能最优的域名发散数量~）。
+1. 浏览器输入`www.example.com`后，需要将此主机地址转换为实际的IP地址，先从*浏览器缓存*中查找；
+2. 如果没有，则尝试从本机*hosts*文件中查找映射；
+3. 如果没有，则尝试向本机配置的*首选DNS*发起请求，DNS在它本地存储的记录中查找；
+4. 如果没有，则首选DNS服务器会向ISP发请求（如英特网服务提供商：电信）；
+5. 如果没有，则ISP服务器应该会开始直接请求*根域名*（即root domain：`.`），**全球有13台根域名服务器**；
+6. 此时进入迭代查询，根DNS将顶级域名（.com）服务器的IP地址返回给ISP；
+    - 6.1. ISP再向（.com）DNS发请求，（.com）DNS将（.example.com）的IP地址告诉返回；
+    - 6.2. 此时ISP已经拿到了`www.example.com`对应的主机地址，将其返回给客户端。客户端就可以进行下一步：发起[TCP连接请求了<sup>24</sup>](##-24.-http-vs-https)。
+
+### 域名发散
+
+Domain Sharding(shard: (玻璃等的)尖片)
+
+由于浏览器限制了对**同一域名**的最大连接数（一般为6-10左右），在*HTTP/1.1*中每个连接对应一次请求，因此对于网页需要加载较多资源时很难满足快速的响应。
+
+为了利用并发性突破浏览器的连接数限制，人们想出了将资源分散到不同的域名下，这样就能大大提高并行连接的数量，因而提高网页的加载速度。这个思路便就是**域名发散**了。
+
+但遗憾的是，经过实际数据测试，在PC端表现尚可，移动端却非常缓慢（2G、3G、4G、WiFi）。
+
+数据显示在4G时加载`www.taobao.com`总耗时`1733ms`，当使用域名发散机制时，平均DNS解析时间需要2.32s（Safari，2-shard）、2.55s（Safari，4-shard）。
+
+所以移动端不适合域名发散，那只能乖乖地尽量将资源放在同一域名下。这就叫做**域名收敛**（其实就是最普通的做法而已，只不过并不一定严格地全部都放在同一域名下，可能数量较域名发散少些吧，寻找一个性能最优的域名发散数量~）。
+
 那还是不快啊，有什么更好的办法吗？
-有，大屌Google告诉你：SPeeDY！
 
-[域名收敛]
-见域名发散。
+有，大屌Google告诉你：**SPeeDY**！
 
-[SPeeDY]
-SPDY，是HTTP/2.0的前身。
-SPDY(音SPeeDY)，是Google开发的一个协议，旨在通过解决HTTP1.1中的一些问题来提高网页的加载性能。主要通过引入binary frame layer来达到在一个TCP连接上，请求、响应复用的效果。
-  [HTTP/1.x的一些缺点]
-  客户端为实现并发、减少时延，需要发起多个TCP连接；未压缩的请求、响应头部，会导致不必要的网络开销；也不支持资源优先级，导致TCP连接效率低下。
-  Unfortunately, implementation simplicity also came at a cost of application performance: HTTP/1.x clients need to use multiple connections to achieve concurrency and reduce latency; HTTP/1.x does not compress request and response headers, causing unnecessary network traffic; HTTP/1.x does not allow effective resource prioritization, resulting in poor use of the underlying TCP connection; and so on.
-  [HTTP/2要解决的问题]
-  为提高网络资源使用效率、减少时延，HTTP/2引入header压缩、在同一个连接上交替进行请求、响应的发送，还支持请求优先级机制，让更重要的请求先完成。
-HTTP/2 enables a more efficient use of network resources and a reduced perception of latency by introducing header field compression and allowing multiple concurrent exchanges on the same connection… Specifically, it allows interleaving of request and response messages on the same connection and uses an efficient coding for HTTP header fields. It also allows prioritization of requests, letting more important requests complete more quickly, further improving performance.
-  [HTTP/2解决问题的方式]
-  引入binary framing layer。即不像HTTP1.1那样，request和response用回车换行来分隔，而且内容是纯文本(plaintext)。HTTP/2将其分隔到更小的消息中，每个消息都以二进制格式编码。
+### SPeeDY
+
+**SPDY**，是`HTTP/2.0`的前身。
+
+**SPDY**(音*SPeeDY*)，是Google开发的一个协议，旨在通过解决*HTTP1.1*中的一些问题来提高网页的加载性能。
+
+主要通过引入*binary frame layer*来达到**在一个TCP连接上，请求、响应复用**的效果。
+
+#### HTTP/1.x的一些缺点
+
+客户端为实现并发、减少时延，需要发起多个TCP连接；未压缩的请求、响应头部，会导致不必要的网络开销；也不支持资源优先级，导致TCP连接效率低下。
+  
+> Unfortunately, implementation simplicity also came at a cost of application performance: HTTP/1.x clients need to use multiple connections to achieve concurrency and reduce latency; HTTP/1.x does not compress request and response headers, causing unnecessary network traffic; HTTP/1.x does not allow effective resource prioritization, resulting in poor use of the underlying TCP connection; and so on.
+#### HTTP/2要解决的问题
+  
+为提高网络资源使用效率、减少时延，`HTTP/2`引入**header压缩**、**在同一个连接上交替进行请求、响应的发送**，还支持请求优先级机制，让更重要的请求先完成。
+
+> HTTP/2 enables a more efficient use of network resources and a reduced perception of latency by introducing header field compression and allowing multiple concurrent exchanges on the same connection… Specifically, it allows interleaving of request and response messages on the same connection and uses an efficient coding for HTTP header fields. It also allows prioritization of requests, letting more important requests complete more quickly, further improving performance.
+
+#### HTTP/2解决问题的方式
+
+引入*binary framing layer*。即不像`HTTP1.1`那样，request和response用回车换行来分隔，而且内容是纯文本(plaintext)。
+
+HTTP/2将其分隔到更小的消息中，每个消息都以二进制格式编码。
 
 google developer、mdn developer都已经用的是HTTP/2，老大就是屌的一笔
-[note]不细看了。。很多干货，也很细致。按黄正蔚的perception：深入钻研可能只会从80%到90%，不如用这些10%的精力去学习另一种新知识，从0到50%要比这10%可能更合适些吧。
-[ref]https://developers.google.com/web/fundamentals/performance/http2/
 
-[HTTP Caching]
-只有GET请求会缓存，用URI进行对比。
-Cache-Control是个通用的指令，Request和Response的Header都可以用。
-private cache: 只能由单独的用户自己使用；shared cache：可以由多用户使用，如代理服务器可以作为缓存，服务于多用户。
-Pragma：是HTTP/1.0的Header，相当于Cache-Control: no-cache
-Vary: 该指令用于指示缓存应服务于那些匹配的请求。有点绕，举例子：
-请求1：GET Accept-Encoding: *； 响应1：Content-Encoded: gzip; Vary: Content-Encoding
-请求2：GET Accept-Encoding: br;  响应2：Content-Encoded: br; Vary: Content-Encoding
-注意，这里响应2仍然是将客户端发来的请求2 foward到origin server，因为Vary指明Encoding必须相同才可利用缓存（这里Accept-Encoding不同，缓存的是gzip，而请求的是br）
-请求3：GET Accept-Encoding: br; 响应3*：这次匹配，命中Cache直接返回。
+ref: https://developers.google.com/web/fundamentals/performance/http2/
 
-## 17.[js]for...in vs for...of(for...of是es6)
-- `for...in`：对object的所有enumerable的属性进行任意顺序的遍历，包含继承的属性。但注意对Array/String用for...in，遍历得到的每个value是index，而不是数组元素/每个字符。因为在javascript中，everything is an object！
-- `for...of`：对iterable objects进行遍历（如内置的Array、Map均已实现，但Object是没有的），因此为了让Object也支持遍历，则应首先这个object得有@@iterator方法，即Object得有一个叫做"@@iterator"的属性，且这个属性可以通过常量"[Symbol.iterator]"来访问。
-[Symbol.iterator]：它是一个无参函数，返回一个实现了next接口的object。而next是一个无参函数，返回形如{value: somVal, done: boolean}的object（参见iterator protocol）。p.s.和C#的枚举类类比即可：类含有一个iterator用来遍历，这个iterator又实现了iterable接口。
-要让一个object支持iteration，需要加一个[Symbol.iterator]属性、且其值为一个可以返回迭代器（就是一个实现了next的object）的函数。
+不细看了。。很多干货，也很细致。按黄正蔚的perception：
+
+> 深入钻研可能只会从`80%`到`90%`，不如用这些**10%的精力**去学习另一种新知识，从`0`到`50%`要比这10%可能更合适些吧。
+
+### HTTP Caching
+
+只有**GET**请求会缓存，用`URI`进行对比。
+
+`Cache-Control`
+
+是个通用的指令，`Request`和`Response`的`Header`都可以用。
+
+- `private cache`
+
+  只能由单独的用户自己使用
+- `shared cache`
+
+  可以由多用户使用，如代理服务器可以作为缓存，服务于多用户
+
+`Pragma`
+
+是`HTTP/1.0`的`Header`，相当于`Cache-Control: no-cache`
+
+`Vary`
+
+该指令用于指示缓存应服务于那些匹配的请求。有点绕，举例子：
+
+    请求1：GET Accept-Encoding: *； 
+    响应1：Content-Encoded: gzip;
+          Vary: Content-Encoding
+
+    请求2：GET Accept-Encoding: br;
+    响应2：Content-Encoded: br;
+          Vary: Content-Encoding
+
+注意，这里响应2仍然是将客户端发来的请求2 foward到origin server。
+
+因为`Vary`指明Encoding必须相同才可利用缓存（这里Accept-Encoding不同，缓存的是gzip，而请求的是br）
+
+    请求3：GET Accept-Encoding: br;
+    响应3*：这次匹配，命中Cache直接返回。
+
+## 17. `for...in` vs `for...of`
+
+- `for...in`
+
+  对`object`的所有*enumerable*的属性进行任意顺序的遍历，**包含继承的属性**。
+  
+  但注意对Array/String用for...in，遍历得到的每个value是index，而不是数组元素/每个字符。**因为在javascript中，everything is an object**！
+
+- `for...of`
+
+  对`iterable` objects进行遍历（如内置的`Array`、`Map`均已实现，但Object是没有的），因此为了让Object也支持遍历，则应首先这个object得有`@@iterator`方法，即Object得有一个叫做`@@iterator`的属性，且这个属性可以通过常量`[Symbol.iterator]`来访问。
+
+`[Symbol.iterator]`：它是一个无参函数，返回一个实现了`next`接口的object。而next是一个无参函数，返回形如{value: somVal, done: boolean}的object（参见iterator protocol）。
+
+p.s.和C#的枚举类类比即可：类含有一个iterator用来遍历，这个iterator又实现了iterable接口。
+
+要让一个object支持iteration，需要加一个`[Symbol.iterator]`属性、且其值为一个可以返回迭代器（就是一个实现了next的object）的函数。
+
+ps. 这里也可以参见[迭代器模式](Head-First/Iterator-Pattern-Preface.ts)
+
 ```js
 var myIterator = {
     next: function() {
@@ -593,20 +669,37 @@ var myIterator = {
 };
 ```
 
-### 17.2 spread syntax
-[...myIterableObject]: spread syntax[ES6], allows an iterable such as an array expression or string to be expanded in places where zero or more arguments (for function calls) or elements (for array literals) are expected, or an object expression to be expanded in places where zero or more key-value pairs (for object literals) are expected.
+### spread syntax
 
-18.[js][+3]call vs apply vs bind(ES5)
-语法都很像：myFunction.call/bind(thisArg[, arg1[, ...]]); myFunction.apply(thisArg[, argsArray]);
-相同点：都是想改变function中执行时的this。
+    [...myIterableObject]
+
+> spread syntax[ES6], allows an **iterable** such as an *array expression* or *string* to be expanded in places where zero or more arguments (for function calls) or elements (for array literals) are expected, or an object expression to be expanded in places where zero or more key-value pairs (for object literals) are expected.
+
+## 18. call vs apply vs bind(ES5)
+
+语法都很像：
+
+    myFunction.call/bind(thisArg[, arg1[, ...]]); myFunction.apply(thisArg[, argsArray]);
+
+
+相同点：都是想改变function中执行时的*this*。
+
 注意：primitive value passed as thisArg is converted to object
-Function.prototype.call/Function.prototype.apply
-使用给定的object作为this，执行一个函数。call的参数列表是one by one，apply的参数列表是以数组形式提供（也可以是array-like object）。
-什么是array-like object?
-就是一个含有'length'属性、同时且含有[0, length)整型属性作为关键字的object。如{ 'length': 2, '0': 'eat', '1': 'bananas' }。
 
-Function.prototype.bind
-为myFunction创建一个wrapper function(bound function),当它被调用时，内部this指向'thisArg'；这里的arg1...等参数，在调用时会插在实参的最前面。
+Function.prototype.call/Function.prototype.apply
+
+使用给定的object作为*this*，执行一个函数。call的参数列表是one by one，apply的参数列表是以数组形式提供（也可以是array-like object）。
+
+什么是*array-like* object?
+就是一个含有`length`属性、同时且含有[0, `length`)整型属性作为关键字的object。如
+
+    { 'length': 2, '0': 'eat', '1': 'bananas' }。
+
+    Function.prototype.bind
+
+为myFunction创建一个wrapper function(bound function),当它被调用时，内部*this*指向'thisArg'；这里的arg1...等参数，在调用时会插在实参的最前面。
+
+```js
 Function.prototype.bind = function(scope){
   var fn = this;
   return function(){
@@ -614,6 +707,8 @@ Function.prototype.bind = function(scope){
     //return this.apply(scope);//特别注意！这个写法是错误的！仔细想想this的定义：this是function内的变量，它的值由函数如何被调用决定的。这里this并//不是作用域外上面那个this，而是当前function内的this！讲道理这个this未能决定是被谁调用的，所以是window object（strict模式下是null/undefined）
   };
 };
+```
+
 [ref]https://www.smashingmagazine.com/2014/01/understanding-javascript-function-prototype-bind/
 
 confused me a lot:
@@ -706,7 +801,7 @@ function Person(){
 get: 数据通过url querystring发送给服务端，大小有限制（2k左右吧），一般服务器还会log下来，所以不适合存放敏感信息
 post: 数据放在http body，无大小限制
 
-24.[network]http vs https
+## 24. http vs https
 不同点：
 1. http协议本身没有加密传输，https则是位于TLS/SSL之上的加密协议；
 2. 因为https建立连接时首先需要验证证书、确定加密秘钥(TCP三次握手+SSL握手，RSA算法据说占到75%的时间，而之后传输所用的对称加密算法是很快的)，因此https较http慢一些；
@@ -958,16 +1053,16 @@ Math.ceil: 向上取整
 36. HTTP/1.1 keep-alive
 [HTTP/1.0 vs HTTP/1.1]
 HTTP 1.0 (1994)
-(1). 不支持长连接(keep-alive)，即当一个请求结束后，这个连接就关掉了，必须再另建立一个连接发起请求。也即不能在一个TCP连接上完成多个请求；
+1. 不支持长连接(keep-alive)，即当一个请求结束后，这个连接就关掉了，必须再另建立一个连接发起请求。也即不能在一个TCP连接上完成多个请求；
 正因为此，HTTP 1.0存在严重效率问题，这都是源于TCP的慢启动（瞧瞧多么专业的术语，好好复习下吧！）。以及当服务端主动关闭TCP后会处于TIME_WAIT状态，还需要经过2MSL才能真正地关闭socket（因为TCP是可靠的传输协议，一个TCP包在网络中的最大生存时间就是MSL即从源到目的地。如果这个包没有到达，则会触发重传。如果没有等2MSL的时间而是直接关闭，此时若又新开一个相同的socket，很可能在网络中游离的“上一个socket报文包”正好被新的连接收到，TCP不允许这样的紊乱情况出现。）。
 可以看到，HTTP 1.0时代，一次HTTP请求所占用的时间=TCP三次握手+请求/响应+TCP四次挥手+2MSL。
 
 HTTP 1.1 (1996-2015)
-(1). 支持长连接（客户端在请求时设置Request Header：Connection: Keep-Alive）；
-(2). 要求在Request Header中加入Host Header（当不同host指向同一IP时，服务器可以根据host来分辨客户端的意图，即想访问哪个host的资源，同一台机器上充当多域名）；
-(3). 缓存方面，增加了'entity tag'(E-Tag)，标记资源相当于hash；（扩展下：Caching知识点）
-(4). 100 Continue status状态码，当客户端不清楚服务器能否响应请求时、或者客户端是否有权限发起某个请求时，与其发送大量的数据不如仅发送一个Request Header，来试探下。如果服务器返回HTTP/1.1 100，则意味着一切OK，可以正式地发送请求。
-(5). much much more...
+1. 支持长连接（客户端在请求时设置Request Header：Connection: Keep-Alive）；
+2. 要求在Request Header中加入Host Header（当不同host指向同一IP时，服务器可以根据host来分辨客户端的意图，即想访问哪个host的资源，同一台机器上充当多域名）；
+3. 缓存方面，增加了'entity tag'(E-Tag)，标记资源相当于hash；（扩展下：Caching知识点）
+4. 100 Continue status状态码，当客户端不清楚服务器能否响应请求时、或者客户端是否有权限发起某个请求时，与其发送大量的数据不如仅发送一个Request Header，来试探下。如果服务器返回HTTP/1.1 100，则意味着一切OK，可以正式地发送请求。
+5. much much more...
 [ref]https://stackoverflow.com/questions/246859/http-1-0-vs-1-1
 [ref]https://www.cnblogs.com/freefish12/p/5394876.html
 
@@ -1581,6 +1676,7 @@ console.log(res);
 ## 64. 在继承体系中如何判断一个对象是子类实例还是父类实例？
 
     ChildClass.prototype instanceof ParentClass
+
 先把这个学会了：
 https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance
 
