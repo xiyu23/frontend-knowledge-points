@@ -96,7 +96,7 @@ React发现A3是新增的，只需要渲染A3作为A的孩子即可。
 
 #### 9.1 Controlled Components
 
-***making the React state be the single source of truth***
+> ***making the React state be the single source of truth***
 
 组件的值和React component状态绑定，也即要为每个controlled component写event handler。
 
@@ -116,8 +116,9 @@ React发现A3是新增的，只需要渲染A3作为A的孩子即可。
 
 #### 9.2 Uncontrolled Components（React大多情况下推荐用此类组件实现Form）
 
-***keeps the source of truth in the DOM***
-通过`Refs`来访问DOM节点和React元素。(参考：[Refs and the DOM](https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs))
+> ***keeps the source of truth in the DOM***
+
+**通过`Refs`来访问DOM节点和React元素。**(参考：[Refs and the DOM](https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs))
 
 `Refs`通常在React Class Component的`.ctor`中初始化：
 
@@ -141,32 +142,54 @@ this.myRef = React.createRef();
 
 > You may not use the `ref` attribute on *function components* because they don’t have instances
 
-React在组件挂载时会将DOM元素对象赋值给current属性；在卸载时将赋值为null。
-ref属性的更新是在componentDidMount或componentDidUpdate生命周期方法之前。
+React在组件**挂载时**会将DOM元素对象赋值给`current`属性；在**卸载时**将赋值为*null*。
 
-Exposing DOM Refs to Parent Components（某些情况下，你想在父组件中访问子DOM节点）
-React 16.3+建议使用ref forwarding，即让组件选择将任何子组件的ref暴露给自己，以提供access。
+`ref`属性的更新是在`componentDidMount`或`componentDidUpdate`生命周期方法之前。
 
-Callback Refs
-另一种设置ref的方法。之前是为ref赋值"React.createRef()"，而现在是为其赋值一个函数。该函数接受一个参数，参数类型是React组件实例或HTML DOM元素（具体根据attached对象决定）。
-React保证在componentDidMount、componentDidUpdate事件触发前，refs已更新。
-***Caveats with callback refs: Better do NOT define the callback as inline function***
-因为每次render都会创建一个函数的实例，所以React会调用两次，第一次给callback传null，第二次才是DOM元素。
+- Exposing DOM Refs to Parent Components（某些情况下，你想在父组件中访问子DOM节点）
 
-11. 组合替代继承
-JSX tag中的内容可作为一个特殊属性'children'传递给该component。
+  React 16.3+建议使用*ref forwarding*，即让组件选择将任何子组件的`ref`暴露给自己，以提供access。
+
+- Callback Refs
+另一种设置`ref`的方法。之前是为`ref`赋值`React.createRef()`，而现在是为其赋值一个*函数*。
+
+  该函数接受一个参数，参数类型是React组件实例或HTML DOM元素（具体根据attached对象决定）。
+
+  React保证在componentDidMount、componentDidUpdate事件触发前，refs已更新。
+
+
+> ***Caveats with callback refs: Better do NOT define the callback as inline function***
+
+不要将`callback refs`的回调函数定义为*内联函数*，因为每次render都会创建一个函数的实例，所以React会调用两次，第一次给callback传null，第二次才是DOM元素。
+
+### 11. 组合替代继承
+
+JSX tag中的内容可作为一个特殊属性`children`传递给该component。
+
+```html
 <FancyBorder>
     /* some content */
 </FancyBorder>
-在FancyBorder组件中，
+```
+
+在*FancyBorder*组件中，
+
+```js
 return <div> {props.children} </div>
-这样some content作为props.children插入到div中，这些位置即"slots"。
+```
 
-12. React.Fragment
+这样*some content*作为`props.children`插入到div中，这些位置即***slots***。
 
-13.Forwarding Refs
-外部组件或代码想要访问component内部的某个DOM或子组件，这种情形下使用Forwarding refs。
-16.3+可通过React.fowardRef定义一个component（记为A），该函数第2个参数为ref，即可通过这个ref关联到A中的子组件或DOM节点。客户代码通过React.createRef创建一个ref，在使用A的地方把ref作为参数传入，A将ref与想要关联的子组件或DOM节点关联，这样客户代码就可通过ref以提供对A内部组件or节点的访问。
+### 12. React.Fragment
+
+### 13. Forwarding Refs
+外部组件或代码想要访问component内部的某个DOM或子组件，这种情形下使用*Forwarding refs*。
+
+16.3+可通过`React.fowardRef`定义一个component（记为A），该函数第2个参数为`ref`，即可通过这个`ref`关联到A中的子组件或DOM节点。
+
+客户代码通过`React.createRef`创建一个`ref`，在使用A的地方把`ref`作为参数传入，A将`ref`与想要关联的子组件或DOM节点关联，这样客户代码就可通过`ref`以提供对A内部组件or节点的访问。
+
+```js
 const FancyButon = React.forwardRef((props, ref) => 
     <button ref={ref} className={props.className}>{props.children}</button>
 );
@@ -184,17 +207,19 @@ ReactDOM.render(
 //use ref
 ref.current.value = 'button value';
 ref.current.innerText = 'new button name';
+```
 
+### 14. HOC(Higher-Order Components)
+HOC是一个*接受一个component作为参数、并返回一个新的component*的函数。
 
-14.HOC(Higher-Order Components)
-是一个接受一个component作为参数、并返回一个新的component的函数。
-HOC并不属于React API，而是在React第三方库中很常见，如Redux的connect函数。
+HOC并不属于React API，而是在React第三方库中很常见，如*Redux*的`connect`函数。
 
-15.Code-Splitting
-把多个文件打包合并成1个文件，最终这个文件叫做"bundle"。[webpack]
-那对于初始状态不需要加载的，可以应用lazy load。[dynamic import()][React.lazy][React组件: Suspense]
+### 15. Code-Splitting
+把多个文件打包合并成1个文件，最终这个文件叫做"`bundle`"。
 
-16.The Component Lifecycle
+那对于初始状态不需要加载的，可以应用*lazy load*。[dynamic import()][React.lazy][React组件: Suspense]
+
+### 16. The Component Lifecycle
 当new一个新的react component实例插入到DOM中时：
 Mounting：constructor -> render -> componentDidMount
 
