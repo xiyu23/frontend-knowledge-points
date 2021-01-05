@@ -1,7 +1,62 @@
 ## Learning React
 ===React相关知识点===
 
-### 1. jsx
+*在vscode中，按下F1键以调出命令，输入`create content table`来创建目录。*
+
+- [Learning React](#learning-react)
+  - [1. JSX](#1-jsx)
+    - [1.1 可以嵌入表达式](#11-可以嵌入表达式)
+  - [2. Introducing JSX](#2-introducing-jsx)
+  - [6. Handling Events](#6-handling-events)
+  - [7. 条件渲染(Conditional Rendering)](#7-条件渲染conditional-rendering)
+  - [8. Lists and Keys](#8-lists-and-keys)
+    - [8.1 原理](#81-原理)
+    - [8.2 但是为什么不建议用index呢？](#82-但是为什么不建议用index呢)
+    - [8.3 什么是`key`？](#83-什么是key)
+  - [9. Forms](#9-forms)
+    - [9.1 Controlled Components](#91-controlled-components)
+    - [9.2 Uncontrolled Components（React大多情况下推荐用此类组件实现Form）](#92-uncontrolled-componentsreact大多情况下推荐用此类组件实现form)
+  - [11. 组合替代继承](#11-组合替代继承)
+  - [12. React.Fragment](#12-reactfragment)
+  - [13. Forwarding Refs](#13-forwarding-refs)
+  - [14. HOC(Higher-Order Components)](#14-hochigher-order-components)
+  - [15. Code-Splitting](#15-code-splitting)
+  - [16. The Component Lifecycle](#16-the-component-lifecycle)
+  - [17.JSX In Depth](#17jsx-in-depth)
+
+### 1. JSX
+
+```jsx
+const element = <h1>Hello, world!</h1>;
+```
+
+这就是JSX语法，`.jsx`是对JS的一种扩展，用于在React应用中描述UI。
+
+变量`element`就构成了**React组件**。
+
+#### 1.1 可以嵌入表达式
+
+任何合法的*javascript expression*都可以嵌入到`.jsx`里的`{}`中。
+
+```jsx
+const name = 'yu hui';
+const element = <h1>Hello, {name}!</h1>;
+
+function getFirstName(name) {
+  return name.substring(0, name.indexOf(' '));
+}
+const element2 = (
+  <h1>
+    Hello again, {getFirstName(name)}!
+  </h1>
+);
+// will result in <h1>Hello again, yu!</h1>
+```
+
+**注意**:
+
+在需要跨行书写JSX时，应当用`()`包裹一下，以避免自动的`;`被添加到行尾而导致语法错误。
+
 在cmd运行，当把.jsx文件丢进JSX_src文件夹中后，.jsx会被立即编译为.js（输出到`--out-dir`指定的目录）以支持在浏览器中运行。这玩意就是*Babel*！屌！
 
     npx babel --watch JSX_src --out-dir . --presets react-app/prod
@@ -233,7 +288,7 @@ Unmounting: componentWillUnmount
 在React中ctor就2个目的：为this.state初始化；binding event handler methods to an instance（即赋值事件处理函数前的绑定，将调用时的this指向当前react component对象实例）
 不能在ctor中调用setState()，而是应该直接为this.state初始化，除ctor之外只能用setState赋值（否则会造成数据不一致）
 
-17.JSX In Depth
+### 17.JSX In Depth
 JSX实质就是React.createElement(...)的语法糖，写起来更方便而已。
 -自定义的组件首字母必须大写，否则React会当做built-in html tag
 -导出多个组件的场景，可以用'.'语法来使用具体的某个组件：<MyComponents.DatePicker />
