@@ -6,6 +6,9 @@
 - [Learning React](#learning-react)
   - [1. JSX](#1-jsx)
     - [1.1 可以嵌入表达式](#11-可以嵌入表达式)
+    - [1.2 JSX中的属性](#12-jsx中的属性)
+    - [1.3 JSX中的用户输入部分是安全的](#13-jsx中的用户输入部分是安全的)
+    - [1.4 JSX其实是个语法糖](#14-jsx其实是个语法糖)
   - [2. Introducing JSX](#2-introducing-jsx)
   - [6. Handling Events](#6-handling-events)
   - [7. 条件渲染(Conditional Rendering)](#7-条件渲染conditional-rendering)
@@ -32,7 +35,7 @@ const element = <h1>Hello, world!</h1>;
 
 这就是JSX语法，`.jsx`是对JS的一种扩展，用于在React应用中描述UI。
 
-变量`element`就构成了**React组件**。
+最终会处理为**React组件**，赋值给了变量`element`。
 
 #### 1.1 可以嵌入表达式
 
@@ -60,6 +63,60 @@ const element2 = (
 在cmd运行，当把.jsx文件丢进JSX_src文件夹中后，.jsx会被立即编译为.js（输出到`--out-dir`指定的目录）以支持在浏览器中运行。这玩意就是*Babel*！屌！
 
     npx babel --watch JSX_src --out-dir . --presets react-app/prod
+
+#### 1.2 JSX中的属性
+
+字符串值类型，用*引号*(`'`或`"`)包裹：
+
+```jsx
+const element = <div myAttr="pretty"></div>;
+```
+
+JS表达式类型，用*花括号*(`{}`)包裹：
+
+```jsx
+const element = <img src={user.avatarUrl}></img>;
+```
+
+> React DOM使用`camelCase`命名方式，如`class`变为`className`，`tab-index`变为`tabIndex`。
+
+#### 1.3 JSX中的用户输入部分是安全的
+
+可以将用户输入写进JSX：
+
+```jsx
+const title = response.potentiallyMaliciousInput;
+// This is safe:
+const element = <h1>{title}</h1>;
+```
+
+**因为React在渲染之前，会将JSX中嵌入的值都进行escape(转义)。**
+
+参见：[JSX Prevents Injection Attacks](https://reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks)
+
+#### 1.4 JSX其实是个语法糖
+
+**Babel**将会对JSX编译成对`React.createElement()`的调用。
+
+```jsx
+const element = (
+  <h1 className="greeting">
+    Hello, world!
+  </h1>
+);
+```
+
+等价于：
+
+```js
+const element = React.createElement(
+  'h1',
+  {className: 'greeting'},
+  'Hello, world!'
+);
+```
+
+`element`就是React Component。
 
 ### 2. Introducing JSX
 写多行jsx时，用圆括号`()`将整块内容包起来，以避免自动添加的`;`导致语法错误
