@@ -9,7 +9,10 @@
     - [1.2 JSX中的属性](#12-jsx中的属性)
     - [1.3 JSX中的用户输入部分是安全的](#13-jsx中的用户输入部分是安全的)
     - [1.4 JSX其实是个语法糖](#14-jsx其实是个语法糖)
-  - [2. Introducing JSX](#2-introducing-jsx)
+  - [2. 快让我们用上JSX！](#2-快让我们用上jsx)
+    - [2.1 引入React library](#21-引入react-library)
+    - [2.2 引入babel](#22-引入babel)
+    - [2.3 在HTML中使用jsx](#23-在html中使用jsx)
   - [6. Handling Events](#6-handling-events)
   - [7. 条件渲染(Conditional Rendering)](#7-条件渲染conditional-rendering)
   - [8. Lists and Keys](#8-lists-and-keys)
@@ -35,7 +38,7 @@ const element = <h1>Hello, world!</h1>;
 
 这就是JSX语法，`.jsx`是对JS的一种扩展，用于在React应用中描述UI。
 
-最终会处理为**React组件**，赋值给了变量`element`。
+最终会处理为**React元素**(React Element)，赋值给了变量`element`。
 
 #### 1.1 可以嵌入表达式
 
@@ -116,10 +119,45 @@ const element = React.createElement(
 );
 ```
 
-`element`就是React Component。
+`element`就是React元素。
 
-### 2. Introducing JSX
-写多行jsx时，用圆括号`()`将整块内容包起来，以避免自动添加的`;`导致语法错误
+注意和`Component`区分，`element`是构成`Component`的要素。
+
+### 2. 快让我们用上JSX！
+
+说了这么多，也该用`.jsx`练手了。
+
+#### 2.1 引入React library
+
+**React**也是一个js库而已，通过`<script>`标签加载它：
+
+```html
+  <!-- Load React. -->
+  <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+```
+
+#### 2.2 引入babel
+
+**Babel**用来将对`.jsx`进行语法分析，并转换为`.js`。它的存在就是为了我们用*JSX*写起来爽一点，但毕竟要运行在浏览器中，需要由它帮忙转换为`.js`。
+
+```html
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+```
+
+有了上面的babel的引入，我们可以在*type*为`type=text/babel`的`<script>`标签中书写jsx语法了。
+
+```html
+  <script type='text/babel'>
+    // using JSX syntax
+    const element = <h1>Hello world!</h1>;
+  </script>
+```
+
+#### 2.3 在HTML中使用jsx
+
+见：[在HTML中使用jsx](./using-jsx(1)/jsx-in-script-tag-with-text-babel.html)。
 
 ### 6. Handling Events
 - react事件使用*camelCase*命名(e.g `onClick`)
