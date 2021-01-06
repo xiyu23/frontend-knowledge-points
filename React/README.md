@@ -1,4 +1,4 @@
-## Learning React
+# Learning React
 ===React相关知识点===
 
 *在vscode中，按下F1键以调出命令，输入`create content table`来创建目录。*
@@ -14,6 +14,7 @@
     - [2.2 引入babel](#22-引入babel)
     - [2.3 在HTML中使用jsx](#23-在html中使用jsx)
     - [2.4 jsx预处理器(JSX preprocessor)](#24-jsx预处理器jsx-preprocessor)
+  - [3. 渲染React Element](#3-渲染react-element)
   - [6. Handling Events](#6-handling-events)
   - [7. 条件渲染(Conditional Rendering)](#7-条件渲染conditional-rendering)
   - [8. Lists and Keys](#8-lists-and-keys)
@@ -31,7 +32,7 @@
   - [16. The Component Lifecycle](#16-the-component-lifecycle)
   - [17.JSX In Depth](#17jsx-in-depth)
 
-### 1. JSX
+## 1. JSX
 
 ```jsx
 const element = <h1>Hello, world!</h1>;
@@ -41,7 +42,7 @@ const element = <h1>Hello, world!</h1>;
 
 最终会处理为**React元素**(React Element)，赋值给了变量`element`。
 
-#### 1.1 可以嵌入表达式
+### 1.1 可以嵌入表达式
 
 任何合法的*javascript expression*都可以嵌入到`.jsx`里的`{}`中。
 
@@ -64,7 +65,7 @@ const element2 = (
 
 在需要跨行书写JSX时，应当用`()`包裹一下，以避免自动的`;`被添加到行尾而导致语法错误。
 
-#### 1.2 JSX中的属性
+### 1.2 JSX中的属性
 
 字符串值类型，用*引号*(`'`或`"`)包裹：
 
@@ -80,7 +81,7 @@ const element = <img src={user.avatarUrl}></img>;
 
 > React DOM使用`camelCase`命名方式，如`class`变为`className`，`tab-index`变为`tabIndex`。
 
-#### 1.3 JSX中的用户输入部分是安全的
+### 1.3 JSX中的用户输入部分是安全的
 
 可以将用户输入写进JSX：
 
@@ -94,7 +95,7 @@ const element = <h1>{title}</h1>;
 
 参见：[JSX Prevents Injection Attacks](https://reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks)
 
-#### 1.4 JSX其实是个语法糖
+### 1.4 JSX其实是个语法糖
 
 **Babel**将会对JSX编译成对`React.createElement()`的调用。
 
@@ -120,11 +121,11 @@ const element = React.createElement(
 
 注意和`Component`区分，`element`是构成`Component`的要素。
 
-### 2. 快让我们用上JSX！
+## 2. 快让我们用上JSX！
 
 说了这么多，也该用`.jsx`练手了。
 
-#### 2.1 引入React library
+### 2.1 引入React library
 
 **React**也是一个js库而已，通过`<script>`标签加载它：
 
@@ -135,7 +136,15 @@ const element = React.createElement(
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
 ```
 
-#### 2.2 引入babel
+问题：React vs React DOM ?
+
+React用于更容易地构建用户界面，它和web、浏览器没直接的耦合，
+比如我们用的`component`, `classes`, `elements`就属于React js库；
+
+
+React DOM则是将React和browser粘合在一起，比如我们用到的`render()`或`findDOMNode()`就属于React DOM。
+
+### 2.2 引入babel
 
 **Babel**用来将对`.jsx`进行语法分析，并转换为`.js`。它的存在就是为了我们用*JSX*写起来爽一点，但毕竟要运行在浏览器中，需要由它帮忙转换为`.js`。
 
@@ -152,11 +161,11 @@ const element = React.createElement(
   </script>
 ```
 
-#### 2.3 在HTML中使用jsx
+### 2.3 在HTML中使用jsx
 
 见：[在HTML中使用jsx](./using-jsx(1)/jsx-in-script-tag-with-text-babel.html)。
 
-#### 2.4 jsx预处理器(JSX preprocessor)
+### 2.4 jsx预处理器(JSX preprocessor)
 
 前置条件：
 - `npm` required
@@ -178,7 +187,19 @@ const element = React.createElement(
 
 这个是"预置"的意思，看文档描述似乎是babel编译时，所用到的一些插件。（可能就是辅助编译？）
 
-### 6. Handling Events
+## 3. 渲染React Element
+
+传入element及所要渲染到的根元素(a root DOM node)。
+```html
+  const element = <h1>Hi yuhui</h1>;
+  ReactDom.render(element, document.getElementById('root'));
+```
+
+React element是不可变的，一旦创建好无法修改。
+
+
+
+## 6. Handling Events
 - react事件使用*camelCase*命名(e.g `onClick`)
 
   ```html
@@ -194,7 +215,7 @@ const element = React.createElement(
   - Bind methods in the constructor
   - Use arrow functions, e.g. `onClick={(e) => this.handleClick(e)}`
 
-### 7. 条件渲染(Conditional Rendering)
+## 7. 条件渲染(Conditional Rendering)
 在`{}`中可以书写条件表达式，
 
     true && expr
@@ -207,13 +228,13 @@ const element = React.createElement(
 
 有时想隐藏一个组件B，但它可能在其它组件A中被渲染出来，则可以让组件B `return null`来跳过渲染。**注意不是从render中return**（这样的话react组件生命周期仍然会触发的）。
 
-### 8. Lists and Keys
+## 8. Lists and Keys
 
 建议为list中每一个item的属性`key`赋值，但不建议用*index*。
 
 因为重新打乱顺序后item的*index*会变，导致非预期的行为(unexpected results)。
 
-#### 8.1 原理
+### 8.1 原理
 
 React对比渲染前后的两棵树，对原节点A及新节点A'的children进行对比时，是按顺序对比的：
 
@@ -241,11 +262,11 @@ React发现A3是新增的，只需要渲染A3作为A的孩子即可。
 
 发现A1、A2对应的key相同，只有A0是新增的，渲染的性能会提高很多。
 
-#### 8.2 但是为什么不建议用index呢？
+### 8.2 但是为什么不建议用index呢？
 
 如果对列表进行重新排序，只是改变了元素的顺序，而`key`用的是**index**，也就是说**新旧两棵树孩子节点对应的`key`还是相同的**，React认为没有变化。
 
-#### 8.3 什么是`key`？
+### 8.3 什么是`key`？
 
 > A `key` is a special *string attribute* you need to include when creating lists of elements. 
 >
@@ -261,9 +282,9 @@ React发现A3是新增的，只需要渲染A3作为A的孩子即可。
 
 则`Post`这个component就可以读到`props.id`，但读不到`props.key`的。
 
-### 9. Forms
+## 9. Forms
 
-#### 9.1 Controlled Components
+### 9.1 Controlled Components
 
 > ***making the React state be the single source of truth***
 
@@ -283,7 +304,7 @@ React发现A3是新增的，只需要渲染A3作为A的孩子即可。
 
 *Fully-Fledged Solutions: Formik，用于表单验证、跟踪visited fields、处理表单提交的一个插件。
 
-#### 9.2 Uncontrolled Components（React大多情况下推荐用此类组件实现Form）
+### 9.2 Uncontrolled Components（React大多情况下推荐用此类组件实现Form）
 
 > ***keeps the source of truth in the DOM***
 
@@ -331,7 +352,7 @@ React在组件**挂载时**会将DOM元素对象赋值给`current`属性；在**
 
 不要将`callback refs`的回调函数定义为*内联函数*，因为每次render都会创建一个函数的实例，所以React会调用两次，第一次给callback传null，第二次才是DOM元素。
 
-### 11. 组合替代继承
+## 11. 组合替代继承
 
 JSX tag中的内容可作为一个特殊属性`children`传递给该component。
 
@@ -349,9 +370,9 @@ return <div> {props.children} </div>
 
 这样*some content*作为`props.children`插入到div中，这些位置即***slots***。
 
-### 12. React.Fragment
+## 12. React.Fragment
 
-### 13. Forwarding Refs
+## 13. Forwarding Refs
 外部组件或代码想要访问component内部的某个DOM或子组件，这种情形下使用*Forwarding refs*。
 
 16.3+可通过`React.fowardRef`定义一个component（记为A），该函数第2个参数为`ref`，即可通过这个`ref`关联到A中的子组件或DOM节点。
@@ -378,17 +399,17 @@ ref.current.value = 'button value';
 ref.current.innerText = 'new button name';
 ```
 
-### 14. HOC(Higher-Order Components)
+## 14. HOC(Higher-Order Components)
 HOC是一个*接受一个component作为参数、并返回一个新的component*的函数。
 
 HOC并不属于React API，而是在React第三方库中很常见，如*Redux*的`connect`函数。
 
-### 15. Code-Splitting
+## 15. Code-Splitting
 把多个文件打包合并成1个文件，最终这个文件叫做"`bundle`"。
 
 那对于初始状态不需要加载的，可以应用*lazy load*。[dynamic import()][React.lazy][React组件: Suspense]
 
-### 16. The Component Lifecycle
+## 16. The Component Lifecycle
 当new一个新的react component实例插入到DOM中时：
 Mounting：constructor -> render -> componentDidMount
 
@@ -402,7 +423,7 @@ Unmounting: componentWillUnmount
 在React中ctor就2个目的：为this.state初始化；binding event handler methods to an instance（即赋值事件处理函数前的绑定，将调用时的this指向当前react component对象实例）
 不能在ctor中调用setState()，而是应该直接为this.state初始化，除ctor之外只能用setState赋值（否则会造成数据不一致）
 
-### 17.JSX In Depth
+## 17.JSX In Depth
 JSX实质就是React.createElement(...)的语法糖，写起来更方便而已。
 -自定义的组件首字母必须大写，否则React会当做built-in html tag
 -导出多个组件的场景，可以用'.'语法来使用具体的某个组件：<MyComponents.DatePicker />
