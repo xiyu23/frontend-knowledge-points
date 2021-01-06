@@ -13,6 +13,7 @@
     - [2.1 引入React library](#21-引入react-library)
     - [2.2 引入babel](#22-引入babel)
     - [2.3 在HTML中使用jsx](#23-在html中使用jsx)
+    - [2.4 jsx预处理器(JSX preprocessor)](#24-jsx预处理器jsx-preprocessor)
   - [6. Handling Events](#6-handling-events)
   - [7. 条件渲染(Conditional Rendering)](#7-条件渲染conditional-rendering)
   - [8. Lists and Keys](#8-lists-and-keys)
@@ -62,10 +63,6 @@ const element2 = (
 **注意**:
 
 在需要跨行书写JSX时，应当用`()`包裹一下，以避免自动的`;`被添加到行尾而导致语法错误。
-
-在cmd运行，当把.jsx文件丢进JSX_src文件夹中后，.jsx会被立即编译为.js（输出到`--out-dir`指定的目录）以支持在浏览器中运行。这玩意就是*Babel*！屌！
-
-    npx babel --watch JSX_src --out-dir . --presets react-app/prod
 
 #### 1.2 JSX中的属性
 
@@ -158,6 +155,28 @@ const element = React.createElement(
 #### 2.3 在HTML中使用jsx
 
 见：[在HTML中使用jsx](./using-jsx(1)/jsx-in-script-tag-with-text-babel.html)。
+
+#### 2.4 jsx预处理器(JSX preprocessor)
+
+前置条件：
+- `npm` required
+
+安装步骤：
+
+    npm init -y
+    npm install babel-cli@6 babel-preset-react-app@3
+
+关于命令解释，请查看[npm学习笔记](../learn.md)。
+
+运行JSX预处理器：
+
+    npx babel --watch src --out-dir . --presets react-app/prod
+
+当把`.jsx`文件丢进`src`文件夹中后，`.jsx`会被*babel*立即转换为`.js`（输出到`--out-dir`指定的目录）以支持在浏览器中运行。这玩意就是*Babel*！屌！
+
+    --presets
+
+这个是"预置"的意思，看文档描述似乎是babel编译时，所用到的一些插件。（可能就是辅助编译？）
 
 ### 6. Handling Events
 - react事件使用*camelCase*命名(e.g `onClick`)

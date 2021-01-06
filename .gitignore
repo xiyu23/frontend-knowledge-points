@@ -2,3 +2,5 @@ node_modules/
 Refactoring/*.js
 TypeScript/proj/src/*.js
 Head-First/*.js
+React/using-jsx(1)/jsx-with-JSX-preprocessor/package-lock.json
+React/using-jsx(1)/jsx-with-JSX-preprocessor/output/*

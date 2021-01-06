@@ -336,4 +336,23 @@ npm run <command> [--silent] [--<args>...]
 比如`env`是`built-in`脚本，用于列举出环境变量(脚本中也可以用到)。
 
 
-#### 5.2 npm more?
+#### 5.2 npm init
+
+创建一个`package.json`文件。
+##### 1.跳过所有问题
+
+    npm init -y
+
+You can also use `-y`/`--yes` to skip the questionnaire altogether.
+
+##### 2.创建基于React的项目
+
+    npm init react-app ./my-react-app
+
+这个会用npm包***create-***`react-app`来初始化项目，`npx`将会安装这个包，并在安装完成后运行它(have its main bin executed)。
+
+实际上**init**命令将会转换成npx来执行的：
+
+    npm init foo -> npx create-foo
+    npm init @usr/foo -> npx @usr/create-foo
+    npm init @usr -> npx @usr/create
