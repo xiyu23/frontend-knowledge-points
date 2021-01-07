@@ -10,6 +10,7 @@
   </head>
 
   <body>
+    <div id='root-clock'></div>
     <div id='root'></div>
 
     <!-- Load React -->
@@ -20,10 +21,19 @@
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
     <script src='output/hello.js'></script>
+    <script src='output/clock.js'></script>
 
-    <script type='text/javascript'>
+    <script type='text/babel'>
       const domContainer = document.querySelector('#root');
-      ReactDOM.render(element, domContainer);
+      ReactDOM.render(
+        element,
+        domContainer,
+      );
+
+      ReactDOM.render(
+        <Clock />,
+        document.getElementById('root-clock')
+      );
     </script>
   </body>
 </html>

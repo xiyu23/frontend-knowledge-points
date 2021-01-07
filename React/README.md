@@ -20,7 +20,11 @@
     - [4.2 使用组件渲染](#42-使用组件渲染)
     - [4.3 组件也可以引用另一个组件](#43-组件也可以引用另一个组件)
     - [4.4 `props` are Read-Only](#44-props-are-read-only)
-  - [5.](#5)
+  - [5. 使用`setState`来更新DOM](#5-使用setstate来更新dom)
+    - [5.1 一个错误的例子](#51-一个错误的例子)
+    - [5.2 `state`来了！](#52-state来了)
+      - [5.2.1 将function component转换为class component](#521-将function-component转换为class-component)
+      - [5.2.2 添加local state](#522-添加local-state)
   - [6. Handling Events](#6-handling-events)
   - [7. 条件渲染(Conditional Rendering)](#7-条件渲染conditional-rendering)
   - [8. Lists and Keys](#8-lists-and-keys)
@@ -320,7 +324,109 @@ function withdraw(account, amount) {
 
 ***所有React组件都应该是pure function***。
 
-## 5. 
+## 5. 使用`setState`来更新DOM
+
+### 5.1 一个错误的例子
+
+我们知道，
+
+> React elements are **immutable**. Once you create an element, you can’t change its children or attributes. 
+
+所以这样写是不能更新`<clock>`的：
+
+```jsx
+// 定义clock
+function Clock(props) {
+  let timeString = new Date().toLocaleTimeString();
+  setInterval(() => {
+    timeString = new Date().toLocaleTimeString();
+  }, 1000);
+
+  return (
+    <div>
+      <h2>It is {timeString}.</h2>
+    </div>
+  );
+}
+
+// 渲染
+<div id='root'></div>
+
+const clockElem = <Clock />;
+
+// 在这里，clockElem被创建好后，就是Immutable！所以即使修改了其内部变量，也不会更新这个React Element
+ReactDOM.render(
+  clockElem,
+  document.getElementById('root'),
+);
+```
+
+要做到类似于如下使用`<Clock>`的方式：
+
+```jsx
+ReactDOM.render(
+  <Clock />,
+  document.getElementById('root'),
+);
+```
+
+我们需要引入**state**到`Clock组件`。
+
+### 5.2 `state`来了！
+
+`state`类似于`props`，不过它是属于组件内部私有的(*private*)，只能由组件本身来控制。
+
+#### 5.2.1 将function component转换为class component
+
+```jsx
+class Clock extends React.Component {
+  render() {
+    return (
+      <div>
+        <h2>It is {this.props.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(
+  <Clock date={new Date()} />,
+  document.getElementById('root'),
+);
+```
+
+每次更新组件时，都会调用`render()`方法，但是如果我们只是将`<Clock />`渲染到**同一个DOM节点**，那么一直都是用的同一个类实例。
+
+> The render method will be called each time an update happens, but as long as we render `<Clock />` into the same DOM node, only a single instance of the Clock class will be used
+
+OK，那怎么让组件内部自己去触发更新呢？
+
+两种方式：
+
+1. 为类组件添加*local state*
+2. 为类组件添加*lifecycle methods*
+
+#### 5.2.2 添加local state
+
+为类添加一个成员变量`state`，不再依赖外部传入的`props`，改用`state`代替：
+
+```jsx
+class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      date: new Date(),
+    };
+  }
+  render() {
+    return (
+      <div>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+```
 
 
 ## 6. Handling Events
