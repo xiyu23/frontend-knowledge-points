@@ -15,6 +15,12 @@
     - [2.3 在HTML中使用jsx](#23-在html中使用jsx)
     - [2.4 jsx预处理器(JSX preprocessor)](#24-jsx预处理器jsx-preprocessor)
   - [3. 渲染React Element](#3-渲染react-element)
+  - [4. Components和Props](#4-components和props)
+    - [4.1 这就是一个*React Component*](#41-这就是一个react-component)
+    - [4.2 使用组件渲染](#42-使用组件渲染)
+    - [4.3 组件也可以引用另一个组件](#43-组件也可以引用另一个组件)
+    - [4.4 `props` are Read-Only](#44-props-are-read-only)
+  - [5.](#5)
   - [6. Handling Events](#6-handling-events)
   - [7. 条件渲染(Conditional Rendering)](#7-条件渲染conditional-rendering)
   - [8. Lists and Keys](#8-lists-and-keys)
@@ -53,6 +59,7 @@ const element = <h1>Hello, {name}!</h1>;
 function getFirstName(name) {
   return name.substring(0, name.indexOf(' '));
 }
+
 const element2 = (
   <h1>
     Hello again, {getFirstName(name)}!
@@ -189,7 +196,7 @@ React DOM则是将React和browser粘合在一起，比如我们用到的`render(
 
 ## 3. 渲染React Element
 
-传入element及所要渲染到的根元素(a root DOM node)。
+传入`element`及所要渲染到的根元素(a root DOM node)。
 ```html
   const element = <h1>Hi yuhui</h1>;
   ReactDom.render(element, document.getElementById('root'));
@@ -197,6 +204,123 @@ React DOM则是将React和browser粘合在一起，比如我们用到的`render(
 
 React element是不可变的，一旦创建好无法修改。
 
+## 4. Components和Props
+
+### 4.1 这就是一个*React Component*
+
+```jsx
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+```
+
+接受一个输入参数`props`，返回一个`React Element`，这样的函数就是一个React的***Function Component***。
+
+> When React sees an element representing a user-defined component, it passes JSX **attributes** and **children** to this component as a single object. We call this object “`props`”.
+
+当然，也可以用*Class*来实现：
+
+```jsx
+class Welcome extends React.Component {
+  render() {
+    return <h1>Hello, {this.props.name}</h1>;
+  }
+}
+```
+
+从`React.Component`继承，并实现`render()`方法返回一个*React Element*，那么这样的一个类`Welcome`就是React的***Class Component***。
+
+**注意**：
+- *Component*的命名必须**首字母大写**
+
+ref: [jsx in depth](https://reactjs.org/docs/jsx-in-depth.html#user-defined-components-must-be-capitalized)
+
+### 4.2 使用组件渲染
+
+```jsx
+// 定义函数组件
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+
+// 使用组件渲染
+// html
+<div id='root'></div>
+
+// script
+const elem = <Welcome name='yuhui' />;
+ReactDOM.render(
+  elem,
+  document.getElementById('root'),
+);
+```
+
+来看看上述是怎么工作的：
+1. `Welcome`是一个*function component*，React调用这个函数组件并传参数`{ name: "yuhui" }`；
+
+2. `Welcome`组件返回*React element*为
+
+```html
+    <h1>Hello, yuhui</h1>;
+```
+3. 最终ReactDOM调用`render`渲染出DOM。
+
+### 4.3 组件也可以引用另一个组件
+
+```jsx
+function Welcome(props) {
+  return <h1>hi, {props.name}</h1>;
+}
+
+// 在App组件内引用另一个组件Welcome
+function App() {
+  return (
+    <div>
+      <Welcome name='yuhui' />
+      <Welcome name='yunhui' />
+      <Welcome name='xiaohan' />
+    </div>
+  );
+}
+
+// 渲染App
+<div id='root'></div>
+
+const elem = <App />
+ReactDOM.render(
+  elem,
+  document.getElementById('root'),
+);
+
+```
+
+### 4.4 `props` are Read-Only
+
+什么是*pure function*?
+
+不修改输入参数的函数，而且对于相同的参数，都返回相同的结果，这种函数就叫做**纯函数**(*pure function*)。
+
+比如`sum`就是一个*pure function*。
+
+```js
+function sum(a, b) {
+  return a + b;
+}
+```
+
+相对地，以下就是*impure function*：
+
+```js
+function withdraw(account, amount) {
+  account.total -= amount;
+}
+```
+
+因为它修改了入参*account*。
+
+***所有React组件都应该是pure function***。
+
+## 5. 
 
 
 ## 6. Handling Events
