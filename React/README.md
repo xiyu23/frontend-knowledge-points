@@ -541,7 +541,7 @@ this.setState({
 // correct
 this.setState((prevState, props) => (
     { prevState.counter + 1 }
-  )
+  ) 
 );
 ```
 
@@ -554,6 +554,40 @@ this.setState((prevState, props) => (
 四个正方形代表4个更新时刻，当第二次尚未完成时，这时第三次的更新**直接从`state`取值**就会导致仍然拿到的是1，而不是第二次更新的结果（因为`setState`内部应该(?)会搞个队列等时间到了再将队列中的更新任务合并成一次更新任务）。
 
 而`props`虽然是构造函数传入的，但是如果外部通过`ReactDOM.render()`再次渲染，即间接地调用了我的`render()`方法，那么`props`还是会根据传入的值变化的。
+
+3. `state`的更新是"合并式"更新(merged)
+
+即在用`setState`设置`state`中的某些属性时，只会修改本次set的属性。
+
+（中文真不好描述）
+
+> your state may contain several independent variables(like `posts`, `comments`), then you can update them independently with separate `setState()`, **so `this.setState({comments: newComments})` leaves `this.state.posts` intact**, and vice versa.
+
+```js
+constructor(props) {
+  super(props);
+  this.state = {
+    posts: [],
+    comments: []
+  };
+}
+
+foo() {
+  const newComments = []; // some new comments
+
+  this.setState({
+    comments: newComments,
+  })
+}
+
+bar() {
+  const newPosts = []; // some new posts
+
+  this.setState({
+    posts: newPosts,
+  })
+}
+```
 
 ## 6. Handling Events
 - react事件使用*camelCase*命名(e.g `onClick`)
