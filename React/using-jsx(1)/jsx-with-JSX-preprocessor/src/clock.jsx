@@ -14,9 +14,23 @@
 class Clock extends React.Component {
   constructor(props) {
     super(props);
+
+    this.timerID = 0;
     this.state = {
       date: new Date(),
     };
+  }
+  componentDidMount() {
+    this.timerID = setInterval(() => {
+      this.setState({
+        date: new Date(),
+      });
+    }, 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+    this.timerID = 0;
   }
   render() {
     return (

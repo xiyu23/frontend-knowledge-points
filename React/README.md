@@ -25,6 +25,9 @@
     - [5.2 `state`来了！](#52-state来了)
       - [5.2.1 将function component转换为class component](#521-将function-component转换为class-component)
       - [5.2.2 添加local state](#522-添加local-state)
+      - [5.2.3 添加lifecycle methods](#523-添加lifecycle-methods)
+      - [5.2.4 关键的更新操作：`setState`](#524-关键的更新操作setstate)
+    - [5.3 关于`state`的注意点](#53-关于state的注意点)
   - [6. Handling Events](#6-handling-events)
   - [7. 条件渲染(Conditional Rendering)](#7-条件渲染conditional-rendering)
   - [8. Lists and Keys](#8-lists-and-keys)
@@ -428,6 +431,129 @@ class Clock extends React.Component {
 }
 ```
 
+这时只会渲染一个时刻，怎么让*state*变化呢？
+
+**引入生命周期lifecycle**来试试。
+
+#### 5.2.3 添加lifecycle methods
+
+向React Component类添加如下两个成员方法。
+
+```jsx
+  componentDidMount() {
+    this.timerID = setInterval(() => {
+      // 这里如何更新state呢？
+    }, 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+    this.timerID = 0;
+  }
+```
+
+当组件被**首次**渲染到DOM上时，触发***mount***，即钩子函数*componentDidMount*会被执行；
+
+当组件被从DOM上移除时，触发***unmount***，即钩子函数*componentWillUnmount*会被执行。
+
+**TODO: 看下源码，生命周期的准确触发时刻。**
+
+#### 5.2.4 关键的更新操作：`setState`
+
+```jsx
+  componentDidMount() {
+    this.timerID = setInterval(() => {
+      // 更新state
+      this.setState({
+        date: new Date(),
+      });
+    }, 1000);
+  }
+```
+
+整个流程：
+
+1. `<Clock />`传入`ReactDOM.render()`后，会开始实例化一个`<Clock />`；
+  
+2. React调用`React.Component::render()`方法（这里其实就是**React针对接口编程，调用由子类实现父类中定义的`render()`方法来获取到用于渲染的*React Element***），即会调用`<Clock />`的`render()`方法，得到*React Element*;
+
+3. React将上一步得到的元素渲染到界面上；
+
+4. 当如上元素被插入到DOM后，React内部调用生命周期钩子函数，使得`Clock::componentDidMount()`被调用，从而我们的定时器开始启动；
+
+5. 而后每过1s，通过`setState`方法来触发更新UI的请求，React发现`state`发生了改变，则再次调用子类实现的`render()`方法获取新的要渲染的内容。此时React内部对比前后渲染内容的差异(diff)，最后将diff应用到当前真实DOM上，以完成视图的更新。
+
+总结：
+
+从上面可见，这里可以感觉到React用到了设计模式中的*针对接口编程*（`render`)、*模板模式*（生命周期钩子函数其实就是模板的一种应用），以及常提到的**虚拟DOM**、diff算法。
+
+### 5.3 关于`state`的注意点
+
+1. 不能直接修改`state`变量，可以直接修改`state`的时机只能在`ctor`(*constructor*)里
+
+```js
+// correct
+constructor() {
+  this.state = {
+    name: 'yuhui',
+    age: 29,
+    favor: 'unknown',
+  };
+
+  this.state.gender = 'male';
+}
+
+someMethod() {
+  // wrong
+  this.state.favor = 'xiaohan';
+
+  // correct
+  this.setState({
+    favor: 'xiaohan',
+  });
+}
+```
+
+Q: 咦，那我想动态地给`state`新增一个属性呢？像这样：
+
+```js
+somethingHappened() {
+  this.setState({
+    isTired: true,
+  });
+}
+```
+
+A: 感觉我们应当遵守一个规则，即将渲染需要的属性都提前在`ctor`中声明好。另外，如果动态地新增一个并没有用于`render()`的属性的话，这个`setState`其实也没意义。
+
+**TODO: 看看源码，`setState`一个新的属性会怎样？**
+
+2. `setState`是异步的，可能会将多个更新合并成一个以提升性能
+
+假设本次更新`state`需要依赖之前的状态，则
+
+```js
+// wrong, 因为此时state并不一定已经更新了，有可能还是更早之前的值。
+this.setState({
+  counter: this.state.counter + 1,
+});
+
+// correct
+this.setState((prevState, props) => (
+    { prevState.counter + 1 }
+  )
+);
+```
+
+`setState`提供了另一种形式来更新`state`，`prevState`自不必说，就是上一个状态；而`props`是**此时此刻的`props`**。
+
+怎么理解呢？
+
+![图片](./pics/react-setState-async.png)
+
+四个正方形代表4个更新时刻，当第二次尚未完成时，这时第三次的更新**直接从`state`取值**就会导致仍然拿到的是1，而不是第二次更新的结果（因为`setState`内部应该(?)会搞个队列等时间到了再将队列中的更新任务合并成一次更新任务）。
+
+而`props`虽然是构造函数传入的，但是如果外部通过`ReactDOM.render()`再次渲染，即间接地调用了我的`render()`方法，那么`props`还是会根据传入的值变化的。
 
 ## 6. Handling Events
 - react事件使用*camelCase*命名(e.g `onClick`)
