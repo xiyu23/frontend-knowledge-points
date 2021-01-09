@@ -44,6 +44,10 @@
   - [15. Code-Splitting](#15-code-splitting)
   - [16. The Component Lifecycle](#16-the-component-lifecycle)
   - [17.JSX In Depth](#17jsx-in-depth)
+  - [22. Hooks](#22-hooks)
+    - [22.1 什么是hooks？](#221-什么是hooks)
+    - [22.2 State Hook: `useState`](#222-state-hook-usestate)
+    - [22.3 Effect Hook: `useEffect`](#223-effect-hook-useeffect)
 
 ## 1. JSX
 
@@ -861,6 +865,126 @@ return ReactDOM.createPortal(this.props.children, domNode)或
 return ReactDOM.createPortal(<h1>hi there</h1>, domNode)
 
 21. Reconciliation
+
+
+## 22. Hooks
+
+> React v16.8+ required
+
+### 22.1 什么是hooks？
+
+当我们希望在React内部某些特定状态下做一些事情的时候，比如节点挂载完成时(`componentDidMount`)，我们可以这么做的原因是React提供了*钩子函数*，当它内部到达此状态时会调用*钩子函数*，而钩子函数的具体实现可以由*Client Code*来完成（**可参考《Head-First》的模板模式）**。
+
+***Hooks只在function components中可用，不能在Class Components中使用***。
+
+### 22.2 State Hook: `useState`
+
+`useState`是一个Hook，它为函数组件(*function component*)添加局部状态。
+
+它和类组件中的`setState`类似，但是它**不会合并state**。
+
+```jsx
+const { useState } = React; // 注意，React得保证导入到scope中
+
+function Example() {
+  // Declare a new state variable, which we'll call "count"
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}
+```
+
+### 22.3 Effect Hook: `useEffect`
+
+*side effects*, short for ***effects***.
+
+**意义：将原本分散在生命周期钩子中的代码，集中于一处管理。**
+
+总结：
+
+- 传入的函数参数，函数体相当于在`componentDidMount`、`componentDidUpdate`后执行
+- 传入的函数参数返回的函数，将会在`componentUnmount`执行
+
+比如有时你希望每次渲染完成之后，都做一些操作，如修改一下浏览器的`title`。在***function components***中，React提供了`useEffect`以来实现：
+
+```jsx
+const { useEffect } = React; // 注意，React得保证导入到scope中
+
+// Similar to componentDidMount and componentDidUpdate in Class:
+useEffect(() => {
+  // Update the document title using the browser API
+  document.title = `You clicked ${count} times`;
+});
+```
+
+这意味着，**每当React更新了组件后，就运行作为参数传入`userEffect`的函数**。
+
+再比如，我们有一对操作**订阅**、**注销**，希望在更新DOM后订阅、组件卸载后**注销**。
+
+那么在*Class Component*中我们想到用生命周期来实现：
+
+```js
+// in class
+
+// 订阅，首次挂载执行
+componentDidMount() {
+  // do subscribe
+}
+
+// 非首次，更新时执行
+componentDidUpdate() {
+  // do nothing
+}
+
+// 注销
+componentWillUnmount() {
+  // do unsubscribe
+}
+```
+
+但在*function component*中怎么做呢？
+
+可以为`useEffect`传入一个**返回一个clean up函数**的函数）：
+
+```jsx
+useEffect(() => {
+  // do subscribe
+
+  // 返回的这个函数就被React当做是"clean up function"
+  return () => {
+    // do unsubscribe
+  };
+});
+```
+
+这样的话，**当组件被卸载(*unmount*)时，这个*clean up function*就会被调用**。
+
+当然，下一次再渲染组件完成后（相当于重新走一遍全新的生命周期），`useEffect`又会被调用。
+
+**注意：**
+
+函数组件(*function component*)一旦渲染便是*immutable*，因此下次需要渲染这个组件时，React会先将它从DOM树卸载、而后再重新实例化一个并挂载到DOM上。
+
+首次渲染函数组件：mount（本次）
+
+再次渲染函数组件（比如函数组件的`props`或者内部`state`更新了）：unmout(上一个)，mount（本次）
+
+第三次渲染函数组件：unmout(上一个)，mount（本次）
+
+`...`依次类推
+
+> By default, React runs the effects after every render — including the first render.  
+> The Effect Hook, ***useEffect***, adds the ability to perform side effects from a function component. It serves the same purpose as *componentDidMount*, *componentDidUpdate*, and *componentWillUnmount* in React classes, but unified into a single API
+
+
+
 
 
 ===在写React时想到的一些疑问===

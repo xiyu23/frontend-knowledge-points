@@ -1680,6 +1680,15 @@ console.log(res);
 先把这个学会了：
 https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance
 
+## 65. `import`
+
+错误：Uncaught SyntaxError: Cannot use `import` statement outside a module
+
+解决：在`<script>`标签上增加`type=module`，即
+
+      <script type='module' src='output/useEffect.js'></script>
+
+> whether you declare them as such or not. The import statement cannot be used in embedded scripts unless such script has a type="module". 
 
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---

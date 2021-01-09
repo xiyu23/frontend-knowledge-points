@@ -10,6 +10,8 @@
   </head>
 
   <body>
+    <div id='root-useEffect'></div>
+
     <div id='root-clock'></div>
     <div id='root'></div>
 
@@ -26,8 +28,14 @@
 
     <script src='output/hello.js'></script>
     <script src='output/clock.js'></script>
+    <script src='output/useEffect.js'></script>
 
     <script type='text/babel'>
+      const domContainer1 = document.querySelector('#root-useEffect');
+      ReactDOM.render(<Counter />, domContainer1);
+
+      // ---
+
       const domContainer = document.querySelector('#root');
       ReactDOM.render(
         element,
