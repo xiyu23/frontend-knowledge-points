@@ -39,9 +39,9 @@ function Counter() {
   const [count, setCount] = useState(0);
   
   useEffect(() => {
-    console.log('updated in useEffect(both mount and update)?');
+    console.log(`updated in useEffect: ${count}`);
     return () => {
-      console.log('unmounted in useEffect?');
+      console.log(`unmounted in useEffect: ${count}`);
     };
   });
 

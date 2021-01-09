@@ -951,34 +951,70 @@ componentWillUnmount() {
 
 但在*function component*中怎么做呢？
 
-可以为`useEffect`传入一个**返回一个clean up函数**的函数）：
+可以为`useEffect`传入一个**返回一个cleanup函数**的函数）：
 
 ```jsx
 useEffect(() => {
   // do subscribe
 
-  // 返回的这个函数就被React当做是"clean up function"
+  // 返回的这个函数就被React当做是"cleanup function"
   return () => {
     // do unsubscribe
   };
 });
 ```
 
-这样的话，**当组件被卸载(*unmount*)时，这个*clean up function*就会被调用**。
+这样的话，**当组件被卸载(*unmount*)时，这个*cleanup function*就会被调用**。
 
 当然，下一次再渲染组件完成后（相当于重新走一遍全新的生命周期），`useEffect`又会被调用。
 
 **注意：**
 
-函数组件(*function component*)一旦渲染便是*immutable*，因此下次需要渲染这个组件时，React会先将它从DOM树卸载、而后再重新实例化一个并挂载到DOM上。
+函数组件(*function component*)一旦渲染便是*immutable*，即这个实例不可被修改。
 
-首次渲染函数组件：mount（本次）
+因此当需要再次渲染这个函数组件时，React会先将它从DOM树卸载、而后再重新实例化一个并挂载到DOM上。
 
-再次渲染函数组件（比如函数组件的`props`或者内部`state`更新了）：unmout(上一个)，mount（本次）
+比如对以下代码，
 
-第三次渲染函数组件：unmout(上一个)，mount（本次）
+```jsx
+const { useState, useEffect } = React;
 
-`...`依次类推
+function Counter() {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    console.log(`updated in useEffect: ${count}`);
+    return () => {
+      console.log(`unmounted in useEffect: ${count}`);
+    };
+  });
+
+  function onBtnClick() {
+    setCount(count + 1);
+  }
+
+  return (
+    <button onClick={onBtnClick}>You have clicked {count} times</button>
+  );
+}
+
+ReactDOM.render(<Counter />, document.getElementById('root'));
+```
+
+渲染完成后，点击2次button后的输出结果：
+```js
+updated in useEffect: 0 // 首次渲染函数组件完成
+unmounted in useEffect: 0 // 第一次点击button，首先触发函数组件卸载
+updated in useEffect: 1 // 其次React开始生成一个新的函数组件实例，使得新的函数组件被挂载，状态保持并更新到了1
+unmounted in useEffect: 1 // 第二次点击button，类似于上述逻辑...
+updated in useEffect: 2 // ...
+```
+
+**注意：**
+
+上述例子中函数组件更新的，是由于内部`state`发生变化（点击组件内的`<button>`出发了`state.count`自增导致。
+
+而如果函数组件的`props`发生变化，也会触发函数组件的重新渲染。
 
 > By default, React runs the effects after every render — including the first render.  
 > The Effect Hook, ***useEffect***, adds the ability to perform side effects from a function component. It serves the same purpose as *componentDidMount*, *componentDidUpdate*, and *componentWillUnmount* in React classes, but unified into a single API
