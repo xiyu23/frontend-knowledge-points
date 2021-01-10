@@ -48,6 +48,7 @@
     - [22.1 什么是hooks？](#221-什么是hooks)
     - [22.2 State Hook: `useState`](#222-state-hook-usestate)
     - [22.3 Effect Hook: `useEffect`](#223-effect-hook-useeffect)
+    - [22.4 hooks的规则](#224-hooks的规则)
 
 ## 1. JSX
 
@@ -901,6 +902,33 @@ function Example() {
 }
 ```
 
+给`useState`传入一个初始状态值*initial state*，这里`count`就是我们的状态变量。`setCount`是用于更新它的函数。
+
+如果我们还有状态需要保存，那就再类似地写一次`useState`：
+
+```js
+const [count, setCount] = useState(0);
+const [fruit, setFruit] = useState('apple');
+const [todo, setTodo] = useState(
+  [
+    { name: 'clean room', timeCost: 2, isDone: false },
+    { name: 'exercise', timeCost: 1, isDone: false },
+  ]
+);
+
+function onCleanRoomDone() {
+  // 需要修改todo中的第一项，我们必须整个todo来替换，而不要仅修改一项
+  
+  const cleanRoom = todo[0];
+  cleanRoom.isDone = true;
+  setTodo(todo); // 整个todo替换state，因为useState不能像Class Components中this.setState那样merge。
+}
+```
+
+**`useState`可以在函数组件的多次更新间保留状态。**
+
+> This is a way to “preserve” some values between the function calls
+
 ### 22.3 Effect Hook: `useEffect`
 
 *side effects*, short for ***effects***.
@@ -1019,8 +1047,11 @@ updated in useEffect: 2 // ...
 > By default, React runs the effects after every render — including the first render.  
 > The Effect Hook, ***useEffect***, adds the ability to perform side effects from a function component. It serves the same purpose as *componentDidMount*, *componentDidUpdate*, and *componentWillUnmount* in React classes, but unified into a single API
 
+### 22.4 hooks的规则
 
-
+就两点，
+- 只在*top-level*作用域调用
+- 只在*function component*中调用
 
 
 ===在写React时想到的一些疑问===
