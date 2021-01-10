@@ -1680,15 +1680,92 @@ console.log(res);
 先把这个学会了：
 https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance
 
-## 65. `import`
+## 65. `export`(ES6, ECMA-262)
 
-错误：Uncaught SyntaxError: Cannot use `import` statement outside a module
+### 65.1 Named Exports (Zero or more exports per module)
+
+每个模块可以有0+个导出，如
+
+```js
+const SIZE = 10;
+let count = 0;
+function foo() {
+  console.log('foo');
+}
+
+export { SIZE, count, foo }; // #1
+export const MAX_NUM = 20; // #2
+export let length; // #2
+export function bar() { // #2
+  console.log('bar');
+}
+export class Person { // #2
+  // ...
+}
+export { SIZE as BOTTLE_SIZE, MAX_NUM }; // #3 导入模块(importing module)将会以'BOTTLE_SIZE'来引用导出模块(exporting module，SIZE是谁的谁就是)的'SIZE'
+```
+
+- 导出名称时，需要用`{}`包裹 #1
+- 若想*定义+导出*，直接在定义前加`export`修饰即可 #2
+- 导出名称时，也可以为其指定别名 #3
+
+### 65.2 Default Exports (One per module)
+
+每个模块最多只能有一个*默认导出*，后写的默认导出会覆盖之前写的。
+
+```js
+// a.js
+export { SIZE as default };
+
+export default function foo() {
+  console.log('foo')
+}
+
+export default function() {
+console.log('unnamed function')
+}
+```
+
+```js
+// b.js
+import CAR_SIZE from './a.js' // CAR_SIZE将会是a.js中的默认导出，即SIZE
+```
+
+## 66. `import`(ES6, ECMA-262)
+
+1. 用于导入"从其他模块导出"的东西
+2. 被导入的module是*strict mode*
+3. 
+
+语法：
+
+    import *defaultExport* from 'module-name'
+    import { *export1*, *export2* as *alias2*, ...  } from 'module-name'
+    import * as *name* from 'module-name'
+
+示例：
+
+```js
+import bar from 'b.js'; // 使用b.js的默认导出，并起名为'bar'
+import { SIZE, hello as hi } from 'b.js'; // 使用b.js导出的SIZE，以及hello（但起了别名，本模块中用'hi'代替）
+import * as ModuleB from 'b.js'; // 导入b.js所有的导出，用一个'ModuleB'来限定（相当于ModuleB是一个namespace，如果b.js导出了foo，则需要用Module.foo来引用）
+```
+
+错误：Uncaught SyntaxError: Cannot use import statement outside a module
 
 解决：在`<script>`标签上增加`type=module`，即
 
       <script type='module' src='output/useEffect.js'></script>
 
-> whether you declare them as such or not. The import statement cannot be used in embedded scripts unless such script has a type="module". 
+这是因为浏览器本身并未实现对`import`的支持。
+
+> whether you declare them as such or not. The `import` statement **cannot be used in embedded scripts** unless such script has a type="module". 
+
+错误：Access to script at '*xxx*' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: http, data, chrome, chrome-extension, chrome-untrusted, https.
+
+原因：浏览器不允许本地访问**模块**，虽然页面本身就在localhost上。
+
+解决方法：搭一个本地服务器。用npm装一个`http-server`或者`live-server`。
 
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
