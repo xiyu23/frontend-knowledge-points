@@ -135,3 +135,22 @@ export default Page;
 ```
 
 ref: https://nextjs.org/docs/basic-features/data-fetching
+
+## 2. 导入CSS
+
+css文件必须以`*.module.css`的扩展名命名，导入时固定写的`styles`？
+
+```tsx
+import styles from './Button.module.css'
+
+export function Button() {
+  return (
+    <button
+      type="button"
+      className={styles.error}
+    >
+      Destroy
+    </button>
+  )
+}
+```
