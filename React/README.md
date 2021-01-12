@@ -48,6 +48,8 @@
     - [22.1 什么是hooks？](#221-什么是hooks)
     - [22.2 State Hook: `useState`](#222-state-hook-usestate)
     - [22.3 Effect Hook: `useEffect`](#223-effect-hook-useeffect)
+  - [Q&A](#qa)
+    - [1. `React.FC`是啥？](#1-reactfc是啥)
 
 ## 1. JSX
 
@@ -1018,6 +1020,10 @@ updated in useEffect: 2 // ...
 
 > By default, React runs the effects after every render — including the first render.  
 > The Effect Hook, ***useEffect***, adds the ability to perform side effects from a function component. It serves the same purpose as *componentDidMount*, *componentDidUpdate*, and *componentWillUnmount* in React classes, but unified into a single API
+
+## Q&A
+### 1. `React.FC`是啥？
+typescript中为*React Function Component`定义了类型，即描述React函数组件的类型。
 
 
 
