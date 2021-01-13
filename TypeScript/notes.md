@@ -152,3 +152,55 @@ $ tsc learn.ts --lib es6
 ```
 
 4. 
+
+
+## 14. 定义函数类型
+
+### 14.1 方式一：箭头函数赋给变量
+
+声明形参类型，并通过`=>`声明返回值类型。
+
+```ts
+let myAdd: (x: number, y: number) => number = function (
+  x: number,
+  y: number
+): number {
+  return x + y;
+};
+```
+
+因为已经为`myAdd`声明了形参、返回类型，函数体就不必了，可以简写为：
+```ts
+let myAdd: (x: number, y: number) => number = function (x, y) {
+  return x + y;
+};
+```
+
+### 14.2 方式二：*function*函数赋给变量
+
+```ts
+let myAdd = function (x: number, y: number): number {
+  return x + y;
+};
+```
+
+### 14.3 方式三：定义function
+
+```ts
+function myAdd(x: number, y: number): number {
+  return x + y;
+};
+```
+
+## 15. `type` Aliases
+
+> `Type` aliases create a new name for a type.
+> 
+> Type aliases are sometimes similar to interfaces, but can name primitives, unions, tuples, and any other types that you’d otherwise have to write by hand.
+
+```ts
+type Second = number;
+
+let timeInSecond: number = 10;
+let time: Second = 10;
+```

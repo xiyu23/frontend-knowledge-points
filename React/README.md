@@ -48,8 +48,11 @@
     - [22.1 什么是hooks？](#221-什么是hooks)
     - [22.2 State Hook: `useState`](#222-state-hook-usestate)
     - [22.3 Effect Hook: `useEffect`](#223-effect-hook-useeffect)
+    - [22.4 hooks的规则](#224-hooks的规则)
+    - [22.5 自定义hook](#225-自定义hook)
   - [Q&A](#qa)
     - [1. `React.FC`是啥？](#1-reactfc是啥)
+    - [2. 使用`FC`](#2-使用fc)
 
 ## 1. JSX
 
@@ -905,6 +908,33 @@ function Example() {
 }
 ```
 
+给`useState`传入一个初始状态值*initial state*，这里`count`就是我们的状态变量。`setCount`是用于更新它的函数。
+
+如果我们还有状态需要保存，那就再类似地写一次`useState`：
+
+```js
+const [count, setCount] = useState(0);
+const [fruit, setFruit] = useState('apple');
+const [todo, setTodo] = useState(
+  [
+    { name: 'clean room', timeCost: 2, isDone: false },
+    { name: 'exercise', timeCost: 1, isDone: false },
+  ]
+);
+
+function onCleanRoomDone() {
+  // 需要修改todo中的第一项，我们必须整个todo来替换，而不要仅修改一项
+  
+  const cleanRoom = todo[0];
+  cleanRoom.isDone = true;
+  setTodo(todo); // 整个todo替换state，因为useState不能像Class Components中this.setState那样merge。
+}
+```
+
+**`useState`可以在函数组件的多次更新间保留状态。**
+
+> This is a way to “preserve” some values between the function calls
+
 ### 22.3 Effect Hook: `useEffect`
 
 *side effects*, short for ***effects***.
@@ -916,7 +946,7 @@ function Example() {
 - 传入的函数参数，函数体相当于在`componentDidMount`、`componentDidUpdate`后执行
 - 传入的函数参数返回的函数，将会在`componentUnmount`执行
 
-比如有时你希望每次渲染完成之后，都做一些操作，如修改一下浏览器的`title`。在***function components***中，React提供了`useEffect`以来实现：
+比如有时你希望每次渲染完成之后（`render()`不行，因为这个太早，我们需要**在渲染完成之后**），都做一些操作，如修改一下浏览器的`title`。在***function components***中，React提供了`useEffect`以来实现：
 
 ```jsx
 const { useEffect } = React; // 注意，React得保证导入到scope中
@@ -1023,10 +1053,54 @@ updated in useEffect: 2 // ...
 > By default, React runs the effects after every render — including the first render.  
 > The Effect Hook, ***useEffect***, adds the ability to perform side effects from a function component. It serves the same purpose as *componentDidMount*, *componentDidUpdate*, and *componentWillUnmount* in React classes, but unified into a single API
 
+### 22.4 hooks的规则
+
+就两点，
+- 只在*top-level*作用域调用
+- 只在*function component*中调用
+
+### 22.5 自定义hook
 ## Q&A
 ### 1. `React.FC`是啥？
-typescript中为*React Function Component`定义了类型，即描述React函数组件的类型。
 
+typescript中为*React Function Component*定义了类型，即描述React函数组件的类型。
+
+**FC**（它是*FunctionComponent*的简写)的定义：
+
+```ts
+type FC<P = {}> = FunctionComponent<P>;
+
+interface FunctionComponent<P = {}> {
+    (props: PropsWithChildren<P>, context?: any): ReactElement | null;
+    propTypes?: WeakValidationMap<P>;
+    contextTypes?: ValidationMap<any>;
+    defaultProps?: Partial<P>;
+    displayName?: string;
+}
+```
+
+*FC*是一个泛型接口，它描述了应该具有的字段：
+
+- 一个函数：形参为`props`、以及或有的`context`，返回值为`ReactElement`或`null`
+- 或有字段`propTypes`
+- 或有字段`contextTypes`
+- 或有字段`defaultProps`
+- 或有字段`displayName`
+
+### 2. 使用`FC`
+
+```tsx
+import React, { FC } from "react";
+
+type GreetingProps = {
+  name: string;
+}
+
+const Greeting:FC<GreetingProps> = ({ name }) => {
+  // name is string!
+  return <h1>Hello {name}</h1>
+};
+```
 
 
 
