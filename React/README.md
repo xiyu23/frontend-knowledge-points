@@ -611,6 +611,8 @@ bar() {
   - Bind methods in the constructor
   - Use arrow functions, e.g. `onClick={(e) => this.handleClick(e)}`
 
+6.1 子组件中触发了一个事件，怎么抛给父组件，让父组件处理具体的业务逻辑？
+
 ## 7. 条件渲染(Conditional Rendering)
 在`{}`中可以书写条件表达式，
 
