@@ -1736,7 +1736,7 @@ import CAR_SIZE from './a.js' // CAR_SIZE将会是a.js中的默认导出，即SI
 1. 用于导入"从其他模块导出"的东西
 2. 被导入的module是*strict mode*
 
-语法：
+### 66.1 语法：
 
     import *defaultExport* from 'module-name'
     import { *export1*, *export2* as *alias2*, ...  } from 'module-name'
@@ -1756,14 +1756,20 @@ import * as ModuleB from 'b.js'; // 导入b.js所有的导出，用一个'Module
 
 则也会包含*default export*的，可以通过`name.default`来引用默认导出。
 
+### 66.2 原理：`import`是怎么导入的？
+
+
+
+### 66.3
+
 遇到的问题：
-1. 错误：Uncaught SyntaxError: Cannot use import statement outside a module
+1. 错误：Uncaught SyntaxError: Cannot use `import` statement outside a **module**
+
+原因：因为在你引用的这个js文件中，使用了`import`语句，而`import`语句必须在一个**module**中使用。(这是因为浏览器本身并未实现对`import`的支持。)
 
 解决：在`<script>`标签上增加`type=module`，即
 
       <script type='module' src='output/useEffect.js'></script>
-
-这是因为浏览器本身并未实现对`import`的支持。
 
 > whether you declare them as such or not. The `import` statement **cannot be used in embedded scripts** unless such script has a type="module". 
 
@@ -1771,7 +1777,7 @@ import * as ModuleB from 'b.js'; // 导入b.js所有的导出，用一个'Module
 
 原因：浏览器不允许本地访问**模块**，虽然页面本身就在localhost上。
 
-解决方法：搭一个本地服务器。用npm装一个`http-server`或者`live-server`。
+1. 解决方法一：搭一个本地服务器。用npm装一个`http-server`或者`live-server`。
 
 安装`live-server`：
 
@@ -1782,6 +1788,8 @@ cd到工程目录下，启动server：
     $ live-server
 
 server会监听当前目录下所有文件的变化并re-load。
+
+2. 解决方法二：webpack打包
 
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---

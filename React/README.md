@@ -1065,7 +1065,7 @@ updated in useEffect: 2 // ...
 
 typescript中为*React Function Component*定义了类型，即描述React函数组件的类型。
 
-**FC**（它是*FunctionComponent*的简写)的定义：
+**FC**（它是*FunctionComponent*的简写)是一个*泛型接口*：
 
 ```ts
 type FC<P = {}> = FunctionComponent<P>;
@@ -1079,13 +1079,21 @@ interface FunctionComponent<P = {}> {
 }
 ```
 
-*FC*是一个泛型接口，它描述了应该具有的字段：
+它描述了应该具有的字段：
 
 - 一个函数：形参为`props`、以及或有的`context`，返回值为`ReactElement`或`null`
 - 或有字段`propTypes`
 - 或有字段`contextTypes`
 - 或有字段`defaultProps`
 - 或有字段`displayName`
+
+其中修饰`props`的类型`PropsWithChildren<P>`定义为：
+
+```ts
+type PropsWithChildren<P> = P & { children?: ReactNode };
+```
+
+上面的`PropsWithChildren<P>`表示，这个类型修饰的变量，除了包含`P`所定义的接口，还需要包含`{ children?: ReactNode }`定义的成员（不过这里`children`是*optional*属性，故意味着不要求一定有）。
 
 ### 2. 使用`FC`
 
