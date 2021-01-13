@@ -49,14 +49,10 @@
     - [22.2 State Hook: `useState`](#222-state-hook-usestate)
     - [22.3 Effect Hook: `useEffect`](#223-effect-hook-useeffect)
     - [22.4 hooks的规则](#224-hooks的规则)
+    - [22.5 自定义hook](#225-自定义hook)
   - [Q&A](#qa)
     - [1. `React.FC`是啥？](#1-reactfc是啥)
-<<<<<<< HEAD
-    - [22.4 hooks的规则](#224-hooks的规则)
-=======
-  - [Q&A](#qa)
-    - [1. `React.FC`是啥？](#1-reactfc是啥)
->>>>>>> origin/learn/nextjs
+    - [2. 使用`FC`](#2-使用fc)
 
 ## 1. JSX
 
@@ -948,7 +944,7 @@ function onCleanRoomDone() {
 - 传入的函数参数，函数体相当于在`componentDidMount`、`componentDidUpdate`后执行
 - 传入的函数参数返回的函数，将会在`componentUnmount`执行
 
-比如有时你希望每次渲染完成之后，都做一些操作，如修改一下浏览器的`title`。在***function components***中，React提供了`useEffect`以来实现：
+比如有时你希望每次渲染完成之后（`render()`不行，因为这个太早，我们需要**在渲染完成之后**），都做一些操作，如修改一下浏览器的`title`。在***function components***中，React提供了`useEffect`以来实现：
 
 ```jsx
 const { useEffect } = React; // 注意，React得保证导入到scope中
@@ -1056,14 +1052,55 @@ updated in useEffect: 2 // ...
 > The Effect Hook, ***useEffect***, adds the ability to perform side effects from a function component. It serves the same purpose as *componentDidMount*, *componentDidUpdate*, and *componentWillUnmount* in React classes, but unified into a single API
 
 ### 22.4 hooks的规则
-## Q&A
-### 1. `React.FC`是啥？
-typescript中为*React Function Component`定义了类型，即描述React函数组件的类型。
-
 
 就两点，
 - 只在*top-level*作用域调用
 - 只在*function component*中调用
+
+### 22.5 自定义hook
+## Q&A
+### 1. `React.FC`是啥？
+
+typescript中为*React Function Component*定义了类型，即描述React函数组件的类型。
+
+**FC**（它是*FunctionComponent*的简写)的定义：
+
+```ts
+type FC<P = {}> = FunctionComponent<P>;
+
+interface FunctionComponent<P = {}> {
+    (props: PropsWithChildren<P>, context?: any): ReactElement | null;
+    propTypes?: WeakValidationMap<P>;
+    contextTypes?: ValidationMap<any>;
+    defaultProps?: Partial<P>;
+    displayName?: string;
+}
+```
+
+*FC*是一个泛型接口，它描述了应该具有的字段：
+
+- 一个函数：形参为`props`、以及或有的`context`，返回值为`ReactElement`或`null`
+- 或有字段`propTypes`
+- 或有字段`contextTypes`
+- 或有字段`defaultProps`
+- 或有字段`displayName`
+
+### 2. 使用`FC`
+
+```tsx
+import React, { FC } from "react";
+
+type GreetingProps = {
+  name: string;
+}
+
+const Greeting:FC<GreetingProps> = ({ name }) => {
+  // name is string!
+  return <h1>Hello {name}</h1>
+};
+```
+
+
 
 
 ===在写React时想到的一些疑问===
