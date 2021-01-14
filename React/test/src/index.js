@@ -1,11 +1,13 @@
-import SwiperCore, { Navigation, Pagination, Scrollbar, A11y } from '../node_modules/swiper/swiper';
-import { Swiper, SwiperSlide } from '../node_modules/swiper/react';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import SwiperCore, { Navigation, Pagination, Scrollbar, A11y } from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 // // Import Swiper styles
-import '../node_modules/swiper/swiper.scss';
-import '../node_modules/swiper/components/navigation/navigation.scss';
-import '../node_modules/swiper/components/pagination/pagination.scss';
-import '../node_modules/swiper/components/scrollbar/scrollbar.scss';
+import 'swiper/swiper.scss';
+import 'swiper/components/navigation/navigation.scss';
+import 'swiper/components/pagination/pagination.scss';
+import 'swiper/components/scrollbar/scrollbar.scss';
 
 // install Swiper components
 SwiperCore.use([Navigation, Pagination, Scrollbar, A11y]);
@@ -45,3 +47,6 @@ function MeetingIdeaGuide() {
 var App = function App(props) {
   return React.createElement(MeetingIdeaGuide, null);
 };
+
+var domContainer = document.querySelector('#root');
+ReactDOM.render(React.createElement(MeetingIdeaGuide, null), domContainer);

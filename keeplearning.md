@@ -1791,6 +1791,84 @@ server会监听当前目录下所有文件的变化并re-load。
 
 2. 解决方法二：webpack打包
 
+#### webpack
+
+##### 遇到的问题：
+
+###### 1. `loaders`
+
+报错信息：
+```
+ERROR in ./node_modules/swiper/components/navigation/navigation.scss 1:0
+Module parse failed: Unexpected character '@' (1:0)
+You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders
+> @import '../../swiper-vars.scss';
+|
+| :root {
+ @ ./src/index.js 8:0-54
+ ```
+
+分析：
+
+webpack只能处理`.js`和`.json`，对于其它类型的文件如写React JSX的`.jsx`、TypeScript文件`.ts`、CSS语法糖`.scss`和`.sass`等，都需要对应的*loader*来处理。
+
+因此，**你需要`loaders`来处理这些类型的文件**。
+
+> Out of the box, **webpack only understands `JavaScript` and `JSON` files**. Loaders allow webpack to process other types of files and convert them into valid modules that can be consumed by your application and added to the dependency graph.
+
+ref: https://webpack.js.org/concepts/#loaders
+
+loader怎么用呢？
+
+在**webpack.config.js**中进行如下配置：
+
+```js
+const path = require('path');
+
+module.exports = {
+  output: {
+    filename: 'my-first-webpack.bundle.js'
+  },
+  module: {
+    rules: [
+      { test: /\.txt$/, use: 'raw-loader' }, // This is the loader!
+      {
+        test: /\.(js|mjs|jsx|ts|tsx)$/,
+        enforce: 'pre',
+        use: [
+          {
+            options: {
+              formatter: require.resolve('react-dev-utils/eslintFormatter'),
+              eslintPath: require.resolve('eslint'),
+              emitWarning: true, // remove this line after we fix all existing problems
+            },
+            loader: require.resolve('eslint-loader'),
+          },
+        ],
+        include: paths.appSrc,
+      },
+    ]
+  }
+};
+```
+
+这个配置意为当webpack遇到`require(xxx.txt)`、`import(xxx.txt)`语句时，先用*raw-loader*进行转换，再打包到最终的*bundle*里。
+
+*loader*有2个属性，
+
+- `test`：用于标识哪些文件需要被转换
+- `use`: 用哪个*loader*来转换`test`标识的文件
+
+如何解决：
+
+1. 先安装必要的*loader*，这里应该缺少`sass-loader`、`scss-loader`，不过只需要安装***sass-loader***即可，这两种它都能转换：
+
+    $ npm install --save-dev sass-loader sass
+
+2. 再次运行webpack进行打包
+
+    $ webpack
+
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
