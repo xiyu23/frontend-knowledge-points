@@ -1793,6 +1793,15 @@ server会监听当前目录下所有文件的变化并re-load。
 
 #### webpack
 
+**webpack**打包工具，它将`import`、`export`转换后再进行打包，并**不会**修改除此之外的代码。
+
+而那些语法糖式的文件类型，将使用`loaders`来预处理，因为webpack只认识`.js`、`.json`。
+
+> With that said, let's run `npx webpack`, which will take our script at `src/index.js` as the entry point, and will generate `dist/main.js` as the output.
+> 
+> Note that ***webpack will not alter any code other than `import` and `export` statements***. If you are using other ES2015 features, make sure to use a transpiler such as Babel or Bublé via webpack's loader system.
+
+
 ##### 遇到的问题：
 
 ###### 1. `loaders`
@@ -1869,6 +1878,31 @@ module.exports = {
 
     $ webpack
 
+###### 2. `npm i`错误：Refusing to delete
+    $ npm i
+    npm ERR! path C:\Users\xiyu\Desktop\study\frontend-knowledge-points\React\test\node_modules\v8flags\node_modules\.bin\user-home.cmd
+    npm ERR! code EEXIST
+    npm ERR! Refusing to delete C:\Users\xiyu\Desktop\study\frontend-knowledge-points\React\test\node_modules\v8flags\node_modules\.bin\user-home.cmd: is outside C:\Users\xiyu\Desktop\study\frontend-knowledge-points\React\test\node_modules\v8flags\node_modules\user-home and not a link
+    npm ERR! File exists: C:\Users\xiyu\Desktop\study\frontend-knowledge-points\React\test\node_modules\v8flags\node_modules\.bin\user-home.cmd
+    npm ERR! Move it away, and try again.
+
+    npm ERR! A complete log of this run can be found in:
+    npm ERR!     C:\Users\xiyu\AppData\Roaming\npm-cache\_logs\2021-01-14T05_08_57_129Z-debug.log
+
+解决方案：
+1. Delete the node_modules directory completely.
+2. Run npm install again.
+
+###### 3. webpack打包时：SyntaxError: Unexpected reserved word
+
+![Unexpected reserved word](Pics/keeplearning/webpack打包错误-reserved-word.PNG)
+
+解决：
+更新node，node v8 --> node v10 就OK了。
+
+    前往(https://nodejs.org/en/download/)下载
+
+![已解决](Pics/keeplearning/已解决-webpack打包错误-reserved-word.PNG)
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
