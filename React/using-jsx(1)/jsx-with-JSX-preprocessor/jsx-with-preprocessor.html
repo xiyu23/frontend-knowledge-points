@@ -10,6 +10,7 @@
   </head>
 
   <body>
+    <div id='root-useState'></div>
     <div id='root-useEffect'></div>
 
     <div id='root-clock'></div>
@@ -29,8 +30,14 @@
     <script src='output/hello.js'></script>
     <script src='output/clock.js'></script>
     <script src='output/useEffect.js'></script>
+    <script src='output/useState.js'></script>
+    
 
     <script type='text/babel'>
+      const domContainer2 = document.querySelector('#root-useState');
+      ReactDOM.render(<HelloEveryone names={['yuhui', 'kabhan', 'xiaohan', 'yunhui']} />, domContainer2);
+  
+
       const domContainer1 = document.querySelector('#root-useEffect');
       ReactDOM.render(<Counter />, domContainer1);
 
