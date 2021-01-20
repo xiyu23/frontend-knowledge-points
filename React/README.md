@@ -36,6 +36,9 @@
       - [6.3.2 方法二：一种实验性(*experimental*)的语法](#632-方法二一种实验性experimental的语法)
       - [6.3.3 方法三：箭头函数](#633-方法三箭头函数)
   - [7. 条件渲染(Conditional Rendering)](#7-条件渲染conditional-rendering)
+    - [7.1 方法一：`if-else`判断，返回不同的`JSX`](#71-方法一if-else判断返回不同的jsx)
+    - [7.2 方法二：直接内联式地写在`JSX`中](#72-方法二直接内联式地写在jsx中)
+    - [7.3 特殊：我不想渲染某个组件该怎么做？](#73-特殊我不想渲染某个组件该怎么做)
   - [8. Lists and Keys](#8-lists-and-keys)
     - [8.1 原理](#81-原理)
     - [8.2 但是为什么不建议用index呢？](#82-但是为什么不建议用index呢)
@@ -737,17 +740,66 @@ class LoggingButton extends React.Component {
 6.1 子组件中触发了一个事件，怎么抛给父组件，让父组件处理具体的业务逻辑？
 
 ## 7. 条件渲染(Conditional Rendering)
-在`{}`中可以书写条件表达式，
 
-    true && expr
-    
-    // 结果是：
-    expr // expr为真
-    false // expr为假
-    
+我想要当`isLoggedIn`为`true`时渲染`<Logout />`，当为`false`时渲染`<Login />`，就要用到条件渲染。
+
+### 7.1 方法一：`if-else`判断，返回不同的`JSX`
+
+```jsx
+// 在类组件的render方法中：
+render() {
+  if (isLoggedIn) {
+    return <Logout />;
+  } else {
+    return <Login />
+  }
+}
+```
+
+### 7.2 方法二：直接内联式地写在`JSX`中
+
+需要用`{}`包裹条件表达式：
+
+```jsx
+render() {
+  return (
+    { isBirthday && <HappyBirthday /> }
+    { isWeekend ? <HappyWeekend /> : <HardWorking /> }
+  );
+}
+```
+
+以上仅当`isBirthday`为`true`时，才会渲染`<HappyBirthday />`；为`false`时React直接跳过这句表达式。
+
+因为在js中，
+```js
+    true && expr // => expr    
+    false && expr // => false
+```
 如果为真，则react输出`expr`；否则react忽略并跳过该表达式。
 
-有时想隐藏一个组件B，但它可能在其它组件A中被渲染出来，则可以让组件B `return null`来跳过渲染。**注意不是从render中return**（这样的话react组件生命周期仍然会触发的）。
+### 7.3 特殊：我不想渲染某个组件该怎么做？
+
+A组件用到了一个子组件B，我需要控制B的显隐。
+
+可以用上面的**条件渲染**来做，另一种方法也可以让组件B根据情况，**在本应该return一个render output的地方**`return null`来跳过渲染。
+
+```jsx
+// function component B
+function ComponentB(props) {
+  if (!props.isShow) {
+    return null; // 在这里return null
+  }
+}
+
+// (function/class)component A
+showB = false;
+return (
+  <ComponentB isShow={showB}/> // 如果showB为false，则这里不会被渲染
+);
+```
+
+**注意：函数组件直接return null，而类组件是没办法的哦。因为它的类组件生命周期仍然会触发的）**。
 
 ## 8. Lists and Keys
 
