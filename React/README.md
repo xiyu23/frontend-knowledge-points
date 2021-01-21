@@ -57,6 +57,7 @@
     - [22.1 什么是hooks？](#221-什么是hooks)
     - [22.2 State Hook: `useState`](#222-state-hook-usestate)
     - [22.3 Effect Hook: `useEffect`](#223-effect-hook-useeffect)
+      - [22.3.1 在函数组件中，我只想在**初始渲染**之后做一件事，并不想每次更新后都执行呢？](#2231-在函数组件中我只想在初始渲染之后做一件事并不想每次更新后都执行呢)
     - [22.4 hooks的规则](#224-hooks的规则)
     - [22.5 自定义hook](#225-自定义hook)
   - [Q&A](#qa)
@@ -1224,6 +1225,41 @@ updated in useEffect: 2 // ...
 
 > By default, React runs the effects after every render — including the first render.  
 > The Effect Hook, ***useEffect***, adds the ability to perform side effects from a function component. It serves the same purpose as *componentDidMount*, *componentDidUpdate*, and *componentWillUnmount* in React classes, but unified into a single API
+
+#### 22.3.1 在函数组件中，我只想在**初始渲染**之后做一件事，并不想每次更新后都执行呢？
+
+```tsx
+// 标准方法
+useEffect(() => {
+  // only run once
+}, []);
+
+// 语义化的写法
+const useMountEffect = (func) => useEffect(func, []);
+useMountEffect(() => {
+  // only run once
+});
+```
+
+为什么呢？
+
+`useEffect`在**第一次渲染**后会执行callback，并且在每次更新DOM后也会执行callback。
+
+但是如果给`useEffect`提供了第二个参数，React除了第一次渲染后调用callback，也会在数组中任意一个元素发生改变时调用callback。
+
+那么给一个空数组，就表示没变化，所以只会在第一次渲染后调用。
+
+> useEffect runs by default after every render of the component (thus causing an effect).
+> 
+> When placing useEffect in your component you tell React you want to run the callback as an effect. React will run the effect after rendering and after performing the DOM updates.
+> 
+> If you pass only a callback - the callback will run after each render.
+> 
+> If passing a second argument (array), React will run the callback after the first render and every time one of the elements in the array is changed. for example when placing   
+> `useEffect(() => console.log('hello'), [someVar, someOtherVar])`  
+> the callback will run after the first render and after any render that one of someVar or someOtherVar are changed.
+> 
+> By passing the second argument an empty array, React will compare after each render the array and will see nothing was changed, thus calling the callback only after the first render.
 
 ### 22.4 hooks的规则
 

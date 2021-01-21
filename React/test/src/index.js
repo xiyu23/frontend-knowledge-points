@@ -21,7 +21,12 @@ function MeetingIdeaGuide() {
     return React.createElement(
       SwiperSlide,
       { key: i },
-      React.createElement('img', { src: path })
+      React.createElement(
+        'div',
+        null,
+        'SLIDE ',
+        i
+      )
     );
   });
 
@@ -31,9 +36,8 @@ function MeetingIdeaGuide() {
       spaceBetween: 50,
       slidesPerView: 1,
       navigation: true,
-      pagination: { clickable: true }
-      // scrollbar={{ draggable: true }}
-      , onSwiper: function onSwiper(swiper) {
+      pagination: { clickable: true },
+      onSwiper: function onSwiper(swiper) {
         return console.log(swiper);
       },
       onSlideChange: function onSlideChange() {

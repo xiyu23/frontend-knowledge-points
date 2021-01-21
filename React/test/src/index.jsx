@@ -26,7 +26,9 @@ function MeetingIdeaGuide() {
 
   const SwiperSlides = imgPaths.map((path, i) => (
       <SwiperSlide key={i}>
-        <img src={path} />
+        <div>
+          <img src={path}></img>
+        </div>
       </SwiperSlide>
   ));
 
@@ -36,7 +38,6 @@ function MeetingIdeaGuide() {
       slidesPerView={1}
       navigation
       pagination={{ clickable: true }}
-      // scrollbar={{ draggable: true }}
       onSwiper={swiper => console.log(swiper)}
       onSlideChange={() => console.log('slide change')}
     >
