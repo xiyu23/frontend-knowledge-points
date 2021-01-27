@@ -1,0 +1,56 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div contenteditable="true">123456</div>
+    <button id='btnSave'>save selection</button>
+    <button id='btnApply'>apply selection</button>
+    <button id='btnGet'>get range</button>
+    
+    <script type='text/javascript'>
+        var savedRanges = [];
+
+        function saveRanges() {
+            var sel = window.getSelection();
+            var rn = sel.rangeCount;
+            savedRanges = [];
+            for (let i = 0; i < rn; i++) {
+                savedRanges.push(sel.getRangeAt(i));
+            }
+            console.log(`${rn} ranges saved`);
+        }
+
+        function applyRanges() {
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            var rn = savedRanges.length;
+            for (let i = 0; i < rn; i++) {
+                sel.addRange(savedRanges[i]);
+            }
+            console.log(`${rn} ranges applied`);
+        }
+
+        function getRange() {
+            var s = window.getSelection();
+            var r =s.getRangeAt(0)
+            console.log(r);
+        }
+
+        var btnSave = document.getElementById('btnSave');
+        var btnApply = document.getElementById('btnApply');
+        var btnGet = document.getElementById('btnGet');
+        btnSave.addEventListener('click', function(e) {
+            saveRanges();
+        });
+        btnApply.addEventListener('click', function(e) {
+            applyRanges();
+        });
+        btnGet.addEventListener('click', function(e) {
+            getRange();
+        });
+    </script>
+</body>
+</html>
