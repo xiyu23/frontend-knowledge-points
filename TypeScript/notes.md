@@ -204,3 +204,43 @@ type Second = number;
 let timeInSecond: number = 10;
 let time: Second = 10;
 ```
+
+## 16. `Intersection Types`
+
+把多个类型整合成一个，被此类型声明的变量，将拥有所有这些类型的成员。
+
+> An intersection type combines multiple types into one.
+>
+> That means an object of this type will have all members of all combined types.
+
+e.g
+```ts
+interface ErrorHandling {
+  success: boolean;
+  error?: { message: string };
+}
+
+interface ArtworksData {
+  artworks: { title: string }[];
+}
+
+interface ArtistsData {
+  artists: { name: string }[];
+}
+
+// These interfaces are composed to have
+// consistent error handling, and their own data.
+
+type ArtworksResponse = ArtworksData & ErrorHandling;
+type ArtistsResponse = ArtistsData & ErrorHandling;
+
+const handleArtistsResponse = (response: ArtistsResponse) => {
+  if (response.error) {
+    console.error(response.error.message);
+    return;
+  }
+
+  console.log(response.artists);
+};
+```
+

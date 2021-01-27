@@ -29,7 +29,16 @@
       - [5.2.4 关键的更新操作：`setState`](#524-关键的更新操作setstate)
     - [5.3 关于`state`的注意点](#53-关于state的注意点)
   - [6. Handling Events](#6-handling-events)
+    - [6.1 定义一个事件](#61-定义一个事件)
+    - [6.2 在事件处理函数中，阻止默认行为](#62-在事件处理函数中阻止默认行为)
+    - [6.3 注意`this`的绑定](#63-注意this的绑定)
+      - [6.3.1 方法一：在构造函数中`bind`](#631-方法一在构造函数中bind)
+      - [6.3.2 方法二：一种实验性(*experimental*)的语法](#632-方法二一种实验性experimental的语法)
+      - [6.3.3 方法三：箭头函数](#633-方法三箭头函数)
   - [7. 条件渲染(Conditional Rendering)](#7-条件渲染conditional-rendering)
+    - [7.1 方法一：`if-else`判断，返回不同的`JSX`](#71-方法一if-else判断返回不同的jsx)
+    - [7.2 方法二：直接内联式地写在`JSX`中](#72-方法二直接内联式地写在jsx中)
+    - [7.3 特殊：我不想渲染某个组件该怎么做？](#73-特殊我不想渲染某个组件该怎么做)
   - [8. Lists and Keys](#8-lists-and-keys)
     - [8.1 原理](#81-原理)
     - [8.2 但是为什么不建议用index呢？](#82-但是为什么不建议用index呢)
@@ -48,11 +57,13 @@
     - [22.1 什么是hooks？](#221-什么是hooks)
     - [22.2 State Hook: `useState`](#222-state-hook-usestate)
     - [22.3 Effect Hook: `useEffect`](#223-effect-hook-useeffect)
+      - [22.3.1 在函数组件中，我只想在**初始渲染**之后做一件事，并不想每次更新后都执行呢？](#2231-在函数组件中我只想在初始渲染之后做一件事并不想每次更新后都执行呢)
     - [22.4 hooks的规则](#224-hooks的规则)
     - [22.5 自定义hook](#225-自定义hook)
   - [Q&A](#qa)
-    - [1. `React.FC`是啥？](#1-reactfc是啥)
+    - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
     - [2. 使用`FC`](#2-使用fc)
+    - [3. *function component*中`useState`原理](#3-function-component中usestate原理)
 
 ## 1. JSX
 
@@ -599,33 +610,197 @@ bar() {
 ```
 
 ## 6. Handling Events
-- react事件使用*camelCase*命名(e.g `onClick`)
 
-  ```html
-  <button onClick={YourFunctionHandlerName}>
-  ```
-- 在*Class*中渲染的组件中写事件时，**注意this的绑定**。建议在*ctor*中`bind`，或者
+### 6.1 定义一个事件
+react事件使用*camelCase*命名(e.g `onClick`)
 
-  ```js
-  onClick={this.HandlerFunc.bind(this, arg1, arg2...)}`
-  ```
+```jsx
+function clickHandler1(e) {
+  // e就是Event
+}
 
-  两种方式：
-  - Bind methods in the constructor
-  - Use arrow functions, e.g. `onClick={(e) => this.handleClick(e)}`
+function clickHandler2(e) {
+  // e就是Event
+}
+
+function clickHandler3(e, item) {
+  // e就是Event
+}
+
+// 多种写法
+<button onClick={clickHandler1} />
+<button onClick={(e) => clickHandler2(e)}>
+<button data={item} onClick={(e) => clickHandler3(e, item)}>
+```
+
+### 6.2 在事件处理函数中，阻止默认行为
+在HTML中：
+
+```html
+<a href='#' onclick="console.log('clicked, but wont follow'); return false">
+```
+
+在React中必须调用`e.preventDefault()`：
+
+```jsx
+function handleClick(e) {
+  e.preventDefault();
+}
+
+<a href='#' onClick={handleClick}>
+```
+
+### 6.3 注意`this`的绑定
+
+#### 6.3.1 方法一：在构造函数中`bind`
+
+```jsx
+class LoggingButton extends React.Component {
+  text = 'hello';
+  constructor() {
+    this.handleClick.bind(this); // 用bind绑定，那么以后执行handleClick函数时，this就固定指向了当前类实例
+  }
+  handleClick() {
+    console.log('this is:', this.text);
+  }
+
+  render() {
+    return (
+      <button onClick={this.handleClick}>Click me</button> // 已经是bind过了的函数
+    );
+  }
+}
+```
+
+当然也可以在`jsx`直接`bind`：
+```jsx
+  onClick={this.HandlerFunc.bind(this, arg1, arg2...)}
+```
+
+#### 6.3.2 方法二：一种实验性(*experimental*)的语法
+
+```jsx
+class LoggingButton extends React.Component {
+  text = 'hello'; // 成员变量
+  handleClick = () => { // 绑定了this的成员函数
+    console.log('this is:', this.text); // this已绑定为当前类实例
+  }
+
+  render() {
+    return (
+      <button onClick={this.handleClick}>Click me</button>
+    );
+  }
+}
+```
+
+https://babeljs.io/docs/en/babel-plugin-proposal-class-properties
+
+语法：
+```js
+class Bork {
+  //Property initializer syntax
+  instanceProperty = "bork";
+  boundFunction = () => {
+    return this.instanceProperty; // 这里的this就已经绑定为类实例了
+  };
+
+  //Static class properties
+  static staticProperty = "babelIsCool";
+  static staticFunction = function() {
+    return Bork.staticProperty;
+  };
+}
+```
+
+#### 6.3.3 方法三：箭头函数
+
+注意！箭头函数带来一个问题是，每当这个组件被渲染时，都会创建一个新的回调函数。
+
+虽然这个回调函数做的事情都一样，但是每每创建的函数，其**并不相等**。
+
+大多数情况都OK，不过呢，如果这个函数会通过`props`传给孩子节点，那么每当本组件渲染，都会触发孩子节点去渲染（因为新建了回调函数呀，相当于给孩子节点的`props`改变了，所以触发孩子也重新渲染），性能不利。
+
+```jsx
+class LoggingButton extends React.Component {
+  text = 'hello';
+  handleClick() {
+    console.log('this is:', this.text);
+  }
+
+  render() {
+    return (
+      <button onClick={() => this.handleClick()}>
+        Click me
+      </button>
+    );
+  }
+}
+```
+
+6.1 子组件中触发了一个事件，怎么抛给父组件，让父组件处理具体的业务逻辑？
 
 ## 7. 条件渲染(Conditional Rendering)
-在`{}`中可以书写条件表达式，
 
-    true && expr
-    
-    // 结果是：
-    expr // expr为真
-    false // expr为假
-    
+我想要当`isLoggedIn`为`true`时渲染`<Logout />`，当为`false`时渲染`<Login />`，就要用到条件渲染。
+
+### 7.1 方法一：`if-else`判断，返回不同的`JSX`
+
+```jsx
+// 在类组件的render方法中：
+render() {
+  if (isLoggedIn) {
+    return <Logout />;
+  } else {
+    return <Login />
+  }
+}
+```
+
+### 7.2 方法二：直接内联式地写在`JSX`中
+
+需要用`{}`包裹条件表达式：
+
+```jsx
+render() {
+  return (
+    { isBirthday && <HappyBirthday /> }
+    { isWeekend ? <HappyWeekend /> : <HardWorking /> }
+  );
+}
+```
+
+以上仅当`isBirthday`为`true`时，才会渲染`<HappyBirthday />`；为`false`时React直接跳过这句表达式。
+
+因为在js中，
+```js
+    true && expr // => expr    
+    false && expr // => false
+```
 如果为真，则react输出`expr`；否则react忽略并跳过该表达式。
 
-有时想隐藏一个组件B，但它可能在其它组件A中被渲染出来，则可以让组件B `return null`来跳过渲染。**注意不是从render中return**（这样的话react组件生命周期仍然会触发的）。
+### 7.3 特殊：我不想渲染某个组件该怎么做？
+
+A组件用到了一个子组件B，我需要控制B的显隐。
+
+可以用上面的**条件渲染**来做，另一种方法也可以让组件B根据情况，**在本应该return一个render output的地方**`return null`来跳过渲染。
+
+```jsx
+// function component B
+function ComponentB(props) {
+  if (!props.isShow) {
+    return null; // 在这里return null
+  }
+}
+
+// (function/class)component A
+showB = false;
+return (
+  <ComponentB isShow={showB}/> // 如果showB为false，则这里不会被渲染
+);
+```
+
+**注意：函数组件直接return null，而类组件是没办法的哦。因为它的类组件生命周期仍然会触发的）**。
 
 ## 8. Lists and Keys
 
@@ -1051,6 +1226,41 @@ updated in useEffect: 2 // ...
 > By default, React runs the effects after every render — including the first render.  
 > The Effect Hook, ***useEffect***, adds the ability to perform side effects from a function component. It serves the same purpose as *componentDidMount*, *componentDidUpdate*, and *componentWillUnmount* in React classes, but unified into a single API
 
+#### 22.3.1 在函数组件中，我只想在**初始渲染**之后做一件事，并不想每次更新后都执行呢？
+
+```tsx
+// 标准方法
+useEffect(() => {
+  // only run once
+}, []);
+
+// 语义化的写法
+const useMountEffect = (func) => useEffect(func, []);
+useMountEffect(() => {
+  // only run once
+});
+```
+
+为什么呢？
+
+`useEffect`在**第一次渲染**后会执行callback，并且在每次更新DOM后也会执行callback。
+
+但是如果给`useEffect`提供了第二个参数，React除了第一次渲染后调用callback，也会在数组中任意一个元素发生改变时调用callback。
+
+那么给一个空数组，就表示没变化，所以只会在第一次渲染后调用。
+
+> useEffect runs by default after every render of the component (thus causing an effect).
+> 
+> When placing useEffect in your component you tell React you want to run the callback as an effect. React will run the effect after rendering and after performing the DOM updates.
+> 
+> If you pass only a callback - the callback will run after each render.
+> 
+> If passing a second argument (array), React will run the callback after the first render and every time one of the elements in the array is changed. for example when placing   
+> `useEffect(() => console.log('hello'), [someVar, someOtherVar])`  
+> the callback will run after the first render and after any render that one of someVar or someOtherVar are changed.
+> 
+> By passing the second argument an empty array, React will compare after each render the array and will see nothing was changed, thus calling the callback only after the first render.
+
 ### 22.4 hooks的规则
 
 就两点，
@@ -1059,11 +1269,11 @@ updated in useEffect: 2 // ...
 
 ### 22.5 自定义hook
 ## Q&A
-### 1. `React.FC`是啥？
+### 1. ts中的`React.FC`是啥？
 
 typescript中为*React Function Component*定义了类型，即描述React函数组件的类型。
 
-**FC**（它是*FunctionComponent*的简写)的定义：
+**FC**（它是*FunctionComponent*的简写)是一个*泛型接口*：
 
 ```ts
 type FC<P = {}> = FunctionComponent<P>;
@@ -1077,13 +1287,21 @@ interface FunctionComponent<P = {}> {
 }
 ```
 
-*FC*是一个泛型接口，它描述了应该具有的字段：
+它描述了应该具有的字段：
 
 - 一个函数：形参为`props`、以及或有的`context`，返回值为`ReactElement`或`null`
 - 或有字段`propTypes`
 - 或有字段`contextTypes`
 - 或有字段`defaultProps`
 - 或有字段`displayName`
+
+其中修饰`props`的类型`PropsWithChildren<P>`定义为：
+
+```ts
+type PropsWithChildren<P> = P & { children?: ReactNode };
+```
+
+上面的`PropsWithChildren<P>`表示，这个类型修饰的变量，除了包含`P`所定义的接口，还需要包含`{ children?: ReactNode }`定义的成员（不过这里`children`是*optional*属性，故意味着不要求一定有）。
 
 ### 2. 使用`FC`
 
@@ -1100,7 +1318,27 @@ const Greeting:FC<GreetingProps> = ({ name }) => {
 };
 ```
 
+### 3. *function component*中`useState`原理
 
+```jsx
+function Hello(props) {
+  const [names, setNames] = useState(props.names);
+
+  // something happened
+  function foo() {
+    names.pop(); // remove the last one
+    
+    // won't work
+    setNames(names);
+
+    // works, but why?
+    setNames([...names]);
+  }
+
+  const welcomeAll = props.names.map(name => <h1>{name}</h1>);
+  return welcomeAll;
+}
+```
 
 
 ===在写React时想到的一些疑问===

@@ -1736,7 +1736,7 @@ import CAR_SIZE from './a.js' // CAR_SIZE将会是a.js中的默认导出，即SI
 1. 用于导入"从其他模块导出"的东西
 2. 被导入的module是*strict mode*
 
-语法：
+### 66.1 语法：
 
     import *defaultExport* from 'module-name'
     import { *export1*, *export2* as *alias2*, ...  } from 'module-name'
@@ -1756,14 +1756,20 @@ import * as ModuleB from 'b.js'; // 导入b.js所有的导出，用一个'Module
 
 则也会包含*default export*的，可以通过`name.default`来引用默认导出。
 
+### 66.2 原理：`import`是怎么导入的？
+
+
+
+### 66.3
+
 遇到的问题：
-1. 错误：Uncaught SyntaxError: Cannot use import statement outside a module
+1. 错误：Uncaught SyntaxError: Cannot use `import` statement outside a **module**
+
+原因：因为在你引用的这个js文件中，使用了`import`语句，而`import`语句必须在一个**module**中使用。(这是因为浏览器本身并未实现对`import`的支持。)
 
 解决：在`<script>`标签上增加`type=module`，即
 
       <script type='module' src='output/useEffect.js'></script>
-
-这是因为浏览器本身并未实现对`import`的支持。
 
 > whether you declare them as such or not. The `import` statement **cannot be used in embedded scripts** unless such script has a type="module". 
 
@@ -1771,7 +1777,7 @@ import * as ModuleB from 'b.js'; // 导入b.js所有的导出，用一个'Module
 
 原因：浏览器不允许本地访问**模块**，虽然页面本身就在localhost上。
 
-解决方法：搭一个本地服务器。用npm装一个`http-server`或者`live-server`。
+1. 解决方法一：搭一个本地服务器。用npm装一个`http-server`或者`live-server`。
 
 安装`live-server`：
 
@@ -1783,6 +1789,120 @@ cd到工程目录下，启动server：
 
 server会监听当前目录下所有文件的变化并re-load。
 
+2. 解决方法二：webpack打包
+
+#### webpack
+
+**webpack**打包工具，它将`import`、`export`转换后再进行打包，并**不会**修改除此之外的代码。
+
+而那些语法糖式的文件类型，将使用`loaders`来预处理，因为webpack只认识`.js`、`.json`。
+
+> With that said, let's run `npx webpack`, which will take our script at `src/index.js` as the entry point, and will generate `dist/main.js` as the output.
+> 
+> Note that ***webpack will not alter any code other than `import` and `export` statements***. If you are using other ES2015 features, make sure to use a transpiler such as Babel or Bublé via webpack's loader system.
+
+
+##### 遇到的问题：
+
+###### 1. `loaders`
+
+报错信息：
+```
+ERROR in ./node_modules/swiper/components/navigation/navigation.scss 1:0
+Module parse failed: Unexpected character '@' (1:0)
+You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders
+> @import '../../swiper-vars.scss';
+|
+| :root {
+ @ ./src/index.js 8:0-54
+ ```
+
+分析：
+
+webpack只能处理`.js`和`.json`，对于其它类型的文件如写React JSX的`.jsx`、TypeScript文件`.ts`、CSS语法糖`.scss`和`.sass`等，都需要对应的*loader*来处理。
+
+因此，**你需要`loaders`来处理这些类型的文件**。
+
+> Out of the box, **webpack only understands `JavaScript` and `JSON` files**. Loaders allow webpack to process other types of files and convert them into valid modules that can be consumed by your application and added to the dependency graph.
+
+ref: https://webpack.js.org/concepts/#loaders
+
+loader怎么用呢？
+
+在**webpack.config.js**中进行如下配置：
+
+```js
+const path = require('path');
+
+module.exports = {
+  output: {
+    filename: 'my-first-webpack.bundle.js'
+  },
+  module: {
+    rules: [
+      { test: /\.txt$/, use: 'raw-loader' }, // This is the loader!
+      {
+        test: /\.(js|mjs|jsx|ts|tsx)$/,
+        enforce: 'pre',
+        use: [
+          {
+            options: {
+              formatter: require.resolve('react-dev-utils/eslintFormatter'),
+              eslintPath: require.resolve('eslint'),
+              emitWarning: true, // remove this line after we fix all existing problems
+            },
+            loader: require.resolve('eslint-loader'),
+          },
+        ],
+        include: paths.appSrc,
+      },
+    ]
+  }
+};
+```
+
+这个配置意为当webpack遇到`require(xxx.txt)`、`import(xxx.txt)`语句时，先用*raw-loader*进行转换，再打包到最终的*bundle*里。
+
+*loader*有2个属性，
+
+- `test`：用于标识哪些文件需要被转换
+- `use`: 用哪个*loader*来转换`test`标识的文件
+
+如何解决：
+
+1. 先安装必要的*loader*，这里应该缺少`sass-loader`、`scss-loader`，不过只需要安装***sass-loader***即可，这两种它都能转换：
+
+    $ npm install --save-dev sass-loader sass
+
+2. 再次运行webpack进行打包
+
+    $ webpack
+
+###### 2. `npm i`错误：Refusing to delete
+    $ npm i
+    npm ERR! path C:\Users\xiyu\Desktop\study\frontend-knowledge-points\React\test\node_modules\v8flags\node_modules\.bin\user-home.cmd
+    npm ERR! code EEXIST
+    npm ERR! Refusing to delete C:\Users\xiyu\Desktop\study\frontend-knowledge-points\React\test\node_modules\v8flags\node_modules\.bin\user-home.cmd: is outside C:\Users\xiyu\Desktop\study\frontend-knowledge-points\React\test\node_modules\v8flags\node_modules\user-home and not a link
+    npm ERR! File exists: C:\Users\xiyu\Desktop\study\frontend-knowledge-points\React\test\node_modules\v8flags\node_modules\.bin\user-home.cmd
+    npm ERR! Move it away, and try again.
+
+    npm ERR! A complete log of this run can be found in:
+    npm ERR!     C:\Users\xiyu\AppData\Roaming\npm-cache\_logs\2021-01-14T05_08_57_129Z-debug.log
+
+解决方案：
+1. Delete the node_modules directory completely.
+2. Run npm install again.
+
+###### 3. webpack打包时：SyntaxError: Unexpected reserved word
+
+![Unexpected reserved word](Pics/keeplearning/webpack打包错误-reserved-word.PNG)
+
+解决：
+更新node，node v8 --> node v10 就OK了。
+
+    前往(https://nodejs.org/en/download/)下载
+
+![已解决](Pics/keeplearning/已解决-webpack打包错误-reserved-word.PNG)
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器

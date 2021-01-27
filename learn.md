@@ -318,6 +318,58 @@ bar(); // will log 'foo'
 
 ### 5. NPM
 
+
+#### 5.0 如何安装一个包
+
+用于安装一个*package*。
+
+> A package is a folder containing a program described by a `package.json` file
+
+##### 5.0.0 `npm i`一下是什么意思？
+
+在工作目录下执行此命令，npm会读取当前目录下`package.json`文件，将*dependencies*字段所列出的依赖包安装到当前目录下的`node_modules`文件夹中。
+
+##### 5.0.1 安装一个包
+
+    $ npm install <package>
+    $ npm i <package>
+
+如：
+    
+    $ npm install react-dom
+
+##### 5.0.2 安装指定`tag`/`version`的包：
+
+    $ npm install [<@scope>/]<name>@<tag>
+    $ npm install [<@scope>/]<name>@<version>
+  
+如：
+    
+    $ npm install @tencent/tea-component@latest
+    $ npm install @tencent/tea-component@1.5.0
+
+注意！这里将会从**scope**所关联的*registry*下载指定包。
+
+##### 5.0.3 
+#### 5.1 安装到哪儿了？
+
+默认添加到`package.json`中的*dependencies*字段。
+
+安装到*devDependencies*:
+
+    $ npm install <package> --save-dev
+    $ npm install <package> -D
+
+ `-D`是`--save-dev`的缩写。
+
+
+安装到*dependencies*:
+
+    $ npm install <package> --save
+    $ npm install <package> -S
+
+ `-S`是`--save`的缩写。
+
 #### 5.1 npm run build
 此命令用于构建生产环境的包。
 
