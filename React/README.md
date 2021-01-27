@@ -64,6 +64,7 @@
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
     - [2. 使用`FC`](#2-使用fc)
     - [3. *function component*中`useState`原理](#3-function-component中usestate原理)
+    - [4. 为什么React元素只能有一个根？](#4-为什么react元素只能有一个根)
 
 ## 1. JSX
 
@@ -860,6 +861,23 @@ React发现A3是新增的，只需要渲染A3作为A的孩子即可。
 
 ### 9.1 Controlled Components
 
+组件的表现是由React的`state`来确定的，比如用户在`<input>`中输入的内容，我们通过为`<input>`绑定一个`onInput`事件来更新组件的`state`：
+
+```jsx
+// e.g in a class component
+handleChange(event) {
+  this.setState({value: event.target.value});
+}
+
+render() {
+  return  (
+    <input type='text' value={this.state.value} onInput={this.handleInput} />
+  );
+}
+```
+
+这样一来，用户输入的内容会更新`state`，而`state`又会决定组件的渲染。
+
 > ***making the React state be the single source of truth***
 
 组件的值和React component状态绑定，也即要为每个controlled component写event handler。
@@ -1340,6 +1358,7 @@ function Hello(props) {
 }
 ```
 
+### 4. 为什么React元素只能有一个根？
 
 ===在写React时想到的一些疑问===
 Q1: React function写法和class写法的区别？以及何时应该使用何种？
