@@ -1904,6 +1904,29 @@ module.exports = {
 
 ![已解决](Pics/keeplearning/已解决-webpack打包错误-reserved-word.PNG)
 
+## 69. 剪切板(*Clipboard*)
+
+剪切板是计算机RAM中的一块区域，也叫*paste buffer*。  
+在windows系统中，剪切板存放一个item，它可以有多种类型：
+
+- standard formats (e.g. CF_BITMAP, or CF_UNICODETEXT),
+- registered formats (e.g. CF_HTML)
+- private formats for internal use
+
+在macOS系统中，可以从Finder->Edit->Show Clipboard查看剪切板中的RAW数据。
+
+在Android中，clipboard can hold up to one *clip object*。  
+简单文本直接存储，复杂的数据则以引用形式存储。  
+*clip object*有三种格式：
+- text string
+- URI object
+- intent
+
+App可以用*ClipboardManager*和系统调用进行copy/cut/paste。
+
+在iOS中，可以创建*UIPasteboard*类的多个实例，一个实例可以持有一个或多个不同格式的item。
+
+
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
 A + B //选择B，当B是A的兄弟节点、且必须跟在A后面
