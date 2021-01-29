@@ -8,7 +8,9 @@
   - [2.5 Tuple](#25-tuple)
   - [2.6 Enum](#26-enum)
   - [2.7 Unknown vs Any](#27-unknown-vs-any)
-  - [2.8 Any](#28-any)
+  - [2.8 Void](#28-void)
+  - [2.9 Never](#29-never)
+  - [2.10 Object](#210-object)
   - [为啥不用大写的，怎么都是小写呢？](#为啥不用大写的怎么都是小写呢)
 - [10.声明抽象类、抽象方法](#10声明抽象类抽象方法)
 - [11.类方法、成员默认为`public`](#11类方法成员默认为public)
@@ -135,10 +137,38 @@ vAny = { a: 1, b: 2 };
 
 当把js迁移到ts时，可用`any`来做第一步的修饰，而后再慢慢修改成具体类型。
 
+### 2.8 Void
 
+一般用于函数返回值，若是给变量声明`void`没啥意义，只能给它赋值`null`或者`undefined`：
 
-### 2.8 Any
+```ts
+function sayHi(name: string): void {
+  console.log(`hi ${name}`);
+}
 
+let unused: void;
+unused = null;
+unused = undefined;
+```
+
+### 2.9 Never
+
+一个抛异常、或者是不会return的函数/箭头函数，`never`就可以表达为这个函数的返回值类型。
+
+```ts
+function bar(): never {
+  throw 'always throw exception!';
+}
+
+// Function returning never must not have a reachable end point
+function foo(): never {
+  while(1) {
+    console.log('hard working...');
+  }
+}
+```
+
+### 2.10 Object
 
 
 ### 为啥不用大写的，怎么都是小写呢？
