@@ -1,7 +1,7 @@
 # Learning React
 ===React相关知识点===
 
-*在vscode中，按下F1键以调出命令，输入`create content table`来创建目录。*
+*在vscode中，按下F1键以调出命令，输入`Create Table of Contents`来创建目录。*
 
 - [Learning React](#learning-react)
   - [1. JSX](#1-jsx)
