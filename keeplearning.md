@@ -1926,6 +1926,21 @@ App可以用*ClipboardManager*和系统调用进行copy/cut/paste。
 
 在iOS中，可以创建*UIPasteboard*类的多个实例，一个实例可以持有一个或多个不同格式的item。
 
+## 70. `currentTarget` vs `target`
+
+`e.target`: 真正导致触发事件的元素；  
+`e.currentTarget`：这个事件处理函数绑定到哪个元素上。
+
+点击"Click Me!"，`e.target`就是`<button>`，`e.currentTarget`是外面绑定了*onclick*的`<div>`。
+
+```html
+<div id='parent' onclick='handleClick'>
+  <button id='child'>Click Me!</button>
+</div>
+```
+
+> `e.target` is what triggers the event dispatcher to trigger and `e.currentTarget` is what you assigned your listener to.
+
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
