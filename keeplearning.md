@@ -1941,6 +1941,23 @@ App可以用*ClipboardManager*和系统调用进行copy/cut/paste。
 
 > `e.target` is what triggers the event dispatcher to trigger and `e.currentTarget` is what you assigned your listener to.
 
+## 71. `blob`
+
+`Blob`对象代表元数据(Raw data)，是一个*immutable*类文件（*file-like*）的对象。
+
+它可以按文本或二进制数据读取，也可以转换成`ReadableStream`来被使用。
+
+`File`接口就是基于`Blob`的，即可以说`File`就是一个`Blob`。
+
+```js
+const blob = new Blob(['hello world', 'happy every day']);
+console.log(blob.size); // 字节数
+console.log(blob.type); // MIME，blob中的数据类型
+
+
+
+```
+
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器

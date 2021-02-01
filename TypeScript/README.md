@@ -11,7 +11,12 @@
   - [2.8 Void](#28-void)
   - [2.9 Never](#29-never)
   - [2.10 Object](#210-object)
-  - [为啥不用大写的，怎么都是小写呢？](#为啥不用大写的怎么都是小写呢)
+  - [2.11 Type Assertions](#211-type-assertions)
+  - [2.12 为啥不用大写的，怎么都是小写呢？](#212-为啥不用大写的怎么都是小写呢)
+- [3. Interfaces(接口)](#3-interfaces接口)
+  - [3.1 声明](#31-声明)
+  - [3.2 或有字段](#32-或有字段)
+  - [3.3 只读](#33-只读)
 - [10.声明抽象类、抽象方法](#10声明抽象类抽象方法)
 - [11.类方法、成员默认为`public`](#11类方法成员默认为public)
 - [12.如何声明一个不允许被子类覆盖的父类方法？](#12如何声明一个不允许被子类覆盖的父类方法)
@@ -170,11 +175,79 @@ function foo(): never {
 
 ### 2.10 Object
 
+声明那些*non-primitive*。
 
-### 为啥不用大写的，怎么都是小写呢？
+```ts
+function create(o: object | null): void;
+
+create({ a: 1 });
+create(null);
+create(undefined); // error
+```
+
+疑问：`undefined`是`null`的子类型，为啥不能用捏？
+
+### 2.11 Type Assertions
+
+类型断言，说白了类似于强制类型转换：
+
+```ts
+let someVal: unknown = 'string';
+let len: number;
+
+// 写法一
+len = (someVal as string).length;
+
+// 写法二
+len = (<string>someVal).length;
+```
+
+
+### 2.12 为啥不用大写的，怎么都是小写呢？
 
 `Number`、`String`等是*boxed objects*（C#有个装箱的概念），它们都是对象；
 而`number`、`string`等是*primitive types*（基本值类型），他们都是值。
+
+## 3. Interfaces(接口)
+
+### 3.1 声明
+
+```ts
+// 声明一个接口，被这个接口所声明的变量，必须包含这些字段
+interface Person {
+  name: string;
+  age: number;
+}
+
+let p: Person = { name: 'yuhui', age: 29 }; // ok
+let p2: Person = { name: 'yuhui', age: '30' }; // bad
+let p3: Person = { name: 'yuhui', age: 29, favors: ['milk'] }; // ok，只要包含"name"、"age"就可
+```
+
+### 3.2 或有字段
+
+```ts
+interface Person {
+  name: string;
+  age: number;
+  favor?: string[]; // 或有
+}
+
+let p: Person = { name: 'yuhui', age: 29 }; // ok
+let p2: Person = { name: 'yuhui', age: 29, favors: ['milk'] }; // ok
+```
+
+### 3.3 只读
+
+```ts
+interface Person {
+  readonly name: string; // 只读字段
+  age: number;
+  favor:  ReadonlyArray<string>[]; // favor是一个只读的数组字段
+}
+```
+
+
 
 1. 编译.ts为.js
 $ tsc hello.ts
