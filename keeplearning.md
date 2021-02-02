@@ -1059,7 +1059,7 @@ HTTP 1.0 (1994)
 
 HTTP 1.1 (1996-2015)
 1. 支持长连接（客户端在请求时设置Request Header：Connection: Keep-Alive）；
-2. 要求在Request Header中加入Host Header（当不同host指向同一IP时，服务器可以根据host来分辨客户端的意图，即想访问哪个host的资源，同一台机器上充当多域名）；
+2. 要求在Request Header中加入Host Header（当不同host指向同一IP时，服务器可以根据host来分辨客户端的意图，��想访问哪个host的资源，同一台机器上充当多域名）；
 3. 缓存方面，增加了'entity tag'(E-Tag)，标记资源相当于hash；（扩展下：Caching知识点）
 4. 100 Continue status状态码，当客户端不清楚服务器能否响应请求时、或者客户端是否有权限发起某个请求时，与其发送大量的数据不如仅发送一个Request Header，来试探下。如果服务器返回HTTP/1.1 100，则意味着一切OK，可以正式地发送请求。
 5. much much more...
@@ -1907,7 +1907,7 @@ module.exports = {
 ## 69. 剪切板(*Clipboard*)
 
 剪切板是计算机RAM中的一块区域，也叫*paste buffer*。  
-在windows系统中，剪切板存放一个item，它可以有多种类型：
+在windows系统中，剪切板存放一个*item*，它可以有多种类型：
 
 - standard formats (e.g. CF_BITMAP, or CF_UNICODETEXT),
 - registered formats (e.g. CF_HTML)
@@ -1957,6 +1957,8 @@ console.log(blob.type); // MIME，blob中的数据类型
 
 
 ```
+
+## 72. 
 
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
