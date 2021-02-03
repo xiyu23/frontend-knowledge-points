@@ -1,0 +1,169 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .editor {
+        	border: 1px solid #9c9c9c;
+					height: auto;
+					line-height: 40px;
+        }
+				.contextmenu {
+					position: absolute;
+					top: 100px;
+					left: 100px;
+					cursor: default;
+					border: 1px solid #9c9c9c;
+					background-color: white;
+					border-radius: 4px;
+				}
+				.cm-ul {
+					padding: 0px 20px;
+					list-style: none;
+				}
+				.cm-ul li {
+					padding: 10px 0px;
+				}
+				.cm-ul li button {
+					background-color: white;
+					border: none;
+					width: 100%;
+					height: 100%;
+				}
+				.cm-ul li button:focus {
+					outline: none;
+				}
+				.cm-ul li:hover {
+					background-color: #9c9c9c;
+				}
+				.outside-editor {
+					border: 1px solid red;
+					border-radius: 4px;
+					padding: 20px;
+					background-color:rgb(208, 233, 255);
+				}
+    </style>
+</head>
+<body>
+		<div id='outsideEditor' class='outside-editor' contenteditable="true">
+			<div class='editor' contenteditable="true">Line1 Line1 Line1 Line1 Line1 </div>
+			<div class='editor' contenteditable="true">www.google.com</div>
+			<div class='imgC1'>
+				<div class='imgC2'>
+					<img src='../Head-First/imgs/decorator-a.png' />
+				</div>
+			</div>
+		</div>
+		<div id='contextMenu' class='contextmenu'>
+			<ul class='cm-ul'>
+				<li id='liCopy'><button>copy</button></li>
+				<li id='liCut'><button>cut</button></li>
+				<li id='liPaste'><button>paste</button></li>
+				<li id='liAll'><button>all</button></li>
+			</ul>
+		</div>
+		<button id='btnCopy'>Copy</button>
+		<button id='btnCut'>Cut</button>
+		<button id='btnPaste'>Paste</button>
+    
+    <button id='btnSave'>save selection</button>
+    <button id='btnApply'>apply selection</button>
+    <button id='btnGet'>get range</button>
+    
+		<script type='text/javascript'>
+				var contextMenu = document.getElementById('contextMenu');
+				var outsideEditor = document.getElementById('outsideEditor');
+				outsideEditor.addEventListener('contextmenu', function(e) {
+					console.log(e);
+					e.preventDefault();
+					const { clientX, clientY, currentTarget, target } = e;
+					contextMenu.style.top = clientY;
+					contextMenu.style.left = clientX;
+
+					// console.log('currentTarget: ', currentTarget);
+					// console.log('target: ', target);
+
+					if (target.nodeName === "IMG") {
+						console.log('you targeted on a <img>!');
+					}
+				});
+
+				var btnCopy = document.getElementById('btnCopy');
+        var btnCut = document.getElementById('btnCut');
+        var btnPaste = document.getElementById('btnPaste');
+        btnCopy.addEventListener('click', function(e) {
+					exec('copy');
+				});
+				btnCut.addEventListener('click', function(e) {
+					exec('cut');
+				});
+				btnPaste.addEventListener('click', function(e) {
+					exec('paste');
+				});
+
+				var btnLiCopy = document.getElementById('liCopy');
+        var btnLiCut = document.getElementById('liCut');
+        var btnLiPaste = document.getElementById('liPaste');
+        btnLiCopy.addEventListener('click', function(e) {
+					exec('copy');
+				});
+				btnLiCut.addEventListener('click', function(e) {
+					exec('cut');
+				});
+				btnLiPaste.addEventListener('click', function(e) {
+					exec('paste');
+				});
+				
+				function exec(cmd) {
+					if (!document.execCommand(cmd)) {
+						console.warn(`execCommand ${cmd} failed`);
+					} else {
+						console.log(`execCommand ${cmd} succeed`);
+					}
+				}
+
+
+        var savedRanges = [];
+
+        function saveRanges() {
+            var sel = window.getSelection();
+            var rn = sel.rangeCount;
+            savedRanges = [];
+            for (let i = 0; i < rn; i++) {
+                savedRanges.push(sel.getRangeAt(i));
+            }
+            console.log(`${rn} ranges saved`);
+        }
+
+        function applyRanges() {
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            var rn = savedRanges.length;
+            for (let i = 0; i < rn; i++) {
+                sel.addRange(savedRanges[i]);
+            }
+            console.log(`${rn} ranges applied`);
+        }
+
+        function getRange() {
+            var s = window.getSelection();
+            var r =s.getRangeAt(0)
+            console.log(r);
+        }
+
+        var btnSave = document.getElementById('btnSave');
+        var btnApply = document.getElementById('btnApply');
+        var btnGet = document.getElementById('btnGet');
+        btnSave.addEventListener('click', function(e) {
+            saveRanges();
+        });
+        btnApply.addEventListener('click', function(e) {
+            applyRanges();
+        });
+        btnGet.addEventListener('click', function(e) {
+            getRange();
+        });
+    </script>
+</body>
+</html>
