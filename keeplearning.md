@@ -2005,6 +2005,38 @@ sel.removeAllRanges();
 sel.addRange(range);
 ```
 
+### 72.3 
+
+#### 72.3.1 **Selection**
+
+**anchorNode**: selection从哪里开始
+
+**anchorOffset**: selection的anchor在anchorNode中的位移。若这个node是一个*TEXT_NODE*，则位移数值表示anchor之前的字符数；若这个node是一个*ELEMENT*，则位移数值表示anchor之前的*CHILD_NODE*的数量。
+
+**focusNode**: selection在哪里结束
+
+**focusOffset**: 类似于*anchorOffset*
+
+#### 72.3.2 **Range**
+
+Range：可包含nodes以及*part of text_nodes*
+
+## 73. **Draftjs**
+
+### 73.1 SelectionState
+
+`key`: 指明selection从哪个*contentBlock*开始/结束
+
+`offset`: 指明在*contentBlock*内，point所在位置的偏移量
+
+`SelectonState`仅追踪`anchor`/`focus`，`start`/`end`是继承而来的。
+
+
+> Note that SelectionState itself tracks only anchor and focus values. Start and end values are derived.
+
+
+
+
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
 A + B //选择B，当B是A的兄弟节点、且必须跟在A后面

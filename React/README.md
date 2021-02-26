@@ -15,6 +15,10 @@
     - [2.3 在HTML中使用jsx](#23-在html中使用jsx)
     - [2.4 jsx预处理器(JSX preprocessor)](#24-jsx预处理器jsx-preprocessor)
   - [3. 渲染React Element](#3-渲染react-element)
+    - [3.1 对于函数组件，当`props`变化时发生了什么？](#31-对于函数组件当props变化时发生了什么)
+    - [3.2 对于函数组件，当内部`state`(通过`useState`添加的状态)变化时发生了什么？](#32-对于函数组件当内部state通过usestate添加的状态变化时发生了什么)
+    - [3.3 对于类组件，当`props`变化时发生了什么？](#33-对于类组件当props变化时发生了什么)
+    - [3.4 对于类组件，当`state`变化时发生了什么？](#34-对于类组件当state变化时发生了什么)
   - [4. Components和Props](#4-components和props)
     - [4.1 这就是一个*React Component*](#41-这就是一个react-component)
     - [4.2 使用组件渲染](#42-使用组件渲染)
@@ -60,6 +64,9 @@
       - [22.3.1 在函数组件中，我只想在**初始渲染**之后做一件事，并不想每次更新后都执行呢？](#2231-在函数组件中我只想在初始渲染之后做一件事并不想每次更新后都执行呢)
     - [22.4 hooks的规则](#224-hooks的规则)
     - [22.5 自定义hook](#225-自定义hook)
+    - [22.6 Memo Hook: `useMemo`](#226-memo-hook-usememo)
+    - [22.7 Callback Hook: `useCallback`](#227-callback-hook-usecallback)
+    - [22.8 Ref Hook: `useRef`](#228-ref-hook-useref)
   - [Q&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
     - [2. 使用`FC`](#2-使用fc)
@@ -231,6 +238,22 @@ React DOM则是将React和browser粘合在一起，比如我们用到的`render(
 ```
 
 React element是不可变的，一旦创建好无法修改。
+
+
+
+static getDerivedStateFromProps()
+shouldComponentUpdate()
+render()
+getSnapshotBeforeUpdate()
+componentDidUpdate()
+
+### 3.1 对于函数组件，当`props`变化时发生了什么？
+
+### 3.2 对于函数组件，当内部`state`(通过`useState`添加的状态)变化时发生了什么？
+
+### 3.3 对于类组件，当`props`变化时发生了什么？
+
+### 3.4 对于类组件，当`state`变化时发生了什么？
 
 ## 4. Components和Props
 
@@ -1286,6 +1309,62 @@ useMountEffect(() => {
 - 只在*function component*中调用
 
 ### 22.5 自定义hook
+
+### 22.6 Memo Hook: `useMemo`
+
+目的：开销大的函数，可以将其缓存，以避免每次render时都要重新计算。
+
+***memoize***: To store (the result of a computation) so that it can be subsequently retrieved without repeating the computation
+
+语法：
+
+```js
+const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
+```
+
+`useMemo`返回一个被缓存起来的值，只有当后续`a`或`b`发生变化时，`useMemo`才会重新计算这个值。
+
+如果依赖是一个空数组，则每次render时都会执行。
+
+传给`userMemo`的函数（第一个参数）在*rendering*阶段运行。
+
+### 22.7 Callback Hook: `useCallback`
+
+```js
+const memoizedCallback = useCallback(
+  () => {
+    doSomething(a, b);
+  },
+  [a, b],
+);
+```
+
+其实上述等价于`userMemo`的另一种形式——记忆一个*函数*：
+
+```js
+const memoizedCallback = useMemo(
+  () => {
+    return () => {
+      doSomething(a, b);
+    }
+  },
+  [a, b],
+);
+```
+
+即第一个参数是一个函数，它这次返回一个**函数**，而不是**value**了。
+
+`useCallback`可以用`useMemo`来表达，以下两者是等价的：
+
+```js
+useCallback(fn, deps)
+useMemo(() => fn, deps)
+```
+
+### 22.8 Ref Hook: `useRef`
+
+
+
 ## Q&A
 ### 1. ts中的`React.FC`是啥？
 
