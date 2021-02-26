@@ -1960,6 +1960,82 @@ console.log(blob.type); // MIME，blob中的数据类型
 
 ## 72. 
 
+### 72.1 如何选中文本
+
+```html
+<p id='p'>The setBaseAndExtent() method of the Selection interface sets the selection to be a range including all or parts of two specified DOM nodes, and any content located between them.</p>
+```
+
+```js
+var range = document.createRange(); // 创建一个新的Range
+var pNode = document.getElementById('p')[0]; // 取到元素
+var range.setStart(pNode, 7); // 令Range从pNode开始（因为它是TEXT_NODE），所以7代表相对于起始位置的偏移距离，即'T'的话startOffset就是0，那7就对应在'The set'和'BaseAnd...'之间，即B前面
+var range.setEnd(pNode, 11); // 同理，那么这个Range就囊括了元素p中的"Base"
+
+// 将range加入到selection，从界面上就会看到我们选中了"Base"
+var sel = window.getSelection();
+sel.removeAllRanges();
+sel.addRange(range);
+
+```
+
+boundary point (node, offset).
+
+### 72.2 选中一个`<img>`元素
+
+```html
+<div class="imgC2">
+  <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png">  <!-- $0 -->
+</div>
+```
+
+```js
+var range = document.createRange(); // 创建一个新的Range
+range.selectNode($0);
+// $0是<img>元素，selectNode方法会让$0的父节点成为parent，$0的index（即它在兄弟节点的index）
+// 而后设置range的起点(start boundary point)为(parent, index)
+// 设置range的终点(end boundary point)为(parent, index + 1)
+// 这里的结果就是：
+// range.startContainer/endContainer都是: 'div.imgC2'
+// range.startOffset === 1 这是为啥？？？为啥不是0
+// range.endOffset === 2 这是为啥？？？为啥不是1
+
+var sel = window.getSelection();
+sel.removeAllRanges();
+sel.addRange(range);
+```
+
+### 72.3 
+
+#### 72.3.1 **Selection**
+
+**anchorNode**: selection从哪里开始
+
+**anchorOffset**: selection的anchor在anchorNode中的位移。若这个node是一个*TEXT_NODE*，则位移数值表示anchor之前的字符数；若这个node是一个*ELEMENT*，则位移数值表示anchor之前的*CHILD_NODE*的数量。
+
+**focusNode**: selection在哪里结束
+
+**focusOffset**: 类似于*anchorOffset*
+
+#### 72.3.2 **Range**
+
+Range：可包含nodes以及*part of text_nodes*
+
+## 73. **Draftjs**
+
+### 73.1 SelectionState
+
+`key`: 指明selection从哪个*contentBlock*开始/结束
+
+`offset`: 指明在*contentBlock*内，point所在位置的偏移量
+
+`SelectonState`仅追踪`anchor`/`focus`，`start`/`end`是继承而来的。
+
+
+> Note that SelectionState itself tracks only anchor and focus values. Start and end values are derived.
+
+
+
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
