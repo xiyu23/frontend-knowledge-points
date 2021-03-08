@@ -350,7 +350,19 @@ bar(); // will log 'foo'
 
 注意！这里将会从**scope**所关联的*registry*下载指定包。
 
-##### 5.0.3 
+##### 5.0.3 如何查看当前安装的某个`package`的版本？
+
+```bash
+$ npm list <package>
+```
+
+如：
+
+```bash
+$ npm list @tencent/wemeet-idea-editor
+nextone@0.1.0 D:\code\nextMeeting
+ -- @tencent/wemeet-idea-editor@1.0.2 
+```
 #### 5.1 安装到哪儿了？
 
 默认添加到`package.json`中的*dependencies*字段。

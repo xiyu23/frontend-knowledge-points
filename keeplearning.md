@@ -2011,7 +2011,17 @@ sel.addRange(range);
 
 **anchorNode**: selection从哪里开始
 
-**anchorOffset**: selection的anchor在anchorNode中的位移。若这个node是一个*TEXT_NODE*，则位移数值表示anchor之前的字符数；若这个node是一个*ELEMENT*，则位移数值表示anchor之前的*CHILD_NODE*的数量。
+**anchorOffset**: selection的anchor在anchorNode中的位移。若这个node是一个*TEXT_NODE*，则位移数值表示anchor之前的字符数；若这个node是一个*ELEMENT*，则位移数值表示anchor之前有多少个node的*CHILD_NODE*。
+
+例如，anchorNode是外侧的span，anchor放在nodeA和nodeB之间，那么anchorOffset就是1，因为anchor之前属于anchorNode的孩子节点共计1个。
+
+```html
+<span id='anchorNode'>
+  <nodeA>
+  <nodeB>
+  <nodeC>
+</span>
+```
 
 **focusNode**: selection在哪里结束
 

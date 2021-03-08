@@ -72,6 +72,8 @@
     - [2. 使用`FC`](#2-使用fc)
     - [3. *function component*中`useState`原理](#3-function-component中usestate原理)
     - [4. 为什么React元素只能有一个根？](#4-为什么react元素只能有一个根)
+    - [5. function component vs class component](#5-function-component-vs-class-component)
+    - [6. props或者state变了，发生了什么？](#6-props或者state变了发生了什么)
 
 ## 1. JSX
 
@@ -1438,6 +1440,10 @@ function Hello(props) {
 ```
 
 ### 4. 为什么React元素只能有一个根？
+
+### 5. function component vs class component
+
+### 6. props或者state变了，发生了什么？
 
 ===在写React时想到的一些疑问===
 Q1: React function写法和class写法的区别？以及何时应该使用何种？
