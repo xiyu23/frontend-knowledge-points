@@ -351,3 +351,29 @@ e.g 远程仓库下面有2个repo（bar.git和foo.git），这俩是兄弟关系
 ![修改require路径](Pics/gitcommands/03.PNG)
 
 48.2 submodule更新了，如何为当前项目(superproject)应用此更新呢？
+
+## 49. 查看当前工程关联的远程仓库地址
+
+    $ git remote -v
+
+  得到
+
+    origin  https://github.com/margox/braft-convert.git (fetch)
+    origin  https://github.com/margox/braft-convert.git (push)
+
+## 50. 修改当前工程对应的远程仓库地址
+
+    $ git remote set-url origin <new_url>
+
+e.g
+
+    $ git remote set-url origin http://git.code.oa.com/yuhui/wemeet-braft-convert.git
+
+  确认是否已修改：
+
+    $ git remote -v
+
+  得到：
+
+    origin  http://git.code.oa.com/yuhui/wemeet-braft-convert.git (fetch)
+    origin  http://git.code.oa.com/yuhui/wemeet-braft-convert.git (push)
