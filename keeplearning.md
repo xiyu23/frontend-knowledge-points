@@ -2054,6 +2054,70 @@ Range：可包含nodes以及*part of text_nodes*
 var a = {}; // 从Object.prototype继承，a会有Object的一系列方法
 var a = Object.create(null); // 它没有
 
+## 67. 浏览器右键复制/粘贴/剪切/全选怎么实现？
+
+### 67.1 基础概念
+
+#### 1. `Selection`
+
+- `anchorNode`：一个`Node`标识selection的从哪儿开始的。
+- `anchorOffset`  
+  返回一个number来表示selection的anchor在`anchorNode`中的位移。  
+  如果`anchorNode`是一个*text node*，则返回前面的字符个数；  
+  如果`anchorNode`是一个*element*，则返回位于selection anchor之前的属于`anchorNode`孩子的个数；
+- `rangeCount`：返回selection中的`range`数量。
+
+
+表示用户选中的文本的区域(range)，或者代表当前光标的位置。
+
+可以通过`window.getSelection()`获取`Selection`对象。
+
+#### 2. `Range`
+
+- `Range.selectNodeContents(*referenceNode*)`  
+  设置Range包含一个`Node`的内容, 将*referenceNode*作为这个`Node`.那么此时,`startOffset就是0(因为我们的Range已设置为一个Node),而endOffset就是*referenceNode*的孩子Node数(或者是它里面的字符个数)
+- 
+
+## 68. `Touch`相关
+
+### 68.1 基础概念
+
+Touch代表1个接触点，重要的属性有：
+- changedTouches  
+  一个`Touch`数组，当与前一个TouchEvent相比状态发生改变的那些Touch，都会放入这个数组  
+  - 对*touchstart*而言，就是刚开始接触的那些touch points  
+  - 对*touchmove*而言，就是相对于上一次事件有变化的touch points
+  - 对*touchend*而言，就是离开了表面的那些touch points
+
+- targetTouches  
+  一个`Touch`数组，当前放在表面上的解除点且?(*A TouchList of all the Touch objects that are both currently in contact with the touch surface and were also started on the same element that is the target of the event.*)  
+
+- touches  
+  一个`Touch`数组，当前表面上所有接触点，不论是*changed*还是*target*。
+
+
+### 68.2 `touchstart`
+
+当一个touch point放到交互表面时触发，`event.target`表示在这个元素内发生了touchstart事件。
+
+### 68.3 `touchend`
+
+当一个touch point离开交互表面时触发，`event.target`就是对应的这个touch point当初触发*touchstart*时的那个元素，**不论当前touch point是不是已经移到元素外面/移动到设备边界外**。
+
+离开表面的touch point(s)可以由`changedTouches`获得。
+
+### 68.4 `touchmove`
+
+同上，`event.target`还是和*touchstart*的那个`event.target`一样。
+
+### 68.5 `touchcancel`
+
+- 对话框弹出
+- 触摸点移出document window，并移动到了浏览器本身的UI区域
+- 用户又放置了更多接触点，如果不能支持这么多触摸点时，也会触发cancel
+
+
+
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
 A + B //选择B，当B是A的兄弟节点、且必须跟在A后面

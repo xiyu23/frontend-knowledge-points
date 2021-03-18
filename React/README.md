@@ -67,6 +67,7 @@
     - [22.6 Memo Hook: `useMemo`](#226-memo-hook-usememo)
     - [22.7 Callback Hook: `useCallback`](#227-callback-hook-usecallback)
     - [22.8 Ref Hook: `useRef`](#228-ref-hook-useref)
+    - [22.9 函数组件内使用`useState`，渲染更新逻辑是怎样的？](#229-函数组件内使用usestate渲染更新逻辑是怎样的)
   - [23. 如何为`className`写多个值？](#23-如何为classname写多个值)
   - [Q&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
@@ -1366,9 +1367,9 @@ useMemo(() => fn, deps)
 
 ### 22.8 Ref Hook: `useRef`
 
+### 22.9 函数组件内使用`useState`，渲染更新逻辑是怎样的？
+
 ## 23. 如何为`className`写多个值？
-
-
 
 ## Q&A
 ### 1. ts中的`React.FC`是啥？
