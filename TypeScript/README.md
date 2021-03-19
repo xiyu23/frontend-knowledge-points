@@ -487,6 +487,8 @@ const handleArtistsResponse = (response: ArtistsResponse) => {
 
 ref: https://www.typescriptlang.org/docs/handbook/declaration-files/templates/module-d-ts.html
 
+## 18. 如果一个函数返回值类型可能为`null`，那该如何表达呢？
+
 
 
 
