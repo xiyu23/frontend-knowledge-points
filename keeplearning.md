@@ -1907,7 +1907,69 @@ module.exports = {
 
 ![已解决](Pics/keeplearning/已解决-webpack打包错误-reserved-word.PNG)
 
-## 69. 剪切板(*Clipboard*)
+## 67. 浏览器右键复制/粘贴/剪切/全选怎么实现？
+
+### 67.1 基础概念
+
+#### 1. `Selection`
+
+- `anchorNode`：一个`Node`标识selection的从哪儿开始的。
+- `anchorOffset`  
+  返回一个number来表示selection的anchor在`anchorNode`中的位移。  
+  如果`anchorNode`是一个*text node*，则返回前面的字符个数；  
+  如果`anchorNode`是一个*element*，则返回位于selection anchor之前的属于`anchorNode`孩子的个数；
+- `rangeCount`：返回selection中的`range`数量。
+
+
+表示用户选中的文本的区域(range)，或者代表当前光标的位置。
+
+可以通过`window.getSelection()`获取`Selection`对象。
+
+#### 2. `Range`
+
+- `Range.selectNodeContents(*referenceNode*)`  
+  设置Range包含一个`Node`的内容, 将*referenceNode*作为这个`Node`.那么此时,`startOffset就是0(因为我们的Range已设置为一个Node),而endOffset就是*referenceNode*的孩子Node数(或者是它里面的字符个数)
+- 
+
+## 68. `Touch`相关
+
+### 68.1 基础概念
+
+Touch代表1个接触点，重要的属性有：
+- changedTouches  
+  一个`Touch`数组，当与前一个TouchEvent相比状态发生改变的那些Touch，都会放入这个数组  
+  - 对*touchstart*而言，就是刚开始接触的那些touch points  
+  - 对*touchmove*而言，就是相对于上一次事件有变化的touch points
+  - 对*touchend*而言，就是离开了表面的那些touch points
+
+- targetTouches  
+  一个`Touch`数组，当前放在表面上的解除点且?(*A TouchList of all the Touch objects that are both currently in contact with the touch surface and were also started on the same element that is the target of the event.*)  
+
+- touches  
+  一个`Touch`数组，当前表面上所有接触点，不论是*changed*还是*target*。
+
+
+### 68.2 `touchstart`
+
+当一个touch point放到交互表面时触发，`event.target`表示在这个元素内发生了touchstart事件。
+
+### 68.3 `touchend`
+
+当一个touch point离开交互表面时触发，`event.target`就是对应的这个touch point当初触发*touchstart*时的那个元素，**不论当前touch point是不是已经移到元素外面/移动到设备边界外**。
+
+离开表面的touch point(s)可以由`changedTouches`获得。
+
+### 68.4 `touchmove`
+
+同上，`event.target`还是和*touchstart*的那个`event.target`一样。
+
+### 68.5 `touchcancel`
+
+- 对话框弹出
+- 触摸点移出document window，并移动到了浏览器本身的UI区域
+- 用户又放置了更多接触点，如果不能支持这么多触摸点时，也会触发cancel
+
+## 69. 剪贴板(*Clipboard*)
 
 剪切板是计算机RAM中的一块区域，也叫*paste buffer*。  
 在windows系统中，剪切板存放一个*item*，它可以有多种类型：
@@ -2054,67 +2116,60 @@ Range：可包含nodes以及*part of text_nodes*
 var a = {}; // 从Object.prototype继承，a会有Object的一系列方法
 var a = Object.create(null); // 它没有
 
-## 67. 浏览器右键复制/粘贴/剪切/全选怎么实现？
 
-### 67.1 基础概念
+## 73. windows中的剪贴板是如何工作的？
 
-#### 1. `Selection`
+### 73.1 
 
-- `anchorNode`：一个`Node`标识selection的从哪儿开始的。
-- `anchorOffset`  
-  返回一个number来表示selection的anchor在`anchorNode`中的位移。  
-  如果`anchorNode`是一个*text node*，则返回前面的字符个数；  
-  如果`anchorNode`是一个*element*，则返回位于selection anchor之前的属于`anchorNode`孩子的个数；
-- `rangeCount`：返回selection中的`range`数量。
+剪贴板中的内存对象可以是任何格式，每种格式由一个`uint`来表示（定义在`Winuser.h`）。
 
+Clipboard Viewer是一个窗口，可以展示当前剪贴板的内容（至少可以展示常见格式如CF_TEXT, CF_BITMAP, and CF_METAFILEPICT）。
 
-表示用户选中的文本的区域(range)，或者代表当前光标的位置。
+剪贴板中可以存放多个clipboard object，每个都可以是不同的格式。
 
-可以通过`window.getSelection()`获取`Selection`对象。
+包含最多信息的剪贴板格式应该被放置在第一个位置，随后是较少信息的格式。（如何理解？）
 
-#### 2. `Range`
+**对相同的信息，用不同的格式来表达，放在剪贴板中，形成了多个剪贴板对象**。
 
-- `Range.selectNodeContents(*referenceNode*)`  
-  设置Range包含一个`Node`的内容, 将*referenceNode*作为这个`Node`.那么此时,`startOffset就是0(因为我们的Range已设置为一个Node),而endOffset就是*referenceNode*的孩子Node数(或者是它里面的字符个数)
-- 
+而格式描述最为丰富的会被放置在第一位，以此类推倒序排列。
 
-## 68. `Touch`相关
+在粘贴时，windows从剪贴板中取第一个它能够识别的格式。
 
-### 68.1 基础概念
+比如，用户从word中粘贴带样式的文本（RTF，Rich Text Format），那么剪贴板中就会存放两个剪贴板对象：
 
-Touch代表1个接触点，重要的属性有：
-- changedTouches  
-  一个`Touch`数组，当与前一个TouchEvent相比状态发生改变的那些Touch，都会放入这个数组  
-  - 对*touchstart*而言，就是刚开始接触的那些touch points  
-  - 对*touchmove*而言，就是相对于上一次事件有变化的touch points
-  - 对*touchend*而言，就是离开了表面的那些touch points
+1.以RTF格式存储的数据
+2.以CF_TEXT格式存储的数据
 
-- targetTouches  
-  一个`Touch`数组，当前放在表面上的解除点且?(*A TouchList of all the Touch objects that are both currently in contact with the touch surface and were also started on the same element that is the target of the event.*)  
-
-- touches  
-  一个`Touch`数组，当前表面上所有接触点，不论是*changed*还是*target*。
+当粘贴时，window如果能识别RTF，则对应的数据就会被取出来粘到文档中，否则就尝试取CF_TEXT。
 
 
-### 68.2 `touchstart`
 
-当一个touch point放到交互表面时触发，`event.target`表示在这个元素内发生了touchstart事件。
 
-### 68.3 `touchend`
+A memory object on the clipboard can be in any data format, called a clipboard format. Each format is identified by an unsigned integer value. For standard (predefined) clipboard formats, this value is a constant defined in Winuser.h
 
-当一个touch point离开交互表面时触发，`event.target`就是对应的这个touch point当初触发*touchstart*时的那个元素，**不论当前touch point是不是已经移到元素外面/移动到设备边界外**。
+ref: https://docs.microsoft.com/en-us/windows/win32/dataxchg/clipboard
 
-离开表面的touch point(s)可以由`changedTouches`获得。
+## 74. `defineProperty`
 
-### 68.4 `touchmove`
+`Object`上的静态方法，可添加或者修改属性。
 
-同上，`event.target`还是和*touchstart*的那个`event.target`一样。
+```js
+Object.defineProperty(obj, prop, descriptor)
+```
 
-### 68.5 `touchcancel`
+`descriptor`是一个`object`，它有两种类型。
 
-- 对话框弹出
-- 触摸点移出document window，并移动到了浏览器本身的UI区域
-- 用户又放置了更多接触点，如果不能支持这么多触摸点时，也会触发cancel
+|   | data descriptor | access descriptor |
+| --- | --- | --- |
+| configurable | √ | √ |
+| enumerable   | √ | √ |
+| value        | √ | x |
+| writable     | √ | x |
+| get          | x | √ |
+| set          | x | √ |
+
+对于access descriptor而言，`get`方法中的`this`指向那个通过它访问`prop`的对象，即`obj`（虽然`prop`可能定义在父类，但`this`并不会指向父类）。
+
 
 
 

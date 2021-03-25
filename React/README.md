@@ -45,11 +45,12 @@
     - [7.3 特殊：我不想渲染某个组件该怎么做？](#73-特殊我不想渲染某个组件该怎么做)
   - [8. Lists and Keys](#8-lists-and-keys)
     - [8.1 原理](#81-原理)
-    - [8.2 但是为什么不建议用index呢？](#82-但是为什么不建议用index呢)
+    - [8.2 但是为什么不建议用`index`呢？](#82-但是为什么不建议用index呢)
     - [8.3 什么是`key`？](#83-什么是key)
   - [9. Forms](#9-forms)
     - [9.1 Controlled Components](#91-controlled-components)
     - [9.2 Uncontrolled Components（React大多情况下推荐用此类组件实现Form）](#92-uncontrolled-componentsreact大多情况下推荐用此类组件实现form)
+  - [10.](#10)
   - [11. 组合替代继承](#11-组合替代继承)
   - [12. React.Fragment](#12-reactfragment)
   - [13. Forwarding Refs](#13-forwarding-refs)
@@ -68,7 +69,8 @@
     - [22.7 Callback Hook: `useCallback`](#227-callback-hook-usecallback)
     - [22.8 Ref Hook: `useRef`](#228-ref-hook-useref)
     - [22.9 函数组件内使用`useState`，渲染更新逻辑是怎样的？](#229-函数组件内使用usestate渲染更新逻辑是怎样的)
-  - [23. 如何为`className`写多个值？](#23-如何为classname写多个值)
+  - [23. Refs and the DOM](#23-refs-and-the-dom)
+  - [24. 如何为`className`写多个值？](#24-如何为classname写多个值)
   - [Q&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
     - [2. 使用`FC`](#2-使用fc)
@@ -864,7 +866,7 @@ React发现A3是新增的，只需要渲染A3作为A的孩子即可。
 
 发现A1、A2对应的key相同，只有A0是新增的，渲染的性能会提高很多。
 
-### 8.2 但是为什么不建议用index呢？
+### 8.2 但是为什么不建议用`index`呢？
 
 如果对列表进行重新排序，只是改变了元素的顺序，而`key`用的是**index**，也就是说**新旧两棵树孩子节点对应的`key`还是相同的**，React认为没有变化。
 
@@ -971,6 +973,8 @@ React在组件**挂载时**会将DOM元素对象赋值给`current`属性；在**
 
 不要将`callback refs`的回调函数定义为*内联函数*，因为每次render都会创建一个函数的实例，所以React会调用两次，第一次给callback传null，第二次才是DOM元素。
 
+## 10. 
+
 ## 11. 组合替代继承
 
 JSX tag中的内容可作为一个特殊属性`children`传递给该component。
@@ -992,6 +996,9 @@ return <div> {props.children} </div>
 ## 12. React.Fragment
 
 ## 13. Forwarding Refs
+
+组件接收到一个`ref`，传递给它里面的孩子节点，这就叫做`forwarding`。
+
 外部组件或代码想要访问component内部的某个DOM或子组件，这种情形下使用*Forwarding refs*。
 
 16.3+可通过`React.fowardRef`定义一个component（记为A），该函数第2个参数为`ref`，即可通过这个`ref`关联到A中的子组件或DOM节点。
@@ -1369,9 +1376,13 @@ useMemo(() => fn, deps)
 
 ### 22.9 函数组件内使用`useState`，渲染更新逻辑是怎样的？
 
-## 23. 如何为`className`写多个值？
+## 23. Refs and the DOM
+
+## 24. 如何为`className`写多个值？
+
 
 ## Q&A
+
 ### 1. ts中的`React.FC`是啥？
 
 typescript中为*React Function Component*定义了类型，即描述React函数组件的类型。

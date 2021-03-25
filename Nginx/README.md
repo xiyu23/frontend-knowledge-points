@@ -1,4 +1,13 @@
-## 0. CMD
+# Learn Nginx 
+- [Learn Nginx](#learn-nginx)
+  - [1. CMD](#1-cmd)
+  - [2. location](#2-location)
+  - [3. server](#3-server)
+  - [4. nginx是如何处理一个请求的](#4-nginx是如何处理一个请求的)
+  - [4. `proxy_pass`是什么？](#4-proxy_pass是什么)
+
+
+## 1. CMD
 运行nginx可执行文件即可。
 
 如果已经运行，则可使用如下命令：
@@ -24,7 +33,7 @@
 >./nginx.exe
 
 
-## 1. location
+## 2. location
 
 语法：
 <pre>
@@ -64,7 +73,7 @@ http {
 }
 </pre>
 
-## 2. server
+## 3. server
 定义了nginx需要将请求转发给对应的server来处理。
 
 定义2个virtual server
@@ -82,7 +91,7 @@ http {
 }
 </pre>
 
-## 3. nginx是如何处理一个请求的
+## 4. nginx是如何处理一个请求的
 nginx拿着请求头中的`Host`在配置中匹配，找到应该由哪个server来处理，将请求转发给它。
 
 nginx tests only the request’s header field “Host” to determine which server the request should be routed to
