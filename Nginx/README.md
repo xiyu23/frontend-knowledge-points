@@ -1,4 +1,4 @@
-### 0. CMD
+## 0. CMD
 运行nginx可执行文件即可。
 
 如果已经运行，则可使用如下命令：
@@ -24,7 +24,7 @@
 >./nginx.exe
 
 
-### 1. location
+## 1. location
 
 语法：
 <pre>
@@ -64,7 +64,7 @@ http {
 }
 </pre>
 
-### 2. server
+## 2. server
 定义了nginx需要将请求转发给对应的server来处理。
 
 定义2个virtual server
@@ -82,9 +82,26 @@ http {
 }
 </pre>
 
-### 3. nginx是如何处理一个请求的
+## 3. nginx是如何处理一个请求的
 nginx拿着请求头中的`Host`在配置中匹配，找到应该由哪个server来处理，将请求转发给它。
 
 nginx tests only the request’s header field “Host” to determine which server the request should be routed to
+
+## 4. `proxy_pass`是什么？
+
+把请求转发给另一个服务器。
+
+例如：
+```
+location /some/path/ {
+    proxy_pass http://www.example.com/link/;
+}
+```
+
+当请求匹配到`/some/path`时，nginx会用`proxy_pass`指定代理服务器的`URI`(这里是`/link/`)替换匹配的`location`。
+
+如有个请求带有`URI`是`/some/path/page.html`，它会被代理给`http://www.example.com/link/page.html`。
+
+当然如果`proxy_pass`没有`URI`，那么请求中的整个`URI`都会被传递过去(the full request URI is passed)。
 
 
