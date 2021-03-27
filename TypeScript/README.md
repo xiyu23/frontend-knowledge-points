@@ -210,6 +210,156 @@ len = (<string>someVal).length;
 `Number`、`String`等是*boxed objects*（C#有个装箱的概念），它们都是对象；
 而`number`、`string`等是*primitive types*（基本值类型），他们都是值。
 
+### 2.13 `Anonymous Functions`(匿名函数)
+
+ts根据调用方式可以推断出匿名函数的参数类型，这种机制叫做*contextual typing*。
+
+比如一个数组中都是`string`，那么用`forEach`处理时，函数的参数就能被推断为`string`：
+
+```js
+const names = ["Alice", "Bob", "Eve"];
+
+// Contextual typing for function
+names.forEach(function (s) {
+  console.log(s.toUppercase()); // Property 'toUppercase' does not exist on type 'string'. Did you mean 'toUpperCase'?
+```
+
+### 2.14 `Optional Properties`(可选属性)
+
+不一定存在的属性，可以在声明的属性名之后加一个`?`，如
+
+```ts
+interface personName {
+  firstName: string;
+  lastName?: string; // may or may not exist
+}
+
+const yuhui = { firstName: yu };
+
+// 方法1：老式判断
+if (yuhui.lastName !== undefined) {
+  console.log(yuhui.lastName.toUpperCase());
+}
+
+// 方法2：js新语法
+console.log(yuhui?.lastName.toUpperCase());
+```
+
+### 2.15 `Union Type`
+
+多个类型可以用`|`连起来，来表示一种更大的类型。
+
+```ts
+function logID(id: number | string) {
+  console.log(`ID is ${id}`);
+}
+```
+
+**不过要注意的是**，传入的参数虽然可以接受多种类型，但是在用到这个参数的地方，注意它所能支持的方法，比如
+
+```ts
+function logID(id: number | string) {
+  console.log(`ID is ${id.toUpperCase()}`); // ❌ number并没有'toUpperCase'这个方法
+}
+```
+
+### 2.16 `Type alias`(类型别名)
+
+```ts
+type Point = { x: number, y: number };
+```
+
+它等价于如下的*匿名对象类型(anonymous object type)*：
+
+```ts
+let point: { x: number, y: number };
+```
+
+`type`的好处是一次定义处处使用。
+
+### 2.17 `type` vs `interface`
+
+|         | `type` | `interface` |
+|-|-|-|
+| 声明类型 | Yes | Yes |
+| 对已有类型扩展新类型 | Yes, `&` | Yes, `extends` |
+| 对已有类型新增属性 | No | Yes |
+
+两者都可来声明类型，但是区别主要体现在扩展和新增属性。
+
+- 扩展属性
+
+  用`type`扩展
+  ```ts
+  type Animal = {
+    prop1: string;
+  }
+  type Bear = Animal & {
+    prop2: boolean;
+  }
+
+  const bear = getBear();
+  bear.prop1;
+  bear.prop2;
+  ```
+
+  用`interface`扩展
+  ```ts
+  interface Animal {
+    prop1: string;
+  }
+
+  interface Bear extends Animal {
+    prop2: boolean;
+  }
+
+  const bear = getBear();
+  bear.prop1;
+  bear.prop2;
+  ```
+- 在已有的类型名上，新增属性（**`type`无法新增！**）  
+  用`interface`重复声明便是。
+  ```ts
+  interface Bear {
+    prop3: string;
+  }
+
+  const bear = getBear();
+  bear.prop1;
+  bear.prop2;
+  bear.prop3;
+  ```
+
+### 2.18 `Type Assertions`(强制类型转换)
+
+当需要转换成一个你确定的类型时，可用`as`或`<>`来转换类型。
+
+```ts
+const elemInput = document.getElementById('inputID') as HTMLInputElement;
+
+// 等价于
+
+const elemInput = <HTMLInputElement>document.getElementById('inputID');
+```
+
+### 2.19 `Literal Types`(字面量类型)
+
+这，也是一种类型！
+
+```ts
+type compRes = -1 | 0 | 1; // 只能表示这几个值
+type alignment = 'left' | 'center' | 'right'; // 只能是这几个字符串值
+```
+
+```ts
+function foo(align: 'left' | 'center' | 'right');
+function bar(align: alignment);
+
+function foo(a: number, b: number): -1 | 0 | 1; // 这里"-1 | 0 | 1"也是类型，只不过是匿名类型，表示返回值必须是这三种。
+```
+
+### 2.20 
+
 ## 3. Interfaces(接口)
 
 ### 3.1 声明
