@@ -19,3 +19,16 @@ const addTodoAction = {
 
 ### 2.2 `Action Creators`
 
+## 3. `configureStore` from `@reduxjs/toolkit`
+
+```js
+import { configureStore } from '@reduxjs/toolkit'
+import counterReducer from '../features/counter/counterSlice'
+
+export default configureStore({
+  reducer: {
+    counter: counterReducer
+  }
+})
+```
+

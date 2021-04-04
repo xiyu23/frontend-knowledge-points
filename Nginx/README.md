@@ -113,4 +113,25 @@ location /some/path/ {
 
 当然如果`proxy_pass`没有`URI`，那么请求中的整个`URI`都会被传递过去(the full request URI is passed)。
 
+## 5. `upstream`
+
+定义一组server，可以在其他指令定义时引用。
+
+```
+upstream backend {
+    server backend1.example.com       weight=5;
+    server backend2.example.com:8080;
+    server unix:/tmp/backend3;
+
+    server backup1.example.com:8080   backup;
+    server backup2.example.com:8080   backup;
+}
+
+server {
+    location / {
+        proxy_pass http://backend;
+    }
+}
+```
+## 6. 
 

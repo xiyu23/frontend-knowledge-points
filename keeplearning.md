@@ -1352,6 +1352,8 @@ var obj3 = {
 >
 > 而这样的数据对象，就可以称之为**Store**。
 
+See `...`([Spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax))
+
 
 49. [设计模式]前端中的设计模式
 单例、观察者、工厂、命令、代理（比如每张图片加载完成之前设置个loading）、职责链（比如根据薪资计算税率、订单购买）
