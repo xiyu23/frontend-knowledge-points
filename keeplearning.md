@@ -1299,6 +1299,59 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Obje
 
 ### 48.3 函数解构
 
+### 48.4 解构内嵌引用类型(destructing nested objects)
+
+> 结论：解构仅仅是**unpack**，即取出每个`(key, value)`对，对于`value`是引用类型的，仍然引用的是同一个对象。
+
+比如有如下对象，
+
+```js
+var obj1 = {
+  a: 1,
+  b: {
+    name: "yuhui",
+    favors: ["nikon", "dota", "aircraft"],
+    times: {
+      birth: "1991/09/15",
+      marry: "2020/09/24",
+    },
+  },
+  c: ["clean room", "have dinner", "watch movie", "sleep"],
+};
+```
+
+现需要修改`b.name = 'xiaoxiao'`，由于`b`是一个对象，所以**需要再对`b`解构(#1)，而后用新的`name`覆盖(#2)**：
+
+```js
+var obj2 = {
+  ...obj1,
+  b: {
+    ...obj1.b, // #1
+    name: "xiaoxiao", // #2
+  },
+};
+```
+
+如果要修改`b.favors`这个数组，新增一个元素呢？同样地，需要展开原数组再添加：
+
+```js
+var obj3 = {
+  ...obj2,
+  b: {
+    ...obj2.b,
+    favors: [...obj2.b.favors, "coding"],
+  },
+};
+```
+
+这样做的好处是什么？（***这也就是`Redux`的原理***）
+
+> 针对对象的每次修改结果，都可以看作是一个**对象快照**，每个对象快照都不一样，它们都可以用于描述**View**该如何展现。
+>
+> 而每一次修改，都可以称之为**Action**，它代表需要对数据做怎样的变更。经过很多次**Action**，我们的**View**也会随着对象的变化而变化。
+>
+> 而这样的数据对象，就可以称之为**Store**。
+
 
 49. [设计模式]前端中的设计模式
 单例、观察者、工厂、命令、代理（比如每张图片加载完成之前设置个loading）、职责链（比如根据薪资计算税率、订单购买）
