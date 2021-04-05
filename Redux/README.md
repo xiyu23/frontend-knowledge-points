@@ -34,12 +34,16 @@ function reducer(state, action) {
 
 原则：
 - 不可直接修改`state`，必须基于`原state`和`action`来计算`新state`
-- 不能做异步操作和其它副作用(`side effects`如何理解？)
+- **不能做异步操作**和其它副作用(`side effects`如何理解？)
 
 tips:
 - 手写Reducer中state的***immutable***更新逻辑非常容易出错而且很痛苦，[Redux Toolkit](https://redux.js.org/tutorials/fundamentals/part-8-modern-redux)可以拯救！
 
+**问题**：
 
+1、为什么不能做异步操作？
+
+A. 是因为reducer并没有被异步调用（不是`async`声明的），所以在
 
 
 ### 2.4 `Action Creator`
@@ -95,7 +99,28 @@ const selectCounterValue = state => state.counter;
 console.log(selectCounterValue(store.getState()));
 ```
 
-### 2.7 `combineReducers`
+### 2.7 `Slices`
+
+概念：`slices`就是多个`reducer`的集合而已；而一个`slice`则表示一种`reducer`，负责对一种范畴内的属性进行更新。
+
+因为Redux只能有1个**root reducer**，因此多个`reducer`可以合并起来：
+
+```js
+import { configureStore } from '@reduxjs/toolkit'
+import usersReducer from '../features/users/usersSlice'
+import postsReducer from '../features/posts/postsSlice'
+import commentsReducer from '../features/comments/commentsSlice'
+
+export default configureStore({
+  reducer: {
+    users: usersReducer,
+    posts: postsReducer,
+    comments: commentsReducer
+  }
+})
+```
+
+### 2.8 `combineReducers`
 
 作用：主要是省事儿。将多个reducer合并，在创建store时传入。
 
@@ -133,6 +158,108 @@ const store = configureStore({
 });
 ```
 
+### 2.9 `thunk`(+1)
+
+通用概念：一个子程序，用于向另一个子程序中注入某些计算。
+
+redux中的概念：一种特殊的redux函数，可以包含异步逻辑。它需要用2个函数来定义，
+
+**内部thunk funciton**接收`dispatch`、`getState`参数；
+
+**外部creator funciton**将内部的这个函数返回。
+
+语法：
+
+```js
+export function outsideThunkCreatorFunction(customeParam1, customeParam2) {
+  return async function insideThunkFunction(dispatch, getState) {
+    // do something asynchronous in thunk
+    // dispatch an action when we get the response back
+    dispatch(action);
+  };
+}
+```
+
+例子：
+
+调用`incrementAsync`这个*thunk funciton creator*，将会dispatch一个*thunk function*，这个函数就是
+
+```js
+dispatch => {
+  // 1. do sth asynchronous
+  // 2. dispatch an action
+}
+```
+
+```js
+// thunk
+export const incrementAsync = amount => dispatch => {
+  setTimeout(() => {
+    dispatch(incrementByAmount(amount))
+  }, 1000)
+}
+
+// dispatch
+store.dispatch(incrementAsync(5))
+```
+
+问题：
+
+1、`store.dispatch`为啥可以接收一个函数？
+
+### 2.10 `useSelector`
+
+> 可以用redux自定义的hook `useSelector` 来在React组件中获取store中的数据。
+
+```js
+import { useSelector } from 'react-redux'
+
+function myReactComponent() {
+  const counter = useSelector(state => state.counter);
+  console.log(`counter value is: ${counter}`);
+}
+```
+
+**每当redux store更新后，`useSelector`都会再运行一次我们提供的*selector*函数，如果值发生了变化，就会触发react组件重新渲染以达到视图的更新。**
+
+> Any time an action has been dispatched and the Redux store has been updated, useSelector will re-run our selector function.
+
+**问题**：
+
+1、store更新后，`useSelector`是怎么触发react组件更新的呢？
+
+### 2.11 `useDispatch`
+
+目的：在无法拿到`store`的引用时，用它来发送action来触发store的更新。
+
+```js
+import { useDispatch } from 'react-redux'
+
+function myReactComponent() {
+  const counter = useSelector(state => state.counter);
+  console.log(`counter value is: ${counter}`);
+
+  const dispatch = useDispatch();
+  dispatch(incrementBy(2));
+}
+```
+
+### 2.12 `Provider`
+
+作用：包裹`<App>`，将`Redux store`传入，以使得React组件树中的组件都能通过hooks引用到`store`。
+
+```tsx
+import store from './app/store'
+import { Provider } from 'react-redux'
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+)
+```
+
 ## 3. @reduxjs/toolkit基本概念
 
 ### 3.1 `configureStore`
@@ -156,24 +283,60 @@ export default configureStore({
 })
 ```
 
-### 3.2 `slices`
+### 3.2 `createSlice`
 
-概念：`slices`就是多个`reducer`的集合而已；而一个`slice`则表示一种`reducer`，负责对一种范畴内的属性进行更新。
+此函数就是替代痛苦地手写reducer更新逻辑的语法糖。
 
-因为Redux只能有1个**root reducer**，因此多个`reducer`可以合并起来：
+比如要更新内嵌比较深的属性`a.b.c[1] = 3`，纯手写更新逻辑时非常复杂且容易出错：
 
 ```js
-import { configureStore } from '@reduxjs/toolkit'
-import usersReducer from '../features/users/usersSlice'
-import postsReducer from '../features/posts/postsSlice'
-import commentsReducer from '../features/comments/commentsSlice'
+function reducerWithHand(state, action) {
+  return {
+    ...state,
+    a: {
+      ...a,
+      b: {
+        ...b,
+        c: [...state.a.b.c.slice(0), 3, ...state.a.b.c.slice(2)],
+      },
+    },
+  };
+}
+```
 
-export default configureStore({
-  reducer: {
-    users: usersReducer,
-    posts: postsReducer,
-    comments: commentsReducer
+在`createSlice`中可以用以下语法来写更新逻辑：
+
+```js
+function reducerWithImmer(state, action) {
+  state.a.b.c[1] = 3;
+}
+```
+
+完整的`createSlice`例子：
+
+```js
+import { createSlice } from '@reduxjs/toolkit'
+
+export const counterSlice = createSlice({
+  name: 'counter',
+  initialState: {
+    value: 0
+  },
+  // reducers中的这些函数，可以书写更加易读的更新store语法
+  reducers: {
+    increment: state => {
+      // Redux Toolkit allows us to write "mutating" logic in reducers. It
+      // doesn't actually mutate the state because it uses the immer library,
+      // which detects changes to a "draft state" and produces a brand new
+      // immutable state based off those changes
+      state.value += 1
+    },
+    decrement: state => {
+      state.value -= 1
+    },
+    incrementByAmount: (state, action) => {
+      state.value += action.payload
+    }
   }
 })
 ```
-
