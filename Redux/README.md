@@ -357,4 +357,61 @@ export const counterSlice = createSlice({
     }
   }
 })
+
+export const {
+  increment,
+  decrement,
+  incrementByAmount,
+} = counterSlice.actions;
 ```
+
+:waring: 注意！上面这些`reducer`函数接收的参数`state`表示的是当前`slice`所负责数据，即`state`是名为`counter`属性对应的数据(`{ value: xx }`)，而不是redux store这个整体的state。
+
+`createSlice`函数的返回值是一个对象，可以获取`actions`和`reducer`：
+
+- `actions`  
+  **作用**： UI可经由此拿到actions，而后去派发事件。
+  ```js
+  const {
+    increment,
+    decrement,
+    incrementByAmount,
+  } = counterSlice.actions;
+  ```
+  拿到这些**Action Creator**，这样就可以在UI处派发事件了：
+  ```tsx
+  // view.tsx
+  // store.dispatch
+  import { useDispatch } from 'react-redux'
+
+  // action creator
+  import { increment, incrementByAmount } from './counterSlice'
+
+  const dispatch = useDispatch()
+
+  // 派发事件给store，让counter+1
+  dispatch(increment());
+  
+  // 派发事件给store，让counter+5
+  // incrementByAmount是一个action creator，返回形如:
+  // { type: 'counter/incrementByAmount', payload: 5 }
+  dispatch(incrementByAmount(5));
+  ```
+
+- `reducer`  
+  **作用**：创建store的时候需要传入reducer，这里表示当前*feature state*所对应的reducer，传入以供`configureStore`使用。  
+  ```js
+  import { configureStore } from '@reduxjs/toolkit'
+  import { counterSlice } from './counterSlice'
+
+  // 拿到counter数据对应的reducer
+  const counterReducer = counterSlice.reducer;
+
+  // 配置到store
+  export default configureStore({
+    reducer: {
+      counter: counterReducer,
+      // more...
+    },
+  })
+  ```
