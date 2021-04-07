@@ -12,6 +12,8 @@
 
 通过镜头测光(Through The Lens, TTL)。
 
+TTL模式是由相机和闪光灯决定输出光量的。相机与闪光灯在测量正确的曝光后，共同决定闪光灯的输出。
+
 ## 4. 预闪测光(`i-TTL`)
 
 `i-TTL`是尼康定义的，指在闪光灯闪烁前进行*预测光*。
@@ -24,4 +26,60 @@
 
 ![img](./pinshan.jpeg)
 
-## 6. 
+## 6. GN60
+
+闪光灯指数(Guide Numbers)，越大则光量越大。一般都会以ISO100的情况下，标出GN值。
+
+```js
+GN = 光圈值 * 闪光有效距离(m)
+
+// e.g 光圈给f/4时，有效闪光距离为15米
+GN60 = f/4 * 15m
+```
+
+```js
+新GN指数 = 原GN指数 * Math.sqrt( ISO / 100 )
+
+// e.g
+GN60 = GN60 * Math.sqrt( ISO100 / 100)
+
+// 当把ISO调整到400时，GN指数就变成了GN120，即闪光指数翻倍了
+GN120 = GN60 * Math.sqrt( ISO400 / 100)
+```
+
+## 7. 高速同步
+
+如果快门速度比闪光同步速度慢，整个画面都能接收到闪光灯的光线—闪光同步；
+
+如果快门速度比闪光同步速度快，画面**只能部分**接收到闪光灯的光线—高速同步。
+
+### 7.1 快门工作原理
+
+慢速：
+
+![gif](shutter-theory.gif)
+
+不同快门速度对比：
+
+![gif](shutter-theory-2.gif)
+
+### 7.2 闪光灯与快门
+
+普通同步与高速同步幕帘快门工作的区别：
+
+![jpg](shutter-theory-3.jpg)
+
+![jpg](shutter-theory-4.jpg)
+
+> 注意：闪光灯并不是持续发光的，而是频闪的。
+
+### 7.3 高速同步有多重要？
+
+当逐步提高快门速度时（一般超过`1/250s`就要开启高速闪光同步了），一旦闪光灯速度比快门速度慢，就会有如下效果：
+
+![jpg](shutter-theory-5.jpg)
+![jpg](shutter-theory-6.jpg)
+![jpg](shutter-theory-7.jpg)
+![jpg](shutter-theory-8.jpg)
+
+ref: https://zhuanlan.zhihu.com/p/25947723
