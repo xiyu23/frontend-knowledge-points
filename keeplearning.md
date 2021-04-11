@@ -1799,6 +1799,7 @@ import CAR_SIZE from './a.js' // CAR_SIZE将会是a.js中的默认导出，即SI
     import *defaultExport* from 'module-name'
     import { *export1*, *export2* as *alias2*, ...  } from 'module-name'
     import * as *name* from 'module-name'
+    import 'module-name'
 
 示例：
 
@@ -1806,6 +1807,7 @@ import CAR_SIZE from './a.js' // CAR_SIZE将会是a.js中的默认导出，即SI
 import bar from 'b.js'; // 使用b.js的默认导出，并起名为'bar'
 import { SIZE, hello as hi } from 'b.js'; // 使用b.js导出的SIZE，以及hello（但起了别名，本模块中用'hi'代替）
 import * as ModuleB from 'b.js'; // 导入b.js所有的导出，用一个'ModuleB'来限定（相当于ModuleB是一个namespace，如果b.js导出了foo，则需要用Module.foo来引用）
+import 'myModule.js'; // 仅仅执行这个module的代码，并不导入任何东西
 ```
 
 注意：如果使用
@@ -1814,11 +1816,32 @@ import * as ModuleB from 'b.js'; // 导入b.js所有的导出，用一个'Module
 
 则也会包含*default export*的，可以通过`name.default`来引用默认导出。
 
-### 66.2 原理：`import`是怎么导入的？
+### 66.2 dynamic import: `import()`
+
+当在满足某种条件时才会加载模块，可以用**动态导入**，它返回一个*promise*：
+
+```js
+import('/modules/my-module.js')
+  .then((module) => {
+    // Do something with the module.
+  });
+```
+
+注意需要解构，把`default`名字修改成想要的：
+
+```js
+(async () => {
+  if (somethingIsTrue) {
+    const { default: myDefault, foo, bar } = await import('/modules/my-module.js');
+  }
+})();
+```
+
+### 66.3 原理：`import`是怎么导入的？
 
 
 
-### 66.3
+### 66.4
 
 遇到的问题：
 1. 错误：Uncaught SyntaxError: Cannot use `import` statement outside a **module**
