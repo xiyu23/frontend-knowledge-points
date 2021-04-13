@@ -14,7 +14,11 @@
 
 若页面内容需要预先查一波数据，则可以用 nextjs 提供的`getStaticProps`。
 
-在页面中，通过导出一个叫做`getStaticProps`的`async`函数，**在 nextjs 构建时，此函数会被调用**，随后在预渲染阶段，会将数据通过页面的`props`属性传递给页面使用。
+在页面中，通过导出一个叫做`getStaticProps`的`async`函数，在 nextjs **构建**时，此函数会被调用，随后在预渲染阶段，会将数据通过页面的`props`属性传递给页面使用。
+
+在构建时，nextjs为服务端静态渲染的页面生成HTML文件和JSON文件，JSON文件保存执行此页面的`getStaticProps`函数的结果。
+
+当在浏览器端需要路由到这个页面时，直接从JSON文件读取数据交给页面渲染即可。
 
 > 在`production`模式下，只会在*build time*运行`getStaticProps`
 >

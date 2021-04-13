@@ -462,11 +462,7 @@ refs:
 
 对于在function中的`this`，如果非严格模式下，`this`指向global object(即`window`)，严格模式下，`this`在进入运行作用域内时被设定，且不会再被改变(the value of `this` remains at whatever it was set to when entering the *execution context*)。
 ## 13. prototypal inheritance(原型继承)
-Each object has a private property which holds a link to another object called its ***prototype***.
-
-每个对象都有一个私有属性，它维持了一个引用，指向另一个对象。
-
-这"另一个对象"就被称之为前面那个对象的***prototype***。
+每个对象都有一个私有属性，它维持了一个引用，指向另一个对象，这个对象就被称之为前面那个对象的***prototype***。
 
 *`__proto__`* contains the object's constructor's prototype object.
 
@@ -488,7 +484,7 @@ And *`xiyu.__proto__.__proto__.__proto__`* is `null`.
 > 
 > The *prototype* property's value **is an object**, which is basically a ***bucket*** for storing properties and methods that we want to be inherited by objects further down the prototype chain.
 
-在constructor function的*prototype*属性上定义methods  
+在constructor function的*prototype*z属性上定义methods  
 在constructor中定义properties
 
 **这样代码更加易读。**
@@ -2195,9 +2191,9 @@ var a = {}; // 从Object.prototype继承，a会有Object的一系列方法
 var a = Object.create(null); // 它没有
 
 
-## 73. windows中的剪贴板是如何工作的？
+## 75. windows中的剪贴板是如何工作的？
 
-### 73.1 
+### 75.1 
 
 剪贴板中的内存对象可以是任何格式，每种格式由一个`uint`来表示（定义在`Winuser.h`）。
 
@@ -2227,7 +2223,7 @@ A memory object on the clipboard can be in any data format, called a clipboard f
 
 ref: https://docs.microsoft.com/en-us/windows/win32/dataxchg/clipboard
 
-## 74. `defineProperty`
+## 76. `defineProperty`
 
 `Object`上的静态方法，可添加或者修改属性。
 
@@ -2248,8 +2244,35 @@ Object.defineProperty(obj, prop, descriptor)
 
 对于access descriptor而言，`get`方法中的`this`指向那个通过它访问`prop`的对象，即`obj`（虽然`prop`可能定义在父类，但`this`并不会指向父类）。
 
+## 77. HTTP Header
 
+## 78. CORS(Cross-Origin Resource Sharing)跨域
 
+浏览器不允许从javascript脚本发起跨域请求。
+
+web应用只能请求同域名(**Same Origin**)的资源，除非其他域名资源的服务器设置了CORS响应包头。
+
+`<iframe>`、`<img>`、`<a>`、`<script>`等是允许通过src来指定url访问跨域资源的。
+
+但浏览器不允许javascript发起跨域请求，不过也可能是请求的确发出了，但被浏览器拦截。（对！）
+
+CORS是一个允许服务器通过设置HTTP Response的Header，来告知浏览器可跨域访问的机制。即如果foo.example向bar.example发送跨域请求，此时bar.example可以通过设置`Access-Control-Allow-Origin`来告诉foo.example，表明是否可以访问我的资源。这个响应实际上是已经发出了，而且如果服务端没有拒绝，则通过抓包工具是可以看到Response有返回的，只不过是被***浏览器***拒绝了！这就是禁止了跨域。这其实是浏览器的机制！
+
+### 78.1 `Access-Control-Allow-Origin`
+
+如下表示允许来自任何域名的请求访问我的资源。
+
+```
+Access-Control-Allow-Origin: *
+```
+
+### 78.2 `Access-Control-Allow-Credentials`
+
+和`XMLHttpRequest.withCredentials`搭配使用（当HTTP请求的`withCredentials`的值是*include*时），告诉浏览器是否把响应回包暴露给javascript。
+
+```
+Access-Control-Allow-Credentials: true
+```
 
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
@@ -2432,10 +2455,7 @@ jsonp：指明在URL中QueryString中的key："callback"，默认为"callback=?"
 jsonpCallback: 指明JSONP的回调函数名。
 JSONP方式，服务器返回javascript，并在ajax的success回调之前，会将Response中的JSON传给jsonpCallback指明的回调函数，并调用该函数。
 If jsonp is specified, $.ajax() will automatically append a query string parameter of (by default) callback=? to the URL. The jsonp and jsonpCallback properties of the settings passed to $.ajax() can be used to specify, respectively, the name of the query string parameter and the name of the JSONP callback function. The server should return valid JavaScript that passes the JSON response into the callback function. $.ajax() will execute the returned JavaScript, calling the JSONP callback function, before passing the JSON object contained in the response to the $.ajax() success handler.
-7.CORS(Cross-Origin Resource Sharing)跨域
-<iframe>、<img>、<a>、<script>等是允许通过src来指定url访问跨域资源的。
-但浏览器不允许javascript发起跨域请求，不过也可能是请求的确发出了，但被浏览器拦截。（对！）
-CORS是一个允许服务器通过设置HTTP Response的Header，来告知浏览器可跨域访问的机制。即如果foo.example向bar.example发送跨域请求，此时bar.example可以通过设置Access-Control-Allow-Origin来告诉foo.example，表明是否可以访问我的资源。这个响应实际上是已经发出了，而且如果服务端没有拒绝，则通过抓包工具是可以看到Response有返回的，只不过是被***浏览器***拒绝了！这就是禁止了跨域。这其实是浏览器的机制！
+
 8.get vs post
 get: 数据通过url querystring发送给服务端，大小有限制（2k左右吧），一般服务器还会log下来，所以不适合存放敏感信息
 post: 数据放在http body，无大小限制
