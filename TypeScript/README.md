@@ -13,12 +13,21 @@
   - [2.10 Object](#210-object)
   - [2.11 Type Assertions](#211-type-assertions)
   - [2.12 为啥不用大写的，怎么都是小写呢？](#212-为啥不用大写的怎么都是小写呢)
+  - [2.13 `Anonymous Functions`(匿名函数)](#213-anonymous-functions匿名函数)
+  - [2.14 `Optional Properties`(可选属性)](#214-optional-properties可选属性)
+  - [2.15 `Union Type`](#215-union-type)
+  - [2.16 `Type alias`(类型别名)](#216-type-alias类型别名)
+  - [2.17 `type` vs `interface`](#217-type-vs-interface)
+  - [2.18 `Type Assertions`(强制类型转换)](#218-type-assertions强制类型转换)
+  - [2.19 `Literal Types`(字面量类型)](#219-literal-types字面量类型)
+  - [2.20](#220)
 - [3. Interfaces(接口)](#3-interfaces接口)
   - [3.1 声明](#31-声明)
   - [3.2 或有字段](#32-或有字段)
   - [3.3 只读](#33-只读)
 - [4、函数](#4函数)
   - [4.1、可选参数](#41可选参数)
+  - [4.2、返回一个`tuple`](#42返回一个tuple)
 - [10.声明抽象类、抽象方法](#10声明抽象类抽象方法)
 - [11.类方法、成员默认为`public`](#11类方法成员默认为public)
 - [12.如何声明一个不允许被子类覆盖的父类方法？](#12如何声明一个不允许被子类覆盖的父类方法)
@@ -30,6 +39,7 @@
 - [15. `type` Aliases](#15-type-aliases)
 - [16. `Intersection Types`](#16-intersection-types)
 - [17. `.d.ts`文件是什么？](#17-dts文件是什么)
+- [18. 如果一个函数返回值类型可能为`null`，那该如何表达呢？](#18-如果一个函数返回值类型可能为null那该如何表达呢)
   - [1. npm](#1-npm)
   - [2. npm的选项](#2-npm的选项)
 
@@ -88,6 +98,19 @@ let list2: Array<number> = [1, 2, 3];
 let tuple: [string, number, number];
 tuple = ['yuhui', 177, 66]; // correct
 tuple2 = ['yuhui', 177, 66]; // incorrect
+
+// returns an array which is decorated as tuple
+function getUserInfo(name: string): [string, number] {
+  if (name === 'yuhui') {
+    return [name, 177];
+  }
+
+  if (name === 'yunhui') {
+    return [name, 182];
+  }
+
+  return [name, 0];
+}
 ```
 
 ### 2.6 Enum
@@ -402,6 +425,24 @@ interface Person {
 ## 4、函数
 
 ### 4.1、可选参数
+
+在参数名后面加个`?`即可，如"lastName`?`"：
+
+```ts
+function buildName(firstName: string, lastName?: string) {
+  if (lastName) return firstName + " " + lastName;
+  else return firstName;
+}
+```
+
+### 4.2、返回一个`tuple`
+
+```ts
+function getUserInfo(name: string): [string, number] {
+  return [name, 177];
+}
+```
+
 
 
 1. 编译.ts为.js
