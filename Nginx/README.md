@@ -5,6 +5,8 @@
   - [3. server](#3-server)
   - [4. nginx是如何处理一个请求的](#4-nginx是如何处理一个请求的)
   - [4. `proxy_pass`是什么？](#4-proxy_pass是什么)
+  - [5. `upstream`](#5-upstream)
+  - [6.](#6)
 
 
 ## 1. CMD

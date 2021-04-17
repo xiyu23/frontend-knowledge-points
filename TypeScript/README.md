@@ -13,12 +13,23 @@
   - [2.10 Object](#210-object)
   - [2.11 Type Assertions](#211-type-assertions)
   - [2.12 为啥不用大写的，怎么都是小写呢？](#212-为啥不用大写的怎么都是小写呢)
+  - [2.13 `Anonymous Functions`(匿名函数)](#213-anonymous-functions匿名函数)
+  - [2.14 `Optional Properties`(可选属性)](#214-optional-properties可选属性)
+  - [2.15 `Union Type`](#215-union-type)
+  - [2.16 `Type alias`(类型别名)](#216-type-alias类型别名)
+  - [2.17 `type` vs `interface`](#217-type-vs-interface)
+  - [2.18 `Type Assertions`(强制类型转换)](#218-type-assertions强制类型转换)
+  - [2.19 `Literal Types`(字面量类型)](#219-literal-types字面量类型)
+  - [2.20 Non-null Assertion Operator (Postfix!)](#220-non-null-assertion-operator-postfix)
 - [3. Interfaces(接口)](#3-interfaces接口)
   - [3.1 声明](#31-声明)
   - [3.2 或有字段](#32-或有字段)
   - [3.3 只读](#33-只读)
 - [4、函数](#4函数)
   - [4.1、可选参数](#41可选参数)
+  - [4.2、声明一个函数类型](#42声明一个函数类型)
+  - [4.3、泛型函数(generic function)](#43泛型函数generic-function)
+  - [4.4、为泛型函数指明类型](#44为泛型函数指明类型)
 - [10.声明抽象类、抽象方法](#10声明抽象类抽象方法)
 - [11.类方法、成员默认为`public`](#11类方法成员默认为public)
 - [12.如何声明一个不允许被子类覆盖的父类方法？](#12如何声明一个不允许被子类覆盖的父类方法)
@@ -30,6 +41,7 @@
 - [15. `type` Aliases](#15-type-aliases)
 - [16. `Intersection Types`](#16-intersection-types)
 - [17. `.d.ts`文件是什么？](#17-dts文件是什么)
+- [18. 如果一个函数返回值类型可能为`null`，那该如何表达呢？](#18-如果一个函数返回值类型可能为null那该如何表达呢)
   - [1. npm](#1-npm)
   - [2. npm的选项](#2-npm的选项)
 
@@ -358,7 +370,16 @@ function bar(align: alignment);
 function foo(a: number, b: number): -1 | 0 | 1; // 这里"-1 | 0 | 1"也是类型，只不过是匿名类型，表示返回值必须是这三种。
 ```
 
-### 2.20 
+### 2.20 Non-null Assertion Operator (Postfix!)
+
+当确认一个变量不会为`null`或`undefined`时，可以在后面加`!`来表达“它一定不会是`null`/`undefined`"。
+
+```ts
+function liveDangerously(x?: number | undefined) {
+  // No error
+  console.log(x!.toFixed());
+}
+```
 
 ## 3. Interfaces(接口)
 
@@ -403,6 +424,82 @@ interface Person {
 
 ### 4.1、可选参数
 
+在参数名后面跟`?`。
+
+```ts
+function foo(a: number, b?: number)
+```
+
+### 4.2、声明一个函数类型
+
+```ts
+function hi(greetFn: (text: string) => void) {
+  greetFn('hi');
+}
+
+// 接收一个string类型参数text，没有返回值
+type GreetFn = (text: string) => void;
+function bar(greetFn: GreetFn) {
+  greetFn('hi');
+}
+```
+
+### 4.3、泛型函数(generic function)
+
+函数名后跟`<YourTypeName>`，类似于C++：
+```ts
+function firstElement<Type>(arr: Type[]): Type {
+  return arr[0];
+}
+```
+
+也可以在希望类型都具有一定特性时，用`extends`来加以限定：
+
+```ts
+function getLongerValue<Type extends { length: number }>(val1: Type, val2: Type): Type {
+  return val1.length > val2.length ? val1 : val2;
+}
+```
+
+即`val1`、`val2`都一定有`length`属性。
+
+:warning: **泛型函数的返回值类型**
+
+`#1`是错误的，因为函数声明了会返回一个类型为`Type`的值。
+
+如果`#1`这样是合法的，那么调用者取到这个值`{ length: xx }`就会按照`Type`类型来处理，必然会有问题。
+
+```ts
+function minimumLength<Type extends { length: number }>(
+  obj: Type,
+  minimum: number
+): Type {
+  if (obj.length >= minimum) {
+    return obj;
+  } else {
+    return { length: minimum }; // #1
+```
+
+比如：
+```ts
+const arr = minimumLength([1,2,3], 6); 
+// arr is { length: 6 }
+arr.push(4); // ops! crashes here.
+```
+
+### 4.4、为泛型函数指明类型
+
+```ts
+function combine<Type>(arr1: Type[], arr2: Type[]): Type[] {
+  return arr1.concat(arr2);
+}
+
+// wrong, 因为两个数组类型不一样
+const res = combine([1,2,3], ['hi', 'hello']);
+
+// corret
+const res = combine<number | string>([1,2,3], ['hi', 'hello']);
+```
 
 1. 编译.ts为.js
 $ tsc hello.ts
