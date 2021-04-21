@@ -15,6 +15,7 @@ npm i redux
   - [2.10 `useSelector`](#210-useselector)
   - [2.11 `useDispatch`](#211-usedispatch)
   - [2.12 `Provider`](#212-provider)
+  - [2.13 `connect`](#213-connect)
 - [3. @reduxjs/toolkit基本概念](#3-reduxjstoolkit基本概念)
   - [3.1 `configureStore`](#31-configurestore)
   - [3.2 `createSlice`](#32-createslice)
@@ -277,6 +278,55 @@ ReactDOM.render(
   document.getElementById('root')
 )
 ```
+
+### 2.13 `connect`
+
+**React-Redux**中的API，用于将**React UI**和**Redux Store**连接起来。
+
+其实避免在UI中手写从store取数据和listen等。
+
+> Its here for you to read values from the Redux store (and re-read the values when the store updates).
+
+connect原型：
+```ts
+function connect(mapStateToProps, mapDispatchToProps): function
+```
+
+- mapStateToProps  
+  一个函数，每当`store`变化时就会被调用，返回你所需要的数据对象，它会被传入给你的组件   
+  ```ts
+  connect(state => ({ counter: state.counter }));
+  ```
+- mapDispatchToProps  
+  函数或者对象，要返回**Action Creators**。  
+  ```ts
+  // 对象（推荐，因为写起来简单）
+  connect(null, {
+    increment: num => ({ type: 'ADD', payload: num }),
+    decrement: num => ({ type: 'SUB', payload: num }),
+  });
+  ```
+
+`connect`返回一个函数，你需要给这个函数传参，参数就是**要被包裹的组件**。
+
+```ts
+// `connect` returns a new function that accepts the component to wrap:
+const connectToStore = connect(mapStateToProps, mapDispatchToProps)
+
+// and that function returns the connected, wrapper component:
+const ConnectedComponent = connectToStore(Component)
+```
+
+而后React组件树中，**Component**就会被包裹起来：
+
+```tsx
+<Connect(AddTodo)>
+  <AddTodo>
+  </AddTodo>
+<Connect(AddTodo) />
+```
+
+此时被包裹的组件`AddTodo`就能接收到props：`increment` 和 `decrement`。
 
 ## 3. @reduxjs/toolkit基本概念
 
