@@ -1376,6 +1376,23 @@ useMemo(() => fn, deps)
 
 ### 22.9 函数组件内使用`useState`，渲染更新逻辑是怎样的？
 
+`useState`创建一个闭包，返回一个数组`[state, setState]`。
+
+`state`引用闭包内的变量，可以使用`setState`来修改这个变量，触发组件重新渲染，再次执行到`useState`时，由于之前已维护了变量，这次调用并不会让state重置，类似于：
+
+```js
+let _val;
+useState(initialValue) {
+  _val = _val || initialValue // assign anew every run
+  function setState(newVal) {
+    _val = newVal
+  }
+  return [_val, setState]
+}
+```
+
+相当于啥都不会发生。（如果当前值是false，而初始值是true，岂不是渲染后会变成true？？）
+
 ## 23. Refs and the DOM
 
 ## 24. 如何为`className`写多个值？

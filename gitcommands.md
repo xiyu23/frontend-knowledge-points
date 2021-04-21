@@ -1,5 +1,10 @@
 ### 1. 将一个目录初始化为git repo
+    # 记得先在git创建一个仓库，而后在本地工程目录下，依次执行下面的命令：
     $ git init
+    $ git add .
+    $ git commit -m "init my repo"
+    $ git remote add <name> <url>  
+    $ git push -u origin master
 
 ### 2. 将文件添加到版本控制（从[工作区]添加到stage[暂存区]）
     $ git add <file1> <file2>
