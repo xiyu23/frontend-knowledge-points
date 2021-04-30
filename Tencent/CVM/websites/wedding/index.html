@@ -1,0 +1,122 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      box-sizing: border-box;
+      position: relative;
+      /* display: flex;
+      align-items: center;
+      justify-content: center; */
+      background-image: url(./background.jpg);
+      background-repeat:  no-repeat;
+      background-position: center;
+      background-size: cover;
+      margin: 0px;
+    }
+
+    .footer {
+      max-width: 80%;
+      position: fixed;
+      bottom: 34px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      font-size: 12px;
+    }
+
+    .music-title {
+      height: 28px;
+      line-height: 28px;
+      color: white;
+    }
+
+    .idays {
+      top: 40px;
+      position: relative;
+      text-align: center;
+      font-size: 1.2rem;
+      animation: colorchange 10s linear 0s infinite;
+      font-family: Consolas;
+    }
+
+    @media screen and (max-width: 320px) {
+      .idays {
+        font-size: 1rem;
+      }
+    }
+			
+    @keyframes colorchange {
+      0% {
+        color: red;
+      }
+      16% {
+        color: orange;
+      }
+      32% {
+        color: yellow;
+      }
+      48% {
+        color: green;
+      }
+      64% {
+        color: blue;
+      }
+      80% {
+        color: rgb(4, 251, 239);
+      }
+      100% {
+        color: blueviolet;
+      }
+    }
+    .audio-control {
+      opacity: .3;
+      transition: all ease-in-out .5s;
+      width: 100%;
+    }
+    .audio-control:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id='days' class='idays'></div>
+  
+  <div class='footer'>
+    <div class='music-title'>《最爱》-周慧敏</div>
+    <audio
+        class='audio-control'
+        controls
+        src="/music/zuiai.mp3">
+            Your browser does not support the
+            <code>audio</code> element.
+    </audio>
+  </div>
+
+  <script type='text/javascript'>
+    const days = document.getElementById('days');
+
+    function getLovingDays() {
+      const from = new Date('2019/05/24');
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+
+      const now = new Date();
+      now.setHours(0);
+      now.setMinutes(0);
+      now.setSeconds(0);
+      now.setMilliseconds(0);
+      
+      const interval = (now.getTime() - from.getTime()) / 1000 / 86400 + 1;
+      console.log('loving days: ', interval);
+      return interval;
+    }
+    days.textContent = `We've been in love for ${getLovingDays()} days`;
+  </script>
+</body>
+</html>

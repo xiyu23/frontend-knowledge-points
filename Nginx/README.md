@@ -11,7 +11,9 @@
   - [4. nginx是如何处理一个请求的](#4-nginx是如何处理一个请求的)
   - [4. `proxy_pass`是什么？](#4-proxy_pass是什么)
   - [5. `upstream`](#5-upstream)
-  - [6.](#6)
+  - [6. `nginx.conf`配置文件的开头](#6-nginxconf配置文件的开头)
+  - [7. `root`](#7-root)
+  - [8. 以`/`结尾的请求代表什么意思？](#8-以结尾的请求代表什么意思)
 
 
 ## 1. CMD
@@ -84,7 +86,7 @@ location定义了URI前缀匹配规则为：`/images`，即如果请求头(Reque
 
 比如上面的例子将会匹配以`/images`开头的URI，如`/images/books.html`，但不会匹配`/docs/images/flowers.html`：
 
-*root*定义了为请求服务的根目录。
+*root*定义了为请求服务的根目录，详见第6点。
 
 例如请求`http://example.com/images/water.png`，URI`/images/water.png`匹配`/images`前缀，nginx将*请求URI*直接拼接到location指定的`root`后面，即返回的资源路径为：`/data/images/water.png`。
 
@@ -165,12 +167,12 @@ location /some/path/ {
 
 ```
 upstream backend {
-    server backend1.example.com       weight=5;
-    server backend2.example.com:8080;
-    server unix:/tmp/backend3;
+  server backend1.example.com       weight=5;
+  server backend2.example.com:8080;
+  server unix:/tmp/backend3;
 
-    server backup1.example.com:8080   backup;
-    server backup2.example.com:8080   backup;
+  server backup1.example.com:8080   backup;
+  server backup2.example.com:8080   backup;
 }
 
 server {
@@ -179,5 +181,56 @@ server {
     }
 }
 ```
-## 6. 
+## 6. `nginx.conf`配置文件的开头
 
+```
+user nginx;
+worker_processes auto;
+```
+
+`user`表示当前nginx进程运行在哪个用户权限下，user需要具有一定的访问权限才可以。
+
+## 7. `root`
+
+`root`描述了在哪个根目录下寻找请求的文件。
+
+nginx在寻找文件时，会将**Requested URI**拼接在`root`指定的根目录路径后，作为一个完整的文件路径去寻找。
+
+`root`可以定义在`http {}`, `server {}`, or `location {}`的上下文内。
+
+例如：
+```
+server {
+  root /www/data;
+
+  location / {
+  }
+
+  location /images/ {
+  }
+
+  location ~ \.(mp3|mp4) {
+    root /www/media;
+  }
+}
+```
+
+第一个location中，请求将会落在`/www/data/`目录下；
+第二个location中，将会落在`/www/data/images/`目录下；
+第三个location中，由于又定义了`root`，会覆盖外层作用域的定义，即会落在`/www/media/`目录下。
+
+## 8. 以`/`结尾的请求代表什么意思？
+
+如果一个请求URI以`/`结尾，代表它**请求的是一个目录**，并试图返回目录下面的**index文件**。
+
+`index`指令指定**index文件**的文件名称，默认为`index.html`。
+
+比如在7的例子中，如果请求的URI是`/images/some/path/`，则会返回`/www/data/images/some/path/index.html`，如果文件不存在，则nginx返回HTTP 404。
+
+自行指定`index`文件时，nginx返回第一个匹配的：
+
+```
+location / {
+    index index.$geo.html index.htm index.html;
+}
+```

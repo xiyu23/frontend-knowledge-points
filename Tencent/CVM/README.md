@@ -68,18 +68,30 @@ nginx服务的默认页面，存放在`/usr/share/nginx/html/`目录下的`index
 
 ## 10. 远程主机域名配置https
 
-[root@VM-0-17-centos ~]# find / -name nginx.conf
-/etc/nginx/nginx.conf
+找到nginx配置文件：
+```
+  [root@VM-0-17-centos ~]# find / -name nginx.conf
+  /etc/nginx/nginx.conf
+```
 
+打开修改`server`字段，
+```
+  listen       443 ssl;
 
-    listen       443 ssl;
-    server_name  xiyu.fun;
-    ssl_certificate /etc/nginx/cert/1_www.xiyu.fun_bundle.crt;
-    ssl_certificate_key /etc/nginx/cert/2_www.xiyu.fun.key; 
-    ssl_session_timeout 5m;
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;
-    ssl_prefer_server_ciphers on;
+  # 服务器域名
+  server_name  xiyu.fun;
+
+  # 服务器公钥位置
+  ssl_certificate /etc/nginx/cert/1_www.xiyu.fun_bundle.crt;
+
+  # 服务器私钥位置
+  ssl_certificate_key /etc/nginx/cert/2_www.xiyu.fun.key;
+
+  ssl_session_timeout 5m;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;
+  ssl_prefer_server_ciphers on;
+```
 
 ~~不靠谱：
 查找nginx在linux中的安装目录：
@@ -90,9 +102,17 @@ nginx服务的默认页面，存放在`/usr/share/nginx/html/`目录下的`index
 
     /usr/sbin/nginx
 
+## 11. `/usr/share/nginx/html/`
 
+默认目录。如果对于一个请求，nginx没有找到匹配的URI，最终就会用这里兜底。
 
+## 12. `/etc/nginx/nginx.conf`
 
+这是nginx的配置文件。
+
+`/etc/nginx`目录下存放nginx的一些配置文件，最主要的配置文件是`/etc/nginx/nginx.conf`。
+
+`nginx.conf`可以*include*`conf.d`目录下的配置文件、`sites-enabled`目录下的虚拟主机文件（*virtual host files*）。
 
 
 
