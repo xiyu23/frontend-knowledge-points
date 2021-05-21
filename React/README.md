@@ -1374,6 +1374,21 @@ useMemo(() => fn, deps)
 
 ### 22.8 Ref Hook: `useRef`
 
+`useRef`返回一个可修改的对象，它的`current`属性被初始化为传入的值。
+
+```js
+const myRef = useRef(5);
+myRef.current === 5; // true
+```
+
+返回的这个对象*myRef*将在整个组件的生命周期中存活。
+
+**它类似于类中的成员变量。**
+
+当为react组件/DOM元素设置`ref`属性后，只要节点发生改变，React都会设置`current`属性为对应的DOM元素。
+
+和`{ current: xxx }`的区别？`useRef`所创建的对象会保持不变，每当重新渲染时，`useRef`所创建的对象引用都是一样的。而*plain javascript object*则每次都会不一样。
+
 ### 22.9 函数组件内使用`useState`，渲染更新逻辑是怎样的？
 
 `useState`创建一个闭包，返回一个数组`[state, setState]`。
