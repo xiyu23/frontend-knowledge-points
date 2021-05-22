@@ -114,6 +114,48 @@ See [13.prototype chain](#13)
 - undefined
 - symbol(ES2015)
 
+### 3.1 `valueOf`
+
+对象上的一个方法，它返回对象的一个*primitive value*。
+
+```js
+function MyNumberType(n) {
+  this.number = n;
+}
+
+MyNumberType.prototype.valueOf = function() {
+  return this.number;
+};
+
+const object1 = new MyNumberType(4);
+
+console.log(object1 + 3); // expected output: 7
+
+// '+'操作符会令JS自动调用对象的valueOf方法，以获取到对应的primitive value
+console.log(+object1); // expected output: 4
+
++new Date() // same as (new Date()).getTime()
++undefined // NaN
++null // 0
++true // 1
++false // 0
+```
+
+对于如下代码，连续引用3次`a`返回的结果分别是`1`、`2`、`3`。
+
+```js
+const a = {
+  value: [3, 2, 1],
+  valueOf: function() {
+    return this.value.pop();
+  },
+}
+
+a == 1 && a== 2 && a == 3 // true
+```
+
+
+
 ## 4. [html]常见的浏览器端的存储技术有哪些？
 ### 4.1 cookie:（8KB）
 server通过http headers `Set-Cookie`来设置cookie，浏览器随后的请求都会将已保存的cookie携带在request的http header中，发送给server。
