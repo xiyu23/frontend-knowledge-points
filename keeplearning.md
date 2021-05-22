@@ -1377,12 +1377,14 @@ async function asyncCall(){
   console.log(res);//'resolved'
 }
 
-52. [+3][ES6, ECMA2015]generator yield
+## 52. `generator` and `yield`
 定义：
-     Generator，是用function*声明的一个Generator function，这个函数返回一个Generator对象。
-     yield expression，在每次调用Generator.prototype.next()时，返回值是一个形如{value: xxx, done: xxx}的对象。'value'是yield后面expression经过计算后的值，'done'表示迭代是否结束(值为true或false)。
+> 用`function*`声明的函数，这个函数会返回一个**Generator对象**。
 
-语法：
+> 在`function*`函数内部书写`yield` *expression*，则每次在**Generator对象**上调用`Generator.prototype.next()`时，将返回一个形如`{value: xxx, done: xxx}`的对象。**value**是yield后面*expression*经过计算后的值，**done**表示迭代是否结束(值为`true`或`false`)。
+
+例子：
+```js
 function* generatorName(i){
   yield i
   yield i+1
@@ -1391,13 +1393,14 @@ var gen = generatorName(0)
 gen.next()  //{value: 0, done: false}
 gen.next()  //{value: 1, done: false}
 gen.next()  //{value: undefined, done: true}
+```
 
 tips：
-a. function*函数被调用时，函数体并不立即执行，而是返回一个遵循(conforms to)iterable protocol和iterator protocol的一个Generator对象;
-b. 当调用next()时，函数体开始执行到下一个yield语句，而后停在这里，直到下一次调用next()时才会继续向下执行；
-c. 如果在function*函数中有return，则在next()执行时遇到return后，Generator函数就此结束，返回对象的value值是return语句的值，done就设定为true；
-d. 如果在function*函数执行过程中发生异常，则Generator函数终止，CPU回到caller继续执行，caller调用的next()抛出异常。此后再调用next，由于Generator已经结束，因此返回值都是{value:undefined, done:true}
-e*[后面的Q就都可以解释了:D]. 如果在调用next时有传参数next(param)，则function*的执行过程为：首先将用传入的参数param替换"当前暂停的yield表达式"，然后再继续向下执行。注意：首次调用next(param)当然不会替换了，因为还没有上次暂停的yield，相当于next()。
+- a. `function*`函数被调用时，函数体并不立即执行，而是返回一个遵循(conforms to)iterable protocol和iterator protocol的一个Generator对象（**即可以对它进行迭代**）;
+- b. 当调用`next()`时，函数体开始执行到下一个yield语句，而后停在这里，直到下一次调用`next()`时才会继续向下执行；
+- c. 如果在`function*`函数中有`return`，则在`next()`执行时遇到`return`后，Generator函数就此结束，返回对象的value值是return语句的值，done就设定为true；
+- d. 如果在`function*`函数执行过程中发生异常，则Generator函数终止，CPU回到caller继续执行，caller调用的next()抛出异常。此后再调用next，由于Generator已经结束，因此返回值都是{value:undefined, done:true}
+- e. 如果在调用`next()`时有传参数`next(param)`，则function*的执行过程为：首先将用传入的参数param替换"当前暂停的yield表达式"，然后再继续向下执行。注意：首次调用next(param)当然不会替换了，因为还没有上次暂停的yield，相当于next()。
 
 Q:疑惑，到底这几句什么意思？
  When the iterator's next() method is called, the generator function's body is executed until the first yield expression, which specifies the value to be returned from the iterator
@@ -1413,6 +1416,7 @@ Calling the next() method with an argument will resume the generator function ex
   'replacing the yield expression'，next传入的参数替换'yield expression'？【是的，替换当前yield暂停的地方】
 
 If an optional value is passed to the generator's next() method, that value becomes the value returned by the generator's current yield operation.【current yield expression是指当前暂停的yield，也就是上次next执行后暂停的地方】
+```js
 function* logGenerator(){
     var i = 1;
     console.log(i)
@@ -1424,16 +1428,17 @@ function* logGenerator(){
 var gen = logGenerator()
 gen.next()
 gen.next('replacing the yield expression')
+```
 
-53. try-catch中的throw new Exception vs throw new Error
+1.  try-catch中的throw new Exception vs throw new Error
 都是Throwable从派生而来。
 
-54. IaaS/PaaS/SaaS
+## 54. IaaS/PaaS/SaaS
 IaaS: 基础设施即服务。所有的东西自己准备。没地方、有设备、有软件，比如想要一台可以用的电脑，自己装。
 PaaS: 平台即服务。有人给你准备了基础平台。没地方、没设备、有软件，买回品牌机到家，开机就可以用。
 SaaS: 软件即服务。有人给你准备了全套，直接用就可以。没地方、没设备、没软件，使用云主机。
 
-55. TLS/
+## 55. TLS/
 
 ## 56. js类中定义静态变量/方法：`static`
 ### 1. 如何定义？
