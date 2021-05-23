@@ -83,3 +83,35 @@ isEqual(
   },
 ); // false
 ```
+
+## 5、节流函数(`throttle`)
+
+> ref: https://www.cnblogs.com/cc-freiheit/p/10827372.html
+
+在一定时间内只允许函数执行一次，提供这样能力的函数叫做**节流函数**。
+
+假设现有一个函数`onPageScroll`执行非常频繁，我们希望**每200ms只执行一次**。
+
+```js
+const throttled = throttleFunc(onPageScroll, 200);
+// throttled函数将仅在200ms内执行一次
+```
+
+## 6、防抖函数(`debounce`)
+
+> ref: https://www.cnblogs.com/cc-freiheit/p/10827372.html
+
+在一定时间内触发了很多事件，当我们只想执行第一个或最后一个、中间的事件不处理时，提供这样能力的函数叫做**防抖函数**。
+
+```js
+// immediate表示是否立即执行，为false则表示在触发事件后函数不会立即执行，而是在 n 秒后执行，如果在 n 秒内又触发了事件，则会重新计算函数执行时间
+debounceFunc(yourFunc, n, immediate)
+
+
+const debounced1 = debounceFunc(onMouseMove, 100, true); // 立即执行
+const debounced2 = debounceFunc(onMouseMove, 100, false); // 执行最后一个，一旦触发事件，则重置倒计时，倒计时完成后才执行。
+
+```
+
+## 7、实现`Promise`的简单版本
+
