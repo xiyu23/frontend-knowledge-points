@@ -63,6 +63,7 @@
     - [22.2 State Hook: `useState`](#222-state-hook-usestate)
     - [22.3 Effect Hook: `useEffect`](#223-effect-hook-useeffect)
       - [22.3.1 在函数组件中，我只想在**初始渲染**之后做一件事，并不想每次更新后都执行呢？](#2231-在函数组件中我只想在初始渲染之后做一件事并不想每次更新后都执行呢)
+      - [22.3.2 `useLayoutEffect` vs `useEffect`](#2232-uselayouteffect-vs-useeffect)
     - [22.4 hooks的规则](#224-hooks的规则)
     - [22.5 自定义hook](#225-自定义hook)
     - [22.6 Memo Hook: `useMemo`](#226-memo-hook-usememo)
@@ -1312,6 +1313,18 @@ useMountEffect(() => {
 > the callback will run after the first render and after any render that one of someVar or someOtherVar are changed.
 > 
 > By passing the second argument an empty array, React will compare after each render the array and will see nothing was changed, thus calling the callback only after the first render.
+
+#### 22.3.2 `useLayoutEffect` vs `useEffect`
+
+useEffect是在paint之后执行；
+
+useLayoutEffect是在pait之前。
+
+
+- `useLayoutEffect`: If you need to mutate the DOM and/or do need to perform measurements
+- `useEffect`: If you don't need to interact with the DOM at all or your DOM changes are unobservable (seriously, most of the time you should use this).
+
+![useLayoutEffect](pics/uselayout.png)
 
 ### 22.4 hooks的规则
 

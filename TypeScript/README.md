@@ -43,6 +43,7 @@
 - [16. `Intersection Types`](#16-intersection-types)
 - [17. `.d.ts`文件是什么？](#17-dts文件是什么)
 - [18. 如果一个函数返回值类型可能为`null`，那该如何表达呢？](#18-如果一个函数返回值类型可能为null那该如何表达呢)
+- [19. `keyof`](#19-keyof)
   - [1. npm](#1-npm)
   - [2. npm的选项](#2-npm的选项)
 
@@ -767,7 +768,16 @@ ref: https://www.typescriptlang.org/docs/handbook/declaration-files/templates/mo
 ## 18. 如果一个函数返回值类型可能为`null`，那该如何表达呢？
 
 
+## 19. `keyof`
 
+```ts
+/**
+ * From T, pick a set of properties whose keys are in the union K
+ */
+type Pick<T, K extends keyof T> = {
+    [P in K]: T[P];
+};
+```
 
 
 2020.03.19 奋进计划：ts学习
