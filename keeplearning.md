@@ -1425,6 +1425,14 @@ async function asyncCall(){
 
 > 在`function*`函数内部书写`yield` *expression*，则每次在**Generator对象**上调用`Generator.prototype.next()`时，将返回一个形如`{value: xxx, done: xxx}`的对象。**value**是yield后面*expression*经过计算后的值，**done**表示迭代是否结束(值为`true`或`false`)。
 
+语法：
+
+```js
+[rv] = yield expression
+```
+
+如果调用`next()`时传了参数（比如`next(myValue)`)，那么`rv`的值就是你传的参数，`myValue`。
+
 例子：
 ```js
 function* generatorName(i){
@@ -1444,18 +1452,50 @@ tips：
 - d. 如果在`function*`函数执行过程中发生异常，则Generator函数终止，CPU回到caller继续执行，caller调用的next()抛出异常。此后再调用next，由于Generator已经结束，因此返回值都是{value:undefined, done:true}
 - e. 如果在调用`next()`时有传参数`next(param)`，则function*的执行过程为：首先将用传入的参数param替换"当前暂停的yield表达式"，然后再继续向下执行。注意：首次调用next(param)当然不会替换了，因为还没有上次暂停的yield，相当于next()。
 
-Q:疑惑，到底这几句什么意思？
- When the iterator's next() method is called, the generator function's body is executed until the first yield expression, which specifies the value to be returned from the iterator
-    'until the first yield expression'，这个怎么定义，包括yield表达式？【包括】那如果表达式嵌套呢？如console.log(1, yield i++)【思考下编译器的处理，编译器处理时先计算log的第一个参数，而后第二个...，最后执行console.log输出。那么这条语句可以相当于是：
+Q1:疑惑，到底这几句什么意思？
+> When the iterator's `next()` method is called, the generator function's body is **executed until the first yield expression**, which specifies the value to be returned from the iterator
+
+**until the first yield expression**，这个怎么定义，包括yield表达式？
+
+A1: 每当调用`next()`时，函数一直执行，直到碰到`yield`，返回值就是`yield`后面跟的**表达式的值**。（可以将`yield`理解类似于`return`）
+
+Q2：那如果表达式嵌套呢？如`console.log(1, yield i++)`
+
+A2：思考下编译器的处理，编译器处理时先计算log的第一个参数，而后第二个...，最后执行console.log输出。那么这条语句可以相当于是：
+```js
   evaluate 1
   evaluate yield i++  //paused immediately after evaluation of this line
   evaluate console.log()
+```
 即，碰到yield i++执行后就暂停了，console.log()还没等到执行。当下次next调用时，console.log方才输出。
-】
 
-Calling the next() method with an argument will resume the generator function execution, replacing the yield expression where execution was paused with the argument from next(). 
-    yield expression，是指整句还是只是"yield expression"？【用参数替换这个形式：yield expression】还是仅仅"expression"？【否】比如console.log(yield i++); 或 var j = yield i*2;
-  'replacing the yield expression'，next传入的参数替换'yield expression'？【是的，替换当前yield暂停的地方】
+Q3: 调用`next()`还可以带参数，啥意思？
+
+A3: 继续执行generator函数时，把参数赋值给**当前暂停位置的`yield`表达式的左值`rv`**。（有点儿像是下一次迭代时，可以将一个参数带给下次迭代用，而这个参数由当前函数暂停位置的左值`rv`来接收）
+
+```js
+const rv = yield 'hello world'; // #1 next()到这里时暂停，而后返回这一次迭代的结果：{ value: 'hello world', done: false }
+yield rv * rv; // #2 下次调用next(5)，函数从#1的位置继续执行，会将带过来的参数5给rv，后执行到这里暂停，并返回这一次迭代的结果：{ value: 25, done: false }
+
+next(); // #1 { value: 'hello world', done: false }
+next(5); // #2 { value: 25', done: false }
+```
+
+理解了上面的例子后，相信官方文档这一句话就不难理解了：
+
+> Calling the `next()` method with an argument will resume the generator function execution, **replacing the yield expression where execution was paused with the argument from `next()`**. 
+
+Q4: `yield i`这一句的返回值是啥，或者说`console.log(yield i)`是啥效果？
+
+A4: 没有意义，它就是`undefined`。似乎它别的用途只有Q3那样了。
+
+```js
+console.log(yield i++); // undefined
+// 或
+var j = yield i*2;
+```
+
+'replacing the yield expression'，next传入的参数替换'yield expression'？【是的，替换当前yield暂停的地方】
 
 If an optional value is passed to the generator's next() method, that value becomes the value returned by the generator's current yield operation.【current yield expression是指当前暂停的yield，也就是上次next执行后暂停的地方】
 ```js
