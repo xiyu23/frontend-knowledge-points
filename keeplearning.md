@@ -2404,6 +2404,11 @@ Access-Control-Allow-Origin: *
 Access-Control-Allow-Credentials: true
 ```
 
+## 79. CSS env/constant
+
+https://webkit.org/blog/7929/designing-websites-for-iphone-x/
+
+
 ---CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
 1. CSS选择器
 A + B //选择B，当B是A的兄弟节点、且必须跟在A后面
