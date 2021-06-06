@@ -1495,6 +1495,49 @@ console.log(yield i++); // undefined
 var j = yield i*2;
 ```
 
+Q5: `yield`后面怎么能跟一个异步函数？
+
+A5: yield一个promise，不过你得在caller（调用方）来接一下`.then`以在异步任务完成后做点什么。
+
+例如：
+```js
+function* foo() {
+  console.log('start homework...');
+  yield washDishes(); // #1
+  yield cleanRoom(); // #2
+}
+
+function sleep(seconds) {
+  return new Promise((res) => {
+    setTimeout(() => res(), seconds* 1000)
+  })
+}
+
+async function washDishes() {
+  console.log('washing dishes...');
+  await sleep(3);
+  return 'washDishes done';
+}
+
+async function cleanRoom() {
+  console.log('cleaning room...');
+  await sleep(5);
+  return 'cleanRoom done';
+}
+
+var gen = foo();
+gen.next().value // #1 这里返回的value是一个Promise，因此我们需要处理下
+  .then((res) => {
+    console.log(res);
+
+    // do next stuff
+    gen.next().value // #2 同上
+      .then((res) => {
+        console.log(res);
+      })
+  });
+```
+
 'replacing the yield expression'，next传入的参数替换'yield expression'？【是的，替换当前yield暂停的地方】
 
 If an optional value is passed to the generator's next() method, that value becomes the value returned by the generator's current yield operation.【current yield expression是指当前暂停的yield，也就是上次next执行后暂停的地方】
