@@ -1452,7 +1452,7 @@ function* generatorName(i){
   yield i
   yield i+1
 }
-var gen = generatorName(0)
+var gen = generatorName(0) // gen在迭代时，i的初始值就是0
 gen.next()  //{value: 0, done: false}
 gen.next()  //{value: 1, done: false}
 gen.next()  //{value: undefined, done: true}

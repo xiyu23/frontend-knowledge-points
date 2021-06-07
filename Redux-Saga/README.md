@@ -1,9 +1,10 @@
 - [Learning Saga](#learning-saga)
   - [1. Saga Effects](#1-saga-effects)
-  - [2. `call`](#2-call)
-  - [3. `put`](#3-put)
+  - [2. `call`：调用一个函数](#2-call调用一个函数)
+  - [3. `put`：给store派发一个action](#3-put给store派发一个action)
   - [4. `call` vs `put`](#4-call-vs-put)
   - [5. `all`](#5-all)
+  - [6. 捕获saga发生的异常](#6-捕获saga发生的异常)
 
 # Learning Saga
 
@@ -27,7 +28,7 @@ function* fetchProducts() {
 
 > Effects are plain JavaScript objects which contain instructions to be fulfilled by the middleware
 
-## 2. `call`
+## 2. `call`：调用一个函数
 
 与其yield一个异步请求，不如我们直接利用Saga提供的`call`方法，仅yield函数调用的描述：
 
@@ -48,7 +49,7 @@ yield call([obj, obj.method], arg1, arg2, ...) // as if we did obj.method(arg1, 
 }
 ```
 
-## 3. `put`
+## 3. `put`：给store派发一个action
 
 不用`put`的话，得这么写：
 
@@ -163,4 +164,48 @@ function* mySaga() {
     call(fetchProducts)
   ])
 }
+```
+
+## 6. 捕获saga发生的异常
+
+**方法一**：和平常一样`try...catch`
+
+```js
+function* foo(dispatch) {
+  try {
+    const userInfo = yield call(fetchUserInfo); // #1
+    yield put({
+      type: 'FETCH_USER_INFO_SUCCEED',
+      userInfo,
+    });
+  } catch (e) {
+    yield put({
+      type: 'FETCH_USER_INFO_FAILED',
+      error: e,
+    });
+  }
+}
+```
+
+**注意**：这里`#1`这条语句，`yield expression`本身并没有返回值的，如果是普通方法使用generator，则*userInfo*的值是`undefined`的。
+
+为什么这么写可以呢？
+
+其实我认为是**Saga middleware**做了一些事情，它在调用函数时，会将返回结果带给下一次迭代，也就是当执行了`fetchUserInfo`后，中间件内部将结果通过`next(fetchUserInfoResult)`带给下一次迭代。
+
+那么下一次迭代时，函数`foo`中的*userInfo*变量就会是`fetchUserInfoResult`。
+
+
+**方法二**：使用中间件的`onError`hook
+
+创建时saga中间件时传入：
+
+```ts
+import createSagaMiddleware from 'redux-saga'
+
+createSagaMiddleware({
+  onError: (error: Error, { sagaStack: string }) => {
+    // 从saga冒出来的未捕获的异常，都会来到这里
+  },
+});
 ```
