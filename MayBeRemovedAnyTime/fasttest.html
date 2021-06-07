@@ -51,16 +51,21 @@
 			<div class='editor' contenteditable="true">www.google.com</div>
 			<div class='imgC1' contenteditable="true">
 				<div class='imgC2'>
-					<img src='https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png' />
+          <img id='testImg' src='https://www.google.com.hk/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png' />
 				</div>
 			</div>
 		</div>
 		<div id='contextMenu' class='contextmenu'>
 			<ul class='cm-ul'>
-				<li id='liCopy'><button>copy</button></li>
+        <li id='liCopy'>copy</li>
+				<li id='liCut'>cut</li>
+				<li id='liPaste'>paste</li>
+        <li id='liAll'>all</li>
+        
+				<!-- <li id='liCopy'><button>copy</button></li>
 				<li id='liCut'><button>cut</button></li>
 				<li id='liPaste'><button>paste</button></li>
-				<li id='liAll'><button>all</button></li>
+				<li id='liAll'><button>all</button></li> -->
 			</ul>
 		</div>
 		<button id='btnCopy'>Copy</button>
@@ -71,11 +76,47 @@
     <button id='btnApply'>apply selection</button>
     <button id='btnGet'>get range</button>
     
-		<script type='text/javascript'>
+    <script type='text/javascript'>
+    // setTimeout(() => {
+    //   const img = document.getElementById('testImg');
+    //   html2canvas(img).then(function(canvas) {
+    //       document.body.appendChild(canvas);
+    //   });
+    //   html2canvas(imgTargeted)
+    //     .then(canvas => canvas.toBlob(blob => {
+    //       console.log(blob);
+    //       navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
+    //     }))
+    //     .then(() => {
+    //       console.log('copy img succeed');
+    //     })
+    //     .catch(e => {
+    //       console.error('copy img failed: ', e);
+    //     });
+    // }, 2000);
 				var contextMenu = document.getElementById('contextMenu');
-				var outsideEditor = document.getElementById('outsideEditor');
+        var outsideEditor = document.getElementById('outsideEditor');
+        
+        var imgTargeted = null;
+        var savedRanges = [];
+        function saveRanges() {
+          savedRanges = [];
+          for (let i = 0, l = getSelection().rangeCount; i < l; i++) {
+            savedRanges.push(getSelection().getRangeAt(i));
+          }
+          console.log('range saved: ', savedRanges.length)
+        }
+        function applyRanges() {
+          getSelection().removeAllRanges();
+          console.log('range applied: ', savedRanges.length)
+          for (let i = 0, l = savedRanges.length; i < l; i++) {
+            getSelection().addRange(savedRanges[i]);
+          }
+          savedRanges = [];
+        }
 				outsideEditor.addEventListener('contextmenu', function(e) {
-					console.log(e);
+          // 右键
+					console.log('右键',e);
 					e.preventDefault();
 					const { clientX, clientY, currentTarget, target } = e;
 					contextMenu.style.top = clientY;
@@ -83,11 +124,93 @@
 
 					// console.log('currentTarget: ', currentTarget);
 					// console.log('target: ', target);
-
+          imgTargeted = null;
 					if (target.nodeName === "IMG") {
-						console.log('you targeted on a <img>!');
-					}
-				});
+            console.log('you targeted on a <img>!');
+            
+            const isImgInSelection = window.getSelection().containsNode(target, false);
+            if (!isImgInSelection) {
+              console.log('<IMG> is NOT contained in the selection, make <IMG> as the new selection');
+              try {
+                const range = document.createRange();
+                range.selectNode(target);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                console.log('add selection for <img> ok')
+                imgTargeted = target;
+              } catch (e) {
+                console.error('add image range faild: ', e);
+              }
+            } else {
+              console.log('<IMG> is being contained in the selection, do nothing')
+            }
+          }
+          
+          let noRange = window.getSelection().rangeCount < 1;
+          let caretRange = window.getSelection().rangeCount === 1 && window.getSelection().type === 'Caret';
+          let noSelection = noRange || caretRange;
+          console.log(`has selection? ${noSelection ? 'N' : 'Y' }`);
+
+          if (!noSelection) {
+            saveRanges();
+          }
+        });
+        
+        var body = document.getElementsByTagName("body")[0];
+        body.addEventListener('copy', (event) => {
+          console.log('copy event fired');
+          return;
+          if (!imgTargeted) {
+            console.log('copy fired with non-img as traget.');
+            return;
+          }
+
+          // console.log('copy fired with <img> as target: ', imgTargeted)
+          // const selection = document.getSelection();
+          event.clipboardData.setData('text/html', imgTargeted.outerHTML);
+          // event.clipboardData.setDragImage(imgTargeted, 0, 0); // not working
+
+          // getImageBase64URL(imgTargeted.src, 300, 300).then(res => console.log(res));
+
+          // copyImageIntoClipboard.then(() => {
+
+          // }).catch(err => console.log('copy image to clipboard failed: ', err))
+          
+          // html2canvas(imgTargeted)
+          //   .then(canvas => {
+          //      canvas.toBlob(blob => {
+          //         console.log(blob);
+                  
+                  
+
+          //         var urlCreator = window.URL || window.webkitURL;
+          //         var imageUrl = urlCreator.createObjectURL(blob);
+          //         document.querySelector("#testImg2").src = imageUrl;
+
+          //         navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
+          //     })
+
+          //     const url = canvas.toDataURL();
+          //     console.log(url);
+          // })
+          //   .then(() => {
+          //     console.log('copy img succeed');
+          //   })
+          //   .catch(e => {
+          //     console.error('copy img failed: ', e);
+          //   });
+          event.preventDefault();
+        });
+
+        async function copyImageIntoClipboard(imgSrc) {
+          const response = await fetch(imgSrc);
+          const blob = await response.blob();
+          return await setToClipboard(blob);
+        }
+
+        async function setToClipboard(blob) {
+          await navigator.clipboard.write([new ClipboardItem({ [blob.type] : blob })])
+        }
 
 				var btnCopy = document.getElementById('btnCopy');
         var btnCut = document.getElementById('btnCut');
@@ -116,6 +239,13 @@
 				});
 				
 				function exec(cmd) {
+          // apply ranges
+          applyRanges();
+          if (getSelection().rangeCount < 1 || getSelection().type === 'Caret') {
+            console.warn(`exec ignored since rangeCount = ${getSelection().rangeCount}, type = ${getSelection().type}`);
+            return;
+          }
+
 					if (!document.execCommand(cmd)) {
 						console.warn(`execCommand ${cmd} failed`);
 					} else {
@@ -165,5 +295,7 @@
             getRange();
         });
     </script>
+
+    <script type="text/javascript" src='html2canvas.js'></script>
 </body>
 </html>
