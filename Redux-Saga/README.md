@@ -1,7 +1,25 @@
+- [Learning Saga](#learning-saga)
+  - [1. Saga Effects](#1-saga-effects)
+  - [2. `call`](#2-call)
+  - [3. `put`](#3-put)
+  - [4. `call` vs `put`](#4-call-vs-put)
+  - [5. `all`](#5-all)
+
+# Learning Saga
+
 ## 1. Saga Effects
 在`redux-saga`中，saga是用*Generator Functions*实现的。
 
-创建一个*Generator Function*，每个`yield`语句都返回一个*plain javascript object*，这种对象就叫做***Effects***。
+创建一个*Generator Function*，每个`yield`语句都返回一个*plain javascript object*，这些对象就叫做***Effects***。
+
+`fetchProducts`就是一个***Saga***，`yield Api.fetch('/products')`这条语句将返回一个普通js对象，也就是一个*Effect*。
+
+```js
+function* fetchProducts() {
+  const products = yield Api.fetch('/products')
+  console.log(products)
+}
+```
 
 ***Effect***就是包含了指令的普通js对象，告诉中间件需要做某件事情。
 
@@ -125,3 +143,24 @@ put({type: 'INCREMENT'})
 
 
 ref: https://redux-saga.js.org/docs/introduction/BeginnerTutorial#making-our-code-testable
+
+## 5. `all`
+
+创建一个*effect*，告诉中间件去**并行地**运行多个Effect，直到全部完成。
+
+```js
+all([...effects]) // 数组形式: [ effect1, effect2, ... ]
+all(effects) // object形式: { label: effect, ... }``
+```
+
+```js
+import { fetchCustomers, fetchProducts } from './path/to/api'
+import { all, call } from `redux-saga/effects`
+
+function* mySaga() {
+  const [customers, products] = yield all([
+    call(fetchCustomers),
+    call(fetchProducts)
+  ])
+}
+```

@@ -19,6 +19,7 @@ npm i redux
 - [3. @reduxjs/toolkit基本概念](#3-reduxjstoolkit基本概念)
   - [3.1 `configureStore`](#31-configurestore)
   - [3.2 `createSlice`](#32-createslice)
+  - [3.3 该这个了](#33-该这个了)
 
 
 ## 2. Redux基本概念
@@ -62,7 +63,7 @@ tips:
 
 1、为什么不能做异步操作？
 
-A. 是因为reducer并没有被异步调用（不是`async`声明的）
+A. 是因为reducer并没有被异步调用（不是`async`声明的），所以在
 
 2、为什么不可以直接修改`state`?
 
@@ -296,7 +297,9 @@ function connect(mapStateToProps, mapDispatchToProps): function
 ```
 
 - mapStateToProps  
-  一个函数，每当`store`变化时就会被调用，返回你所需要的数据对象，它会被传入给你的组件   
+  它是一个函数，每当`store`变化时就会被调用，返回你所需要的数据对象，它会被传入给你的组件。
+  
+  下面例子中表示，每当`store`变化时，`{ counter: xxx }`就会被传入组件。
   ```ts
   connect(state => ({ counter: state.counter }));
   ```
@@ -468,3 +471,8 @@ export const {
     },
   })
   ```
+
+  ### 3.3 该这个了
+
+  href: https://redux.js.org/tutorials/essentials/part-4-using-data
+  
