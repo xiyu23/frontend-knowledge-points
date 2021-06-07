@@ -54,6 +54,15 @@
 
 `/(?<!-)\d+/`匹配前面不带`-`的数字，如匹配"123"，但不匹配"-123"。
 
+### 1.2 实践
+
+#### 1.2.1 提取xxx后面的yyy
+
+希望提取下面的错误码，即跟在这个URL后面的数字`92002`。
+```js
+{ errmsg: "not allow to cross corp more info at https://open.work.weixin.qq.com/devtool/query?e=92002" }
+```
+
 ## 2. `prototype`, prototype chain
 See [13.prototype chain](#13)
 ## 3. `is`, `typeof`, `==`, `===`

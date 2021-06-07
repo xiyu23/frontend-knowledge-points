@@ -171,4 +171,8 @@ export function Button() {
 
 ## 11. 在服务端如何获取请求的完整URL？
 
+## 12. 如何在`_app.tsx`中检测到页面mount？
+
+我希望等待页面渲染完毕后做一件事情。但是又不能直接放在`_app.tsx`中的`useEffect`中，因为这是应用初始化的hook，而我想要的是每个页面初始化完成的hook。
+
 
