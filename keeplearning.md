@@ -726,7 +726,11 @@ var myIterator = {
 
 语法都很像：
 
-    myFunction.call/bind(thisArg[, arg1[, ...]]); myFunction.apply(thisArg[, argsArray]);
+```js
+  myFunction.call(thisArg[, arg1[, ...]]);
+  myFunction.bind(thisArg[, arg1[, ...]]);
+  myFunction.apply(thisArg[, argsArray]);
+```
 
 
 相同点：都是想改变function中执行时的*this*。
