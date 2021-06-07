@@ -5,6 +5,7 @@
   - [4. `call` vs `put`](#4-call-vs-put)
   - [5. `all`](#5-all)
   - [6. 捕获saga发生的异常](#6-捕获saga发生的异常)
+  - [7. Next](#7-next)
 
 # Learning Saga
 
@@ -209,3 +210,36 @@ createSagaMiddleware({
   },
 });
 ```
+
+**方法三**：不想让异常从saga中冒出来
+
+不想每个saga都写```try...catch```，用`safeEffect`包一下：
+
+```ts
+function* safe(effect: Effect) {
+  try {
+    return {
+      response: yield effect,
+    }
+  } catch (error) {
+    return {
+      error,
+    }
+  }
+}
+
+function* fetchProducts() {
+  const { response, error } = yield safe(call(Api.fetch, '/products'));
+
+  if (response) {
+    yield put({ type: 'PRODUCTS_RECEIVED', products: response })
+  } else {
+    yield put({ type: 'PRODUCTS_REQUEST_FAILED', error })
+  }
+}
+```
+
+ref: https://github.com/redux-saga/redux-saga/issues/1250
+
+## 7. Next
+https://redux-saga.js.org/docs/basics/UsingSagaHelpers
