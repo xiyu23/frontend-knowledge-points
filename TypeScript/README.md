@@ -21,6 +21,9 @@
   - [2.18 `Type Assertions`(强制类型转换)](#218-type-assertions强制类型转换)
   - [2.19 `Literal Types`(字面量类型)](#219-literal-types字面量类型)
   - [2.20 Non-null Assertion Operator (Postfix!)](#220-non-null-assertion-operator-postfix)
+  - [2.21 `Index Signature`(索引签名)](#221-index-signature索引签名)
+    - [2.21.1 注意与其它声明的冲突](#2211-注意与其它声明的冲突)
+    - [2.21.2 增加只读声明，不允许通过index signature修改](#2212-增加只读声明不允许通过index-signature修改)
 - [3. Interfaces(接口)](#3-interfaces接口)
   - [3.1 声明](#31-声明)
   - [3.2 或有字段](#32-或有字段)
@@ -394,6 +397,50 @@ function liveDangerously(x?: number | undefined) {
   // No error
   console.log(x!.toFixed());
 }
+```
+
+### 2.21 `Index Signature`(索引签名)
+
+> href: https://www.typescriptlang.org/docs/handbook/2/objects.html#index-signatures
+
+当声明一个类型时，不知道它的属性名叫啥，但知道它的大致结构时，可以用*index signature*来描述。
+
+下方的类型声明表示，如果对`StringArray`类型的对象使用索引时（索引的类型为`number`），它会返回一个`string`类型的值。
+
+```ts
+interface StringArray {
+  [index: number]: string;
+}
+```
+
+**注意**：索引类型只能是`number`或`string`。
+
+#### 2.21.1 注意与其它声明的冲突
+
+下面的写法是错误的。因为用*string*类型来引用一个对象时，其实相当于`obj.prop`，即取*obj*上的一个属性。
+
+```ts
+interface Dict {
+  [index: string]: number;
+  name: string; // error
+}
+```
+
+这里我们定义了*index signature*它的key是一个*string*、value需为*number*。
+
+但是下面的`name`属性的value却是*string*。
+
+**key都是string，但是value有*number*又有*string*，不一致而导致ts报错。**
+
+#### 2.21.2 增加只读声明，不允许通过index signature修改
+
+```ts
+interface StringArray {
+  readonly [index: number]: string;
+}
+
+const arr = ['apple', 'banana', 'coconut'];
+arr[1] = 'peach'; // Error: Index signature in type 'StringArray' only permits reading
 ```
 
 ## 3. Interfaces(接口)
