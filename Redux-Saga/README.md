@@ -5,7 +5,9 @@
   - [4. `call` vs `put`](#4-call-vs-put)
   - [5. `all`](#5-all)
   - [6. 捕获saga发生的异常](#6-捕获saga发生的异常)
-  - [7. Next](#7-next)
+  - [7. Saga Helpers: `takeEvery`, `takeLatest`](#7-saga-helpers-takeevery-takelatest)
+    - [7.1 `takeEvery`](#71-takeevery)
+    - [7.1 `takeLatest`](#71-takelatest)
 
 # Learning Saga
 
@@ -241,5 +243,48 @@ function* fetchProducts() {
 
 ref: https://github.com/redux-saga/redux-saga/issues/1250
 
-## 7. Next
-https://redux-saga.js.org/docs/basics/UsingSagaHelpers
+## 7. Saga Helpers: `takeEvery`, `takeLatest`
+
+> href: https://redux-saga.js.org/docs/basics/UsingSagaHelpers
+
+### 7.1 `takeEvery`
+
+Saga task：
+
+```ts
+import { call, put } from 'redux-saga/effects'
+import Api from './path/to/api'
+
+export function* fetchData(action) {
+  try {
+    const data = yield call(Api.fetchUser, action.payload.url)
+    yield put({ type: 'FETCH_SUCCEEDED', data })
+  } catch (error) {
+    yield put({ type: 'FETCH_FAILED', error })
+  }
+}
+```
+
+若希望每一次派发事件`FETCH_REQUESTED`都能执行`fetchData`，则需：
+
+```ts
+import { takeEvery } from 'redux-saga/effects'
+
+function* watchFetchData() {
+  yield takeEvery('FETCH_REQUESTED', fetchData)
+}
+```
+
+这样一来，相当于会有多个任务在并发地执行。
+
+但如果只希望用最后一个触发action的task，则可以用`takeLatest`。
+
+### 7.1 `takeLatest`
+
+```ts
+import { takeEvery } from 'redux-saga/effects'
+
+function* watchFetchData() {
+  yield takeLatest('FETCH_REQUESTED', fetchData)
+}
+```

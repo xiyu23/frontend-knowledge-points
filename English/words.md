@@ -22,3 +22,8 @@
 - solitary
   [ˈsɑːləteri]
   adj. 单独的
+
+- spawn
+  [spɔːn]
+  v. (鱼、蛙）产卵; 引发; 引起; 导致; 造成
+
