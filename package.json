@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@tencent/wemeet-better-scroll-mouse-wheel": "^1.0.0-beta.0"
+  }
+}

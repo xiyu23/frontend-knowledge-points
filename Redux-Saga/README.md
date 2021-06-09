@@ -8,6 +8,8 @@
   - [7. Saga Helpers: `takeEvery`, `takeLatest`](#7-saga-helpers-takeevery-takelatest)
     - [7.1 `takeEvery`](#71-takeevery)
     - [7.1 `takeLatest`](#71-takelatest)
+  - [Q&A](#qa)
+    - [1. action里面做了一件事情，结果想通知view，而不用经过store，如何做？](#1-action里面做了一件事情结果想通知view而不用经过store如何做)
 
 # Learning Saga
 
@@ -288,3 +290,11 @@ function* watchFetchData() {
   yield takeLatest('FETCH_REQUESTED', fetchData)
 }
 ```
+
+## Q&A
+
+### 1. action里面做了一件事情，结果想通知view，而不用经过store，如何做？
+
+背景：桌面端、移动端在选人之后，根据情况会有一个弹窗。saga里面执行选人操作，希望把需要弹窗的这个事情通知到view，view自己负责显示弹窗。
+
+怎么写好呢？
