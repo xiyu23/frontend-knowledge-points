@@ -34,6 +34,7 @@
   - [4.3、声明一个函数类型](#43声明一个函数类型)
   - [4.4、泛型函数(generic function)](#44泛型函数generic-function)
   - [4.5、为泛型函数指明类型](#45为泛型函数指明类型)
+- [5、definite assignment assertion operator(`!`)](#5definite-assignment-assertion-operator)
 - [10.声明抽象类、抽象方法](#10声明抽象类抽象方法)
 - [11.类方法、成员默认为`public`](#11类方法成员默认为public)
 - [12.如何声明一个不允许被子类覆盖的父类方法？](#12如何声明一个不允许被子类覆盖的父类方法)
@@ -572,6 +573,50 @@ const res = combine([1,2,3], ['hi', 'hello']);
 
 // corret
 const res = combine<number | string>([1,2,3], ['hi', 'hello']);
+```
+
+## 5、definite assignment assertion operator(`!`)
+
+这个用于当ts编译选项`--strictPropertyInitialization`开启时，检查类成员变量是否初始化了。
+
+类成员变量必须要在`.ctor`中初始化，否则会抛出静态检查错误。
+
+```ts
+class BadGreeter {
+  name: string;
+  // Error: Property 'name' has no initializer and is not definitely assigned in the constructor.
+}
+```
+
+```ts
+class GoodGreeter1 {
+  name: string;
+
+  constructor() {
+    this.name = "hello";
+  }
+}
+
+// 或
+
+class GoodGreeter2 {
+  name: string = 'loveuxiao';
+
+  constructor() {
+
+  }
+}
+```
+
+好吧，我并没有在构造函数中初始化，那不想报错怎么办？
+
+给变量后面加一个`!`：
+
+```ts
+class OKGreeter {
+  // Not initialized, but no error
+  name!: string;
+}
 ```
 
 1. 编译.ts为.js
