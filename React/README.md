@@ -1165,6 +1165,10 @@ function onCleanRoomDone() {
 
 *side effects*, short for ***effects***.
 
+传给`useEffect`的那个函数，就叫做*effect*，就是说我们希望在render完成之后做点事情，这个事情被赋予*effect*的代名词。
+
+而`useEffect`传入的函数，它可以返回一个函数，这个函数就叫做*cleanup function*，意味着**每次effect运行前，都会调用cleanup函数**（即不仅会在*unmounted*调用，也会**每次render**时）。
+
 **意义：将原本分散在生命周期钩子中的代码，集中于一处管理。**
 
 总结：
