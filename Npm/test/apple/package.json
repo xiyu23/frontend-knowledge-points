@@ -1,0 +1,17 @@
+{
+  "name": "apple",
+  "version": "1.0.0",
+  "description": "apple test",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel index.js -d dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "xiyu",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.14.3",
+    "@babel/core": "^7.14.3",
+    "@babel/preset-env": "^7.14.4"
+  }
+}
