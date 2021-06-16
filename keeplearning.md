@@ -1082,7 +1082,37 @@ Math.round: 返回整型，<0.5则取绝对值小的方向，>0.5取大的，==0
 Math.floor: 向下取整，5.05=>5, -5.05=>-6
 Math.ceil: 向上取整
 
-35. HTTP状态码
+<style>
+.http-status-code-table tr:nth-child(1){
+  background-color: #006fff;
+}
+.http-status-code-table tr:nth-child(5){
+  background-color: green;
+}
+
+</style>
+
+## 35. HTTP状态码
+
+<div class='http-status-code-table'>
+ 
+| 状态码 | 文档定义 | 解释 | - |
+| -- | -- | -- | -- |
+|100~199|Information responses|-|-|
+|100|Continue|临时响应的状态码，客户端可以继续请求|-|
+|101|Switching Protocol|这个是针对客户端发来的`Upgrade`请求头的响应，表示服务端即将切换到某个协议去|比如http->websockt|
+|103|Early Hints|HTTP响应头中的`Link`字段，可以令浏览器预先加载资源|`Link: <https://example.com>; rel="preconnect"`|
+|200~299|Successful responses|成功|-|
+|200| OK |-|-|
+|206| Partial Content | 当客户端请求头中带了`Range`字段（表示只请求一部分资源）时，服务端会返回206 |-|
+|300~399|Redirection messages|重定向|-|
+|301|Moved Permanently|资源地址已经永久移动到别处，回包中应当包含新的URL|-|
+|302|Found|客户端所请求的资源地址已临时移动到了新的地方，通过头部的`Location`来标示|-|
+
+
+
+</div>
+
 2** - 成功
 3** - 重定向
 4** - 客户端错误，请求包含语法错误或无法完成请求
@@ -1101,7 +1131,7 @@ Math.ceil: 向上取整
 502-Bad Gateway，作为网关或者代理工作的服务器尝试执行请求时，从远程服务器接收到了一个无效的响应
 503-Service Unavailable，由于超载或系统维护，服务器暂时无法处理请求
 
-36. HTTP/1.1 keep-alive
+1.  HTTP/1.1 keep-alive
 [HTTP/1.0 vs HTTP/1.1]
 HTTP 1.0 (1994)
 1. 不支持长连接(keep-alive)，即当一个请求结束后，这个连接就关掉了，必须再另建立一个连接发起请求。也即不能在一个TCP连接上完成多个请求；
@@ -2422,7 +2452,9 @@ Access-Control-Allow-Credentials: true
 https://webkit.org/blog/7929/designing-websites-for-iphone-x/
 
 
----CSS---[ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference]---
+---CSS---
+ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
+
 1. CSS选择器
 A + B //选择B，当B是A的兄弟节点、且必须跟在A后面
 A ~ B //选择B，当B是A的兄弟节点、且跟在A后面就行，但不一定是第一个
@@ -2430,10 +2462,10 @@ A > B //选择B，当B是A的直接孩子节点时
 A   B //选择B，当B是A的孩子节点，不管有多深的层级
 
 //pseudo-classes伪类
-:link //应用于一个没有被访问过元素：<a>, <area>, <link href=xxx>
+:link //应用于一个没有被访问过元素：`<a>`, `<area>`, `<link href=xxx>`
 :visited //应用于访问过的链接
 :hover //在鼠标移动到元素之上时应用此样式。CSS4允许此样式应用于伪元素上。
-:active //正在处于激活状态，如鼠标左键在元素上（如<button>或<a>）按下时
+:active //正在处于激活状态，如鼠标左键在元素上（如`<button>`或`<a>`）按下时
 //以上这四个定义的顺序遵从LVHA原则(爱恨原则，LoVe and HAte)
 
 :checked //当radio/checkbox/option元素为checked，或转变为'on'状态时应用此样式
@@ -2591,10 +2623,54 @@ Non-positioned, non-floated, block-level elements act as if the floated element 
 5.前端优化策略
   1.减少请求数：因为每个请求都要建立TCP连接（三次握手），以及TCP的慢启动。
     实施途径：利用缓存、js/css压缩合并、css sprite(零散的图片整合成一张)
-6.jsonp vs jsonpCallback（跨域访问的解决方法之一）
-JSONP: 实际上是利用<script>可以通过src引入跨域资源的方式，发请求到跨域服务器，响应后生成动态脚本，会调用传过去的回调函数。
-如当前页面为domain-a.com，此时动态向DOM中添加<script type="text/javascript" src="http://domain-b.com/username?q=xiyu"></script>，由于<script>是不受Same Origin Policy限制的，这就向domain-b.com发送了一个请求。在domain-b.com响应时返回结果一般是JSON如"{name:xiyu, age:27, alone:yes}"。如何让domain-a.com脚本来使用这个响应呢？那就需要在domain-a.com中定义一个回调函数如foo(res){ alert(res) }，然后将foo追加到url中（即http://domain-b.com/username?q=xiyu&callback=foo），跨域请求后domain-b.com服务器从callback取到回调函数的名称foo，再将响应wrap一下：foo("{name:xiyu, age:27, alone:yes}")，最后将这个结果返回。那么当在domain-a.com中拿到响应后，实际就是一句foo函数表达式被执行。JSON with Padding，这就是JSONP的由来。。
-注意：JSONP仅支持GET方法。
+## 6. jsonp vs jsonpCallback（跨域访问的解决方法之一）
+
+**JSONP**，实际上是利用`<script>`标签可以通过`src`属性引入跨域资源的方式，触发请求到需要跨域的服务器，服务器响应后生成动态脚本，会调用传过去的回调函数。
+
+举例：
+如当前页面为*domain-a.com*，此时动态向DOM中添加下面的脚本标签：
+
+```html
+<script type="text/javascript" src="http://domain-b.com/username?q=xiyu"></script>
+```
+
+由于`<script>`是不受**Same Origin Policy**限制的，这就向`domain-b.com`发送了一个请求。
+
+在`domain-b.com`响应时返回结果一般是JSON格式，如
+
+```json
+{
+  "name": "xiyu",
+  "age": 27,
+  "alone": "yes"
+}
+```
+
+如何让`domain-a.com`脚本来使用这个响应呢？
+
+那就需要在`domain-a.com`中**定义一个回调函数**。如：
+
+```js
+function foo(res) { 
+  alert(res);
+}
+```
+
+然后将函数名`foo`追加到url中：
+
+> http://domain-b.com/username?q=xiyu&`callback=foo`
+
+跨域请求到`domain-b.com`，该服务器从callback取到回调函数的名称foo，再将响应wrap一下，构造成形如下方的格式后返回给浏览器。
+
+```js
+foo("{ name: xiyu, age: 27, alone: yes}")
+```
+
+那么当在`domain-a.com`页面中拿到响应后，实际就是一句foo函数表达式被执行。
+
+JSON with Padding，这就是JSONP的由来。。
+
+**注意：JSONP仅支持GET方法。**
 
 $.getScript
 
