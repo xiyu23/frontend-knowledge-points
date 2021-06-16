@@ -7,7 +7,9 @@
   - [6. 捕获saga发生的异常](#6-捕获saga发生的异常)
   - [7. Saga Helpers: `takeEvery`, `takeLatest`](#7-saga-helpers-takeevery-takelatest)
     - [7.1 `takeEvery`](#71-takeevery)
-    - [7.1 `takeLatest`](#71-takelatest)
+    - [7.2 `takeLatest`](#72-takelatest)
+    - [7.3 `takeEvery` vs `takeLatest`](#73-takeevery-vs-takelatest)
+    - [7.4 `ForkEffect`](#74-forkeffect)
   - [Q&A](#qa)
     - [1. action里面做了一件事情，结果想通知view，而不用经过store，如何做？](#1-action里面做了一件事情结果想通知view而不用经过store如何做)
 
@@ -281,7 +283,7 @@ function* watchFetchData() {
 
 但如果只希望用最后一个触发action的task，则可以用`takeLatest`。
 
-### 7.1 `takeLatest`
+### 7.2 `takeLatest`
 
 ```ts
 import { takeEvery } from 'redux-saga/effects'
@@ -290,6 +292,40 @@ function* watchFetchData() {
   yield takeLatest('FETCH_REQUESTED', fetchData)
 }
 ```
+
+### 7.3 `takeEvery` vs `takeLatest`
+
+`takeEvery`返回值是一个`ForkEffect`，结构如下：
+
+```ts
+{
+  FORK: {
+    detached?: boolean;
+
+    context: any;
+    fn: Function;
+    args: any[];
+  }
+}
+```
+
+其实是`FORK`的值是继承了`CallEffectDescriptor`：
+
+```ts
+export interface CallEffectDescriptor {
+  context: any;
+  fn: Function;
+  args: any[];
+}
+```
+
+哎等等，我怎么看得跟项目中的不一样，返回类型不一样？？
+
+不过`takeEvery`的确是返回一个`ForkEffect`， 这个*Effect*的`type`字段被设置为`FORK`了。
+
+### 7.4 `ForkEffect`
+
+
 
 ## Q&A
 

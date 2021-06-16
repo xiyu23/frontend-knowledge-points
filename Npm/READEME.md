@@ -7,15 +7,20 @@
     - [1.3 安装指定`tag`/`version`的包：](#13-安装指定tagversion的包)
     - [1.4 如何查看当前安装的某个`package`的版本？](#14-如何查看当前安装的某个package的版本)
   - [2. 安装到哪儿了？](#2-安装到哪儿了)
+    - [2.1 `dependencies`和`devDependencies`的区别](#21-dependencies和devdependencies的区别)
   - [3. npm run build](#3-npm-run-build)
   - [4. npm init](#4-npm-init)
     - [4.1 跳过所有问题](#41-跳过所有问题)
     - [4.2 创建基于React的项目](#42-创建基于react的项目)
+  - [5. 如何发布一个包](#5-如何发布一个包)
+  - [6. `npm link`](#6-npm-link)
 
 
 ## 1. 如何安装一个包
 
-用于安装一个*package*。
+NPM就是一个包管理器，可下载别人的包，也可以上传自己的包供他人使用。
+
+什么是包(*package*)：
 
 > A package is a folder containing a program described by a `package.json` file
 
@@ -40,6 +45,7 @@
 如：
     
     $ npm install @tencent/tea-component@latest
+    $ npm install @tencent/tea-component@beta
     $ npm install @tencent/tea-component@1.5.0
 
 注意！这里将会从**scope**所关联的*registry*下载指定包。
@@ -61,6 +67,8 @@ nextone@0.1.0 D:\code\nextMeeting
 
 默认添加到`package.json`中的*dependencies*字段。
 
+具体安装到哪儿，可以通过CLI参数指定。
+
 安装到*devDependencies*:
 
     $ npm install <package> --save-dev
@@ -76,6 +84,11 @@ nextone@0.1.0 D:\code\nextMeeting
 
  `-S`是`--save`的缩写。
 
+### 2.1 `dependencies`和`devDependencies`的区别
+
+
+
+
 ## 3. npm run build
 此命令用于构建生产环境的包。
 
@@ -83,7 +96,7 @@ nextone@0.1.0 D:\code\nextMeeting
 ```js
 npm run-script <command> [--silent] [--<args>...]
 ```
-alias（`run-script`直接写为`run`）:
+也可简写为（`run-script`直接写为`run`）:
 ```js
 npm run <command> [--silent] [--<args>...]
 ```
@@ -114,3 +127,88 @@ You can also use `-y`/`--yes` to skip the questionnaire altogether.
     npm init foo -> npx create-foo
     npm init @usr/foo -> npx @usr/create-foo
     npm init @usr -> npx @usr/create
+
+## 5. 如何发布一个包
+
+1. 创建一个文件夹(比如`apple`)
+   
+    ```bash
+    $ mkdir apple
+    ```
+
+2. 初始化包
+
+    ```bash
+    $ npm init
+    ```
+
+3. 写代码
+
+    ```js
+    // 这是你的事情
+    ```
+
+
+
+## 6. `npm link`
+
+在当前包目录下，创建一个全局符号链接(symbol link)，即全局*node_modules/*目录下的这个包，就会指向当前目录。
+
+```bash
+$ npm link
+```
+
+而后在你需要用到这个包的工作目录下，来引用全局的这个包。
+
+```bash
+$ npm link [my-packagename]
+$ npm link funny-package
+```
+
+这样就构成了一个引用链条：
+
+使用方目录使用这个包 -> 全局包 -> 局部包文件夹
+
+每当修改局部包的时候，不用重新构建使用方。
+
+**注意事项**：
+
+1. **Node**不支持ES6的`import`/`export`语法，这个是ES6的，而不是**Node**的，你需要用`require`，或者`babel`来构建。
+   
+```js
+module.exports = {
+  foo,
+  bar,
+};
+```
+
+```js
+const { foo, bar } = require('somepath');
+```
+
+安装`babel`：
+```bash
+$ npm install --save-dev @babel/cli @babel/core @babel/preset-env
+```
+
+为了让node能够执行，首先我们要用babel将es6语法转换一下。
+
+先配置babel：
+
+```json
+// .babelrc (babel的配置文件)
+{
+  "presets": ["@babel/preset-env"]
+}
+//
+```
+
+增加一个脚本`build`，用babel做转换：
+
+```json
+// package.json (项目工程包管理文件)
+"scripts": {
+  "build": "babel index.js -d dist", // 构建
+  "start": "npm run build && node dist/index.js" // 构建并执行，一句命令搞定
+},
+```
