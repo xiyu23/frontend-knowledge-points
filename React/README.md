@@ -14,7 +14,13 @@
     - [2.2 引入babel](#22-引入babel)
     - [2.3 在HTML中使用jsx](#23-在html中使用jsx)
     - [2.4 jsx预处理器(JSX preprocessor)](#24-jsx预处理器jsx-preprocessor)
+    - [2.5 创建typescript写React的工程](#25-创建typescript写react的工程)
   - [3. 渲染React Element](#3-渲染react-element)
+    - [3.1 函数组件(`function component`)和类组件(`class component`)](#31-函数组件function-component和类组件class-component)
+      - [3.1.1、定义](#311定义)
+      - [3.1.2、区别](#312区别)
+      - [3.1.3 函数组件](#313-函数组件)
+      - [3.1.4 类组件](#314-类组件)
     - [3.1 对于函数组件，当`props`变化时发生了什么？](#31-对于函数组件当props变化时发生了什么)
     - [3.2 对于函数组件，当内部`state`(通过`useState`添加的状态)变化时发生了什么？](#32-对于函数组件当内部state通过usestate添加的状态变化时发生了什么)
     - [3.3 对于类组件，当`props`变化时发生了什么？](#33-对于类组件当props变化时发生了什么)
@@ -58,6 +64,10 @@
   - [15. Code-Splitting](#15-code-splitting)
   - [16. The Component Lifecycle](#16-the-component-lifecycle)
   - [17.JSX In Depth](#17jsx-in-depth)
+  - [18. Optimizing Performance讲到了react更新的一点东西](#18-optimizing-performance讲到了react更新的一点东西)
+  - [19. Render Props[href=https://reactjs.org/docs/render-props.html#be-careful-when-using-render-props-with-reactpurecomponent]](#19-render-propshrefhttpsreactjsorgdocsrender-propshtmlbe-careful-when-using-render-props-with-reactpurecomponent)
+  - [20. Portals](#20-portals)
+  - [21. Reconciliation](#21-reconciliation)
   - [22. Hooks](#22-hooks)
     - [22.1 什么是hooks？](#221-什么是hooks)
     - [22.2 State Hook: `useState`](#222-state-hook-usestate)
@@ -72,6 +82,8 @@
     - [22.9 函数组件内使用`useState`，渲染更新逻辑是怎样的？](#229-函数组件内使用usestate渲染更新逻辑是怎样的)
   - [23. Refs and the DOM](#23-refs-and-the-dom)
   - [24. 如何为`className`写多个值？](#24-如何为classname写多个值)
+  - [25. 生命周期](#25-生命周期)
+    - [25.2 父子组件的生命周期顺序是怎样的？](#252-父子组件的生命周期顺序是怎样的)
   - [Q&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
     - [2. 使用`FC`](#2-使用fc)
@@ -236,6 +248,18 @@ React DOM则是将React和browser粘合在一起，比如我们用到的`render(
 
 这个是"预置"的意思，看文档描述似乎是babel编译时，所用到的一些插件。（可能就是辅助编译？）
 
+### 2.5 创建typescript写React的工程
+
+创建工程：
+
+    npx create-react-app my-app --template typescript
+
+启动服务：
+
+    yarn start
+
+打开 https://localohost:3000 查看效果。
+
 ## 3. 渲染React Element
 
 传入`element`及所要渲染到的根元素(a root DOM node)。
@@ -246,6 +270,74 @@ React DOM则是将React和browser粘合在一起，比如我们用到的`render(
 
 React element是不可变的，一旦创建好无法修改。
 
+### 3.1 函数组件(`function component`)和类组件(`class component`)
+
+#### 3.1.1、定义
+
+函数组件：接收1个参数，返回1个*React Element*。
+
+```tsx
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+```
+
+类组件:
+
+```tsx
+class Welcome extends React.Component {
+  render() {
+    return <h1>Hello, {this.props.name}</h1>;
+  }
+}
+```
+
+#### 3.1.2、区别
+
+
+#### 3.1.3 函数组件
+
+1、生命周期
+
+见[22.3 Effect Hook: `useEffect`](###-22.3-Effect-Hook:-`useEffect`)
+
+#### 3.1.4 类组件
+
+```tsx
+class Welcome extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  componentDidMount() {
+  }
+
+  componentWillUnmount() {
+  }
+  render() {
+    return <h1>Hello, {this.props.name}</h1>;
+  }
+}
+```
+
+1、生命周期
+
+|生命周期阶段|触发时机|含义|备注|
+|-|-|-|-|
+|componentDidMount|runs after the component output has been rendered to the DOM|`render()`返回的组件被插入到DOM中后触发|-|
+|componentDidUpdate|is invoked immediately after updating occurs|更新后触发（**初始渲染时不会触发**）|-|
+|componentWillUnmount|is invoked immediately before a component is unmounted and destroyed|在组件卸载/销毁之前被调用|-|
+|-|-|-|-|
+
+![React Life Cycle](pics/react-life-cycle.png)
+
+
+- `componentDidMount`说插入到DOM后触发，那究竟什么算**插入DOM**呢？React是怎么知道的？
+
+  DOM3提供了接口[DOMNodeInsertedIntoDocument<sup style='color: red'>Deprecated</sup>](https://www.w3.org/TR/DOM-Level-3-Events/#event-type-DOMNodeInsertedIntoDocument)，可以监听到有节点插入到了DOM树。
+
+  插入到DOM树，就意味着我们可以使用类似于DOM API`document.getElementById('myNewNodeId')`来获取到这个新插入的节点了。
+
+  DOM4中引入[MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver)来监听对DOM树的一系列改动。
 
 
 static getDerivedStateFromProps()
@@ -1082,22 +1174,22 @@ function Repeat(props){
 -这样在条件渲染时就很方便了：<div>{timeIsUp && <Fire />}</div>，那么只有当timeIsUp为真时，才会渲染<Fire/>。但要注意，某些falsy value对于React来说是会渲染的，如0：<div>{items.length && <Buy />}</div>。如果确实想输出false, true, null, undefined，那可以将它转为string再输出：<div>This is boolean value {String(myBooleanVar)}</div>。
 MDN: String is more reliable than toString(), as it works even on null, undefined, and on symbols.
 
-18. Optimizing Performance讲到了react更新的一点东西
+## 18. Optimizing Performance讲到了react更新的一点东西
 shouldComponentUpdate return false，则根本就不调用render了；否则，React调用render并对比Vitrual DOM，如果一样则不更新DOM。
 -Array.prototype.concat：按给定参数顺序合并到一个新的数组，执行shallow copy
 
-19. Render Props[href=https://reactjs.org/docs/render-props.html#be-careful-when-using-render-props-with-reactpurecomponent]
+## 19. Render Props[href=https://reactjs.org/docs/render-props.html#be-careful-when-using-render-props-with-reactpurecomponent]
 render prop是一个函数，该函数作为一个特殊的'render'属性传给另一个组件，这个组件使用函数来渲染：this.props.render(xxx)。
 React.PureComponent和React.Component类似，区别在于React.Component没有实现shouldComponentUpdate()，而React.PureComponent实现了它，（浅比较）implements it with a shallow prop and state comparison。
 当然了从React.Component继承实现自己的组件，也可以自行实现shouldComponentUpdate()，如果数据是简单地比较，那完全可以从PureComponent继承，省去自己实现的麻烦~[href=https://reactjs.org/docs/optimizing-performance.html]
 
-20. Portals
+## 20. Portals
 一般情况下render返回的React element或component会被挂在使用它的地方，如<ParentComponent><ChildComponent/><ParentComponent/>。ChildComponent的render返回结果将会挂在Parent内使用到它的地方。但有时虽然在这里写的，但想把ChildComponent挂在别处，如DOM中其它某一节点下，这里实际上就不想让React渲染任何东西。此时Portals就出现了~this is how Portals comes into...
 修改ChildComponent的render，返回值如这种写法即可：
 return ReactDOM.createPortal(this.props.children, domNode)或
 return ReactDOM.createPortal(<h1>hi there</h1>, domNode)
 
-21. Reconciliation
+## 21. Reconciliation
 
 
 ## 22. Hooks
@@ -1162,6 +1254,8 @@ function onCleanRoomDone() {
 > This is a way to “preserve” some values between the function calls
 
 ### 22.3 Effect Hook: `useEffect`
+
+**用处**：当你想在DOM更新完成后做点什么时，就可以用它。
 
 *side effects*, short for ***effects***.
 
@@ -1429,6 +1523,64 @@ useState(initialValue) {
 
 ## 24. 如何为`className`写多个值？
 
+## 25. 生命周期
+
+### 25.2 父子组件的生命周期顺序是怎样的？
+
+e.g 1 **渲染完成，应该就是指mounted**的顺序是深度优先遍历
+
+```tsx
+<Component id="A0">
+  <Component id="B0" />
+  <Component id="B1">
+    <Component id="C0" />
+    <Component id="C1" />
+  </Component>
+  <Component id="B2" />
+</Component>
+```
+
+渲染的顺序是：
+```
+B0
+C0
+C1
+B1
+B2
+A0
+```
+
+即**后序遍历**，React采用深度优先渲染，所以根结点的渲染完成事件总是最后触发。
+
+e.g 2 见[my-app/src/examples/life-cycle](./my-app/src/examples/life-cycle/).
+
+```tsx
+// Parent
+class Parent extends React.Component {
+  render() {
+    return (
+      <>
+        <Child id='C0' />
+        <Child id='C1' />
+      </>
+    )
+  }
+}
+```
+
+首次渲染触发的周期顺序：
+
+```
+parent::ctor
+parent::render
+child-C0::ctor
+child-C0::render
+child-C1::ctor
+child-C1::render
+child-C0::componentDidMount
+child-C1::componentDidMount
+parent::componentDidMount
+```
 
 ## Q&A
 

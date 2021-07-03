@@ -2452,6 +2452,12 @@ Access-Control-Allow-Credentials: true
 https://webkit.org/blog/7929/designing-websites-for-iphone-x/
 
 
+## 80. 调用`window.history.back()`后发生了什么？
+
+浏览器导航栏点击后退，发生了什么呢？
+
+`back()`是一个异步的方法，回到上一个页面，如果没有上一页则do nothing。
+
 ---CSS---
 ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
 
