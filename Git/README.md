@@ -52,8 +52,8 @@
 - [This is a combination of 3 commits.](#this-is-a-combination-of-3-commits)
 - [This is the 1st commit message:](#this-is-the-1st-commit-message)
   - [48. git submodule](#48-git-submodule)
-  - [1. git-submodule-tools 文件夹](#1-git-submodule-tools-文件夹)
-  - [2. .gitmodules 文件](#2-gitmodules-文件)
+    - [1. git-submodule-tools 文件夹](#1-git-submodule-tools-文件夹)
+    - [2. .gitmodules 文件](#2-gitmodules-文件)
   - [49. 查看当前工程关联的远程仓库地址](#49-查看当前工程关联的远程仓库地址)
   - [50. 修改当前工程对应的远程仓库地址](#50-修改当前工程对应的远程仓库地址)
   - [51. 克隆别人的仓库，作为自己的](#51-克隆别人的仓库作为自己的)
@@ -401,19 +401,19 @@ e.g 远程仓库下面有2个repo（bar.git和foo.git），这俩是兄弟关系
     $ git submodule add ../foo.git
 
 运行结果如下：
-![运行结果](Pics/gitcommands/01.PNG)
+![运行结果](/Pics/gitcommands/01.PNG)
 
 可见多了2个内容:  
-## 1. git-submodule-tools 文件夹  
+### 1. git-submodule-tools 文件夹  
 这个就是所引用的submodule的全部内容。
 
-## 2. .gitmodules 文件
+### 2. .gitmodules 文件
 这个文件是git自动生成的，用以track当前工程所依赖的所有submodules。具体可参见[文档](https://git-scm.com/docs/gitsubmodules)。
 
-![配置文件](Pics/gitcommands/02.PNG)
+![配置文件](/Pics/gitcommands/02.PNG)
 
 此时修改require路径，即可引用到submodule中需要的文件：
-![修改require路径](Pics/gitcommands/03.PNG)
+![修改require路径](/Pics/gitcommands/03.PNG)
 
 48.2 submodule更新了，如何为当前项目(superproject)应用此更新呢？
 
