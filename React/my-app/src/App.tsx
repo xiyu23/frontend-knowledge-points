@@ -1,7 +1,9 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { Parent } from './examples/life-cycle/class-component-style/parent';
+import Child from './examples/life-cycle/function-component-style/child';
+import Parent from './examples/life-cycle/function-component-style/parent';
+// import { Parent } from './examples/life-cycle/class-component-style/parent';
 
 function App() {
   return (

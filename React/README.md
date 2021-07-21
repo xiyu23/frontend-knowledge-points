@@ -1527,6 +1527,73 @@ useState(initialValue) {
 
 ### 25.2 父子组件的生命周期顺序是怎样的？
 
+对于函数组件而言：
+
+1、执行函数组件时，由外层到内层；  
+2、cleanup阶段，由内层到外层（每个组件的cleanup可能有多个，按书写顺序由上到下依次执行）；  
+3、React执行更新；  
+4、rendered阶段，有内层到外层；  
+5、结束
+
+```
+// 首次
+父组件render
+子组件render
+子组件挂载
+父组件挂载
+
+// 子组件自己更新
+子组件render
+子组件cleanup (#1 注意与卸载的区别)
+子组件rendered (#2 注意与挂载的区别)
+```
+
+> `mounted`与`rendered`都表示渲染完毕，只不过第一次渲染完毕时，称之为`mouted`而已。
+> 
+> 挂载后组件的更新，每次更新时都会重新执行一遍函数组件，来获取需要显示的DOM结构。React对比前后两个DOM结构，得出一个patch来更新真实的DOM树。更新前调用钩子`cleanup`，更新后调用钩子`rendered`（即`useEffect`提供的能力）。
+>
+> 当然，`useEffect`可以传入依赖项，可以帮助React确定是否要执行effect。
+
+```ts
+useEffect(() => {
+  document.title = `hello ${name}`;
+}, [name]);
+
+// somehow in useEffect
+if (previousName === newName) {
+  // wont run the effect, since they are same
+  return;
+}
+
+// do effect with newName
+```
+
+例如`<Parent>`组件里面有一个`<Child>`，子组件接收父组件通过`props`传来的属性(`props: { step: number }`)。
+```ts
+// 首次
+Parent runs with props
+Child runs with props: {"step":1}
+Child rendered done, do effects
+Parent rendered done, do effects
+
+// 子组件setState后
+Child runs with props: {"step":1}
+Child cleanup 0 // 0是上一次render时，step的值
+Child rendered done, do effects
+
+// 父组件状态改变，给子组件的props中，step发生变化，1变为2
+Parent runs with props
+Child runs with props: {"step":2}
+Parent cleanup
+Parent rendered done, do effects
+
+// 父组件通过修改props，不再渲染子组件
+Parent runs with props
+Child cleanup
+Parent cleanup
+Parent rendered done, do effects
+```
+
 e.g 1 **渲染完成，应该就是指mounted**的顺序是深度优先遍历
 
 ```tsx
