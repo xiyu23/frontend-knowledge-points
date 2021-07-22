@@ -65,7 +65,7 @@
   - [16. The Component Lifecycle](#16-the-component-lifecycle)
   - [17.JSX In Depth](#17jsx-in-depth)
   - [18. Optimizing Performance讲到了react更新的一点东西](#18-optimizing-performance讲到了react更新的一点东西)
-  - [19. Render Props[href=https://reactjs.org/docs/render-props.html#be-careful-when-using-render-props-with-reactpurecomponent]](#19-render-propshrefhttpsreactjsorgdocsrender-propshtmlbe-careful-when-using-render-props-with-reactpurecomponent)
+  - [19. Render Props](#19-render-props)
   - [20. Portals](#20-portals)
   - [21. Reconciliation](#21-reconciliation)
   - [22. Hooks](#22-hooks)
@@ -1178,9 +1178,50 @@ MDN: String is more reliable than toString(), as it works even on null, undefine
 shouldComponentUpdate return false，则根本就不调用render了；否则，React调用render并对比Vitrual DOM，如果一样则不更新DOM。
 -Array.prototype.concat：按给定参数顺序合并到一个新的数组，执行shallow copy
 
-## 19. Render Props[href=https://reactjs.org/docs/render-props.html#be-careful-when-using-render-props-with-reactpurecomponent]
-render prop是一个函数，该函数作为一个特殊的'render'属性传给另一个组件，这个组件使用函数来渲染：this.props.render(xxx)。
-React.PureComponent和React.Component类似，区别在于React.Component没有实现shouldComponentUpdate()，而React.PureComponent实现了它，（浅比较）implements it with a shallow prop and state comparison。
+## 19. Render Props
+
+ref: https://reactjs.org/docs/render-props.html#be-careful-when-using-render-props-with-reactpurecomponent
+
+用处：在组件内动态地渲染一些内容，这些内容正好要依赖于组件内部的状态。
+
+做法：给组件传递一个函数，这个函数可以接收组件内的状态作为参数，并返回一个React Element，组件就可以将返回的这个元素进行渲染。
+
+例子：
+
+```tsx
+// 组件
+function Mouse(props) {
+  // 假设我们已经有了坐标(x, y): state = { x: xx, y: xx }
+  const state = { x: 5, y: 6};
+  return (
+    <div>
+      { /* 这里渲染动态传入的内容 */ }
+      { props.render(state) }
+    </div>
+  );
+}
+
+// 这个组件依赖于Mouse组件内部的状态
+function Cat(props) {
+  const { x, y } = props; // 依赖x,y的传入
+  return <img style={ left: x, top: y } src='cat.png' />
+}
+
+// 这里给<Mouse>组件传入的`render`属性就是'render props'
+ReactDOM.render(
+  someContainerElement,
+  <Mouse render={(state) => <Cat x={state.x} y={state.y} />} />,
+);
+```
+
+> A component with a render prop takes a function that returns a React element and calls it instead of implementing its own render logic.
+
+总结：
+
+*render prop*是一个函数，该函数作为一个特殊的'render'属性（**当然了，你叫任何名字都是可以的，只要符合`render props`的规则就行**）传给另一个组件，这个组件使用该函数的返回结果来渲染。
+
+`React.PureComponent`和`React.Component`类似，区别在于React.Component没有实现shouldComponentUpdate()，而React.PureComponent实现了它，（浅比较）implements it with a shallow prop and state comparison。
+
 当然了从React.Component继承实现自己的组件，也可以自行实现shouldComponentUpdate()，如果数据是简单地比较，那完全可以从PureComponent继承，省去自己实现的麻烦~[href=https://reactjs.org/docs/optimizing-performance.html]
 
 ## 20. Portals
