@@ -2458,6 +2458,67 @@ https://webkit.org/blog/7929/designing-websites-for-iphone-x/
 
 `back()`是一个异步的方法，回到上一个页面，如果没有上一页则do nothing。
 
+## 81. `try...catch...finally`
+
+看React的`useState`源码时，发现有这样的写法:
+
+```ts
+try {
+  return mountState(initialState);
+} finally {
+  ReactCurrentDispatcher.current = prevDispatcher;
+}
+```
+
+不论是否发生异常，`finally`块中的语句都会被执行，但是这个顺序就很迷惑了。
+
+举个例子，
+
+```ts
+try {
+  return foo();
+} finally {
+  bar();
+}
+```
+
+等价于：
+
+```ts
+let tmp;
+try {
+  tmp = foo();
+} finally {
+  bar();
+}
+return tmp
+```
+
+正确的顺序是：
+1. Code before return statement is executed
+2. Expression in return statement is evaluated
+3. finally block is executed
+4. Result evaluated in step 2 is returned
+
+测试一下：
+```ts
+let x = 1;
+function foo() {
+  try {
+    x = 2;
+    return x; 
+  } finally {
+    x = 3;
+  }
+}
+
+// 请问输出结果是什么？
+console.log(foo());
+console.log(x);
+```
+
+
+
 ---CSS---
 ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
 
