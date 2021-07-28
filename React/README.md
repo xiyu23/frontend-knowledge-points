@@ -1468,8 +1468,16 @@ useLayoutEffect是在pait之前。
 ### 22.4 hooks的规则
 
 就两点，
-- 只在*top-level*作用域调用
-- 只在*function component*中调用
+- 只在顶部作用域(*top-level*)调用，不能有条件式的调用，以保证每次函数组件渲染时，hooks执行的顺序都是一致的
+- 只在*function component*、或者自定义hooks中调用
+
+Q1. 为什么只能在*top-level*调用？
+
+hooks依赖于调用的顺序，每次渲染时，调用hooks的顺序都应该是一样的。
+
+为什么呢？
+
+
 
 ### 22.5 自定义hook
 
@@ -1559,6 +1567,9 @@ useState(initialValue) {
 ```
 
 相当于啥都不会发生。（如果当前值是false，而初始值是true，岂不是渲染后会变成true？？）
+
+如何开启`enableDebugTracing`，就可以打印state的更新log
+
 
 ## 23. Refs and the DOM
 
