@@ -3,9 +3,26 @@ import logo from './logo.svg';
 import './App.css';
 import Child from './examples/life-cycle/function-component-style/child';
 import Parent from './examples/life-cycle/function-component-style/parent';
+import FriendStatus from './examples/custom-hook/friend-status';
+import FriendItem from './examples/custom-hook/friend-item';
 // import { Parent } from './examples/life-cycle/class-component-style/parent';
 
 function App() {
+  const friendList = [
+    {
+      id: '1',
+      name: 'yuhui',
+    },
+    {
+      id: '3',
+      name: 'xiaohan',
+    },
+    {
+      id: '4',
+      name: 'sun',
+    },
+  ];
+  const FriendList = friendList.map(friend => <FriendItem friend={{id: friend.id, name: friend.name}} key={friend.id} />);
   return (
     <div className="App">
       <header className="App-header">
@@ -22,7 +39,8 @@ function App() {
           Learn React
         </a>
       </header>
-      <Parent />
+      {/* <Parent /> */}
+      { FriendList }
     </div>
   );
 }
