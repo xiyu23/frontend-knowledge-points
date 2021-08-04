@@ -34,6 +34,9 @@
   - [4.3、声明一个函数类型](#43声明一个函数类型)
   - [4.4、泛型函数(generic function)](#44泛型函数generic-function)
   - [4.5、为泛型函数指明类型](#45为泛型函数指明类型)
+  - [4.6、函数形参上直接指明类型](#46函数形参上直接指明类型)
+  - [4.7、函数的参数是一个函数类型](#47函数的参数是一个函数类型)
+  - [4.8、声明一个有属性的函数](#48声明一个有属性的函数)
 - [5、definite assignment assertion operator(`!`)](#5definite-assignment-assertion-operator)
 - [10.声明抽象类、抽象方法](#10声明抽象类抽象方法)
 - [11.类方法、成员默认为`public`](#11类方法成员默认为public)
@@ -48,6 +51,9 @@
 - [17. `.d.ts`文件是什么？](#17-dts文件是什么)
 - [18. 如果一个函数返回值类型可能为`null`，那该如何表达呢？](#18-如果一个函数返回值类型可能为null那该如何表达呢)
 - [19. `keyof`](#19-keyof)
+- [20. React源码中这些写法是什么意思？](#20-react源码中这些写法是什么意思)
+  - [1、`currentlyRenderingFiber = (null: any);`](#1currentlyrenderingfiber--null-any)
+  - [2、`|`是用来干啥？](#2是用来干啥)
   - [1. npm](#1-npm)
   - [2. npm的选项](#2-npm的选项)
 
@@ -365,6 +371,8 @@ let point: { x: number, y: number };
 
 当需要转换成一个你确定的类型时，可用`as`或`<>`来转换类型。
 
+ts compiler编译时，会去掉`as`，这里用转换只是为了告诉tsc，“我知道这个类型，你别报错”。
+
 ```ts
 const elemInput = document.getElementById('inputID') as HTMLInputElement;
 
@@ -573,6 +581,51 @@ const res = combine([1,2,3], ['hi', 'hello']);
 
 // corret
 const res = combine<number | string>([1,2,3], ['hi', 'hello']);
+```
+
+### 4.6、函数形参上直接指明类型
+
+形参用`,`或者`;`分隔都可以。
+
+```ts
+function printCoord(pt: { x: number, y: number }) {
+  console.log(`x: ${pt.x}, y: ${pt.y}`);
+}
+
+function printCoord(pt: { x: number; y: number }) {
+  console.log(`x: ${pt.x}, y: ${pt.y}`);
+}
+```
+
+### 4.7、函数的参数是一个函数类型
+
+*function type expression*, 就是指**函数类型**表达式。
+
+下面的`(name: string) => void`就是一个*function type expression*。
+
+```ts
+function sayHi(fn: (name: string) => void) {
+  fn('hi');
+}
+```
+
+### 4.8、声明一个有属性的函数
+
+js中函数也可以有自己的属性，ts声明方法：
+
+```ts
+type HiFunc = {
+  msg: string;
+  (num: number) => number; // #1
+}
+```
+
+`#1`声明这个函数的形参和返回值，注意这里和*function type expression*还有点不同。
+
+```ts
+function sayHi(fn: HiFunc) {
+  console.log(`say ${fn.msg} for ${fn(3)} times!`); // say xxx for 3 times
+}
 ```
 
 ## 5、definite assignment assertion operator(`!`)
@@ -869,6 +922,33 @@ ref: https://www.typescriptlang.org/docs/handbook/declaration-files/templates/mo
 type Pick<T, K extends keyof T> = {
     [P in K]: T[P];
 };
+```
+
+## 20. React源码中这些写法是什么意思？
+
+### 1、`currentlyRenderingFiber = (null: any);`
+
+```ts
+// #1
+newBaseQueueLast.next = (newBaseQueueFirst: any);
+
+// #2 这是啥玩意？？
+currentlyRenderingFiber = (null: any);
+
+newState = ((update.eagerState: any): S);
+```
+
+### 2、`|`是用来干啥？
+
+```ts
+export type UpdateQueue<S, A> = {|
+  pending: Update < S, A > | null,
+  interleaved: Update < S, A > | null,
+  lanes: Lanes,
+  dispatch: (A => mixed) | null,
+  lastRenderedReducer: ((S, A) => S) | null,
+  lastRenderedState: S | null,
+|};
 ```
 
 

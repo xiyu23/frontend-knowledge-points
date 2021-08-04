@@ -16,14 +16,25 @@
 - wizardry  
   n. 杰出的成就；非凡的才能
 
-- unleash
+- unleash  
   v. 发泄；突然释放
 
-- solitary
-  [ˈsɑːləteri]
+- solitary  
+  [ˈsɑːləteri]  
   adj. 单独的
 
-- spawn
-  [spɔːn]
+- spawn  
+  [spɔːn]  
   v. (鱼、蛙）产卵; 引发; 引起; 导致; 造成
 
+- consolidate  
+  合并，使加强
+
+- interleave  
+  v.	(尤指将片状物)插入，夹进;
+
+- eager  
+  渴望的，渴求的
+
+- entangled  
+  被缠入的，卷入的

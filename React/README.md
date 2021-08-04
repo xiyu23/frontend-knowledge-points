@@ -1774,6 +1774,84 @@ function Hello(props) {
 }
 ```
 
+React给每个组件实例都会添加一个`updater`，它持有对*renders*的引用(**#1**)。
+
+```ts
+const inst = new MyReactComponent();
+inst.props = props;
+inst.updater = ReactDOMUpdater; // #1
+```
+
+`ReactDOMUpdater`是*render*提供的，即*React*库是针对接口编程，给它一个具体平台的*render*，就能将视图渲染在具体平台之上。
+
+*ReactDOM*其实就是一个*render*，用于浏览器端的渲染；
+
+*ReactNative*是面向iOS/Android原生端的渲染；
+
+*ReactDOMServerUpdater*是服务端渲染所用。
+
+`useState`内部分了三种类型：*mount*, *update*, *rerender*。
+
+
+
+初始时用`HooksDispatcherOnMount`，后续更新时用`HooksDispatcherOnUpdate`。
+
+![1](./pics/learn-useState-1.PNG)
+
+```ts
+```
+
+一些变量和概念的解释：
+
+什么是*Fiber*？
+
+> A Fiber is work on a Component that needs to be done or was done. There can be more than one per component.
+
+*currentlyRenderingFiber*: The work-in-progress fiber
+
+*workInProgress*：一个*Fiber*
+
+上面这俩Fiber有什么区别？
+
+`ReactCurrentDispatcher.current`：是一个`Dispatcher`
+
+*Dispatcher*：
+
+*queue*: 是一个对象，维护了一个*update*链表。
+
+定义：
+
+```ts
+export type UpdateQueue<S, A> = {|
+  pending: Update < S, A > | null,
+  interleaved: Update < S, A > | null,
+  lanes: Lanes,
+  dispatch: (A => mixed) | null,
+  lastRenderedReducer: ((S, A) => S) | null,
+  lastRenderedState: S | null,
+|};
+
+type Update<S, A> = {|
+  lane: Lane,
+  action: A,
+  eagerReducer: ((S, A) => S) | null,
+  eagerState: S | null,
+  next: Update < S, A >,
+|};
+```
+
+*hook*: hook节点，多个hook组成一个链表。
+
+```ts
+export type Hook = {|
+  memoizedState: any,
+  baseState: any,
+  baseQueue: Update < any, any > | null,
+  queue: UpdateQueue < any, any > | null,
+  next: Hook | null,
+|};
+```
+
 ### 4. 为什么React元素只能有一个根？
 
 ### 5. function component vs class component
