@@ -1380,6 +1380,25 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Obje
 
 ### 48.3 函数解构
 
+用途：给函数传一个对象作为参数时，可以在声明函数的参数时就用解构的写法，直接把属性都拿出来。这样就不必在函数体内再解构。
+
+before:
+
+```js
+function foo(obj) {
+  const { name, age } = obj;
+  console.log(`${name} is ${age} years old.`);
+}
+```
+
+after:
+
+```js
+function foo({ name, age }) {
+  console.log(`${name} is ${age} years old.`);
+}
+```
+
 ### 48.4 解构内嵌引用类型(destructing nested objects)
 
 > 结论：解构仅仅是**unpack**，即取出每个`(key, value)`对，对于`value`是引用类型的，仍然引用的是同一个对象。
