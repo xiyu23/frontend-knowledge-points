@@ -2,6 +2,9 @@ npm i @reduxjs/toolkit
 npx create-react-app my-app --template redux
 npm i redux
 
+- [1. 介绍](#1-介绍)
+  - [1.1、单向数据流](#11单向数据流)
+  - [1.2、数据流向例子](#12数据流向例子)
 - [2. Redux基本概念](#2-redux基本概念)
   - [2.1 `Store`](#21-store)
   - [2.2 `Action`](#22-action)
@@ -20,6 +23,17 @@ npm i redux
   - [3.1 `configureStore`](#31-configurestore)
   - [3.2 `createSlice`](#32-createslice)
   - [3.3 该这个了](#33-该这个了)
+
+
+## 1. 介绍
+
+### 1.1、单向数据流
+
+![例1](./imgs/one-way-data-flow-04fe46332c1ccb3497ecb04b94e55b97.png)
+
+### 1.2、数据流向例子
+
+![例2](./imgs/ReduxDataFlowDiagram-49fa8c3968371d9ef6f2a1486bd40a26.gif)
 
 
 ## 2. Redux基本概念
@@ -243,7 +257,7 @@ function myReactComponent() {
 }
 ```
 
-**每当redux store更新后，`useSelector`都会再运行一次我们提供的*selector*函数，如果值发生了变化，就会触发react组件重新渲染以达到视图的更新。**
+**每当redux store更新后，`useSelector`都会再运行一次我们提供的*selector*函数，如果值发生了变化(或对于引用类型，指向改变时），就会触发react组件重新渲染以达到视图的更新。**
 
 > Any time an action has been dispatched and the Redux store has been updated, useSelector will re-run our selector function.
 
