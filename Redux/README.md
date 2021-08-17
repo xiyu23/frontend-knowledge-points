@@ -23,6 +23,8 @@ npm i redux
   - [3.1 `configureStore`](#31-configurestore)
   - [3.2 `createSlice`](#32-createslice)
   - [3.3 该这个了](#33-该这个了)
+- [4、深入理解](#4深入理解)
+  - [4.1、*`dispatch`*](#41dispatch)
 
 
 ## 1. 介绍
@@ -243,6 +245,72 @@ store.dispatch(incrementAsync(5))
 问题：
 
 1、`store.dispatch`为啥可以接收一个函数？
+
+**当装了`thunk`中间件之后**，就可以让`store.dispatch`派发一个函数了，这个函数被称之为*thunk function*。它能获取到`dispatch`和`getState`这两个引用。
+
+```ts
+import { configureStore } from '@reduxjs/toolkit'
+// somewhere there's a 'counterReducer'
+
+const store = configureStore({ reducer: counterReducer })
+
+const exampleThunkFunction = (dispatch, getState) => {
+  const stateBefore = getState()
+  console.log(`Counter before: ${stateBefore.counter}`)
+  dispatch(increment())
+  const stateAfter = getState()
+  console.log(`Counter after: ${stateAfter.counter}`)
+}
+
+store.dispatch(exampleThunkFunction)
+```
+
+那么很自然地，*thunk action creator*就是这样的，它返回一个*thunk function*用于派发：
+
+```ts
+const logAndAdd = amount => {
+  return (dispatch, getState) => {
+    const stateBefore = getState()
+    console.log(`Counter before: ${stateBefore.counter}`)
+    dispatch(incrementByAmount(amount))
+    const stateAfter = getState()
+    console.log(`Counter after: ${stateAfter.counter}`)
+  }
+}
+
+store.dispatch(logAndAdd(5))
+```
+
+2、怎么把*redux-thunk*作为中间件加入到redux中？
+
+安装：
+```sh
+npm install redux-thunk
+
+yarn add redux-thunk
+```
+
+插入中间件：
+```ts
+import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+import rootReducer from './reducers';
+
+const store = createStore(rootReducer, applyMiddleware(thunk));
+
+const myThunkFunction = (dispatch, getState) => {
+  // do sth asynchronously
+  console.log('do sth...');
+
+  // then dispatch action with the very basic way
+  dispatch({
+    type: 'ADD',
+    payload: 1,
+  })
+};
+
+store.dispatch(myThunkFunction); // 有了redux-thunk中间件，这里可以派发一个函数了
+```
 
 ### 2.10 `useSelector`
 
@@ -490,3 +558,50 @@ export const {
 
   href: https://redux.js.org/tutorials/essentials/part-4-using-data
   
+
+## 4、深入理解
+
+### 4.1、*`dispatch`*
+
+Basically, *`dispatch`* 是一个同步方法，它 **只接收`plain object`**。
+
+但是可以用中间件来包装，这样就可以在业务层派发`promise`、`类似异步任务`等类型的事件了。
+
+dispatch源码:
+
+```ts
+function dispatch(action: A) {
+  if (!isPlainObject(action)) {
+    throw new Error(
+      `Actions must be plain objects. Instead, the actual type was: '${kindOf(
+        action
+      )}'. You may need to add middleware to your store setup to handle dispatching other values, such as 'redux-thunk' to handle dispatching functions. See https://redux.js.org/tutorials/fundamentals/part-4-store#middleware and https://redux.js.org/tutorials/fundamentals/part-6-async-logic#using-the-redux-thunk-middleware for examples.`
+    )
+  }
+
+  if (typeof action.type === 'undefined') {
+    throw new Error(
+      'Actions may not have an undefined "type" property. You may have misspelled an action type string constant.'
+    )
+  }
+
+  if (isDispatching) {
+    throw new Error('Reducers may not dispatch actions.')
+  }
+
+  try {
+    isDispatching = true
+    currentState = currentReducer(currentState, action)
+  } finally {
+    isDispatching = false
+  }
+
+  const listeners = (currentListeners = nextListeners)
+  for (let i = 0; i < listeners.length; i++) {
+    const listener = listeners[i]
+    listener()
+  }
+
+  return action
+}
+```
