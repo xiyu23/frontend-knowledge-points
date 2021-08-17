@@ -35,8 +35,9 @@
   - [4.4、泛型函数(generic function)](#44泛型函数generic-function)
   - [4.5、为泛型函数指明类型](#45为泛型函数指明类型)
   - [4.6、函数形参上直接指明类型](#46函数形参上直接指明类型)
-  - [4.7、函数的参数是一个函数类型](#47函数的参数是一个函数类型)
-  - [4.8、声明一个有属性的函数](#48声明一个有属性的函数)
+  - [4.7、函数的参数是一个函数类型(*`function type expression`*)](#47函数的参数是一个函数类型function-type-expression)
+  - [4.8、声明一个有属性的函数(*`Call Signatures`*)](#48声明一个有属性的函数call-signatures)
+  - [4.9、函数重载(*`Function Overloads`*)](#49函数重载function-overloads)
 - [5、definite assignment assertion operator(`!`)](#5definite-assignment-assertion-operator)
 - [10.声明抽象类、抽象方法](#10声明抽象类抽象方法)
 - [11.类方法、成员默认为`public`](#11类方法成员默认为public)
@@ -597,11 +598,11 @@ function printCoord(pt: { x: number; y: number }) {
 }
 ```
 
-### 4.7、函数的参数是一个函数类型
+### 4.7、函数的参数是一个函数类型(*`function type expression`*)
 
 *function type expression*, 就是指**函数类型**表达式。
 
-下面的`(name: string) => void`就是一个*function type expression*。
+下面的`sayHi`接受1个参数*fn*，`(name: string) => void`就是一个*function type expression*。
 
 ```ts
 function sayHi(fn: (name: string) => void) {
@@ -609,22 +610,54 @@ function sayHi(fn: (name: string) => void) {
 }
 ```
 
-### 4.8、声明一个有属性的函数
+### 4.8、声明一个有属性的函数(*`Call Signatures`*)
 
 js中函数也可以有自己的属性，ts声明方法：
 
 ```ts
 type HiFunc = {
   msg: string;
-  (num: number) => number; // #1
+  (num: number): number; // #1
+}
+
+function sayHi(fn: HiFunc) {
+  console.log(`say ${fn.msg} for ${fn(3)} times!`); // say xxx for 3 times
 }
 ```
 
-`#1`声明这个函数的形参和返回值，注意这里和*function type expression*还有点不同。
+`#1`声明这个函数的形参和返回值，注意这里和*function type expression*还有点不同（这里是用`:`分隔参数和返回值类型，而函数类型的表达式是用`=>`）。
 
 ```ts
-function sayHi(fn: HiFunc) {
-  console.log(`say ${fn.msg} for ${fn(3)} times!`); // say xxx for 3 times
+// Call Signatures
+(num: number): number;
+
+// function type expression
+(num: number) => number;
+```
+
+### 4.9、函数重载(*`Function Overloads`*)
+
+语法：
+```ts
+function foo(a: number, b: number): number; // Overload Signatures
+function foo(a: number): number; // Overload Signatures
+function foo(a: number, b?: number): number { // Implementation Signature
+  if (b === undefined) {
+    return a + 1;
+  }
+  return a + b;
+} 
+```
+
+声明重载时，实现函数的部分叫做*Implementation Signature*，它不可以被外部直接调用（你就当作它不可见）。
+
+你需要在*Implementation Signature*的上方声明**2个或更多**的*Overload Signatures*，这些函数重载的签名是可见的，可以被调用。
+
+比如下面的例子中，直接调用`fn()`是错误的，因为*fn*只有个带*x*参数的声明。
+```ts
+function fn(x: string): void;
+function fn() {
+  // ...
 }
 ```
 
