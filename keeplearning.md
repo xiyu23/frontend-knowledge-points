@@ -1879,7 +1879,10 @@ ref:
     arr.reduce(callback( accumulator, currentValue, [, index[, array]] )[, initialValue])
 
 > 对数组中的每个元素执行`reducer`函数，`reduce`最终返回一个值，这个值就是最后一次`reducer`返回的结果。
-> `initialValue`如果不提供时，初始`accumulator`就是`arr[0]`。
+> 
+> `initialValue`如果不提供时，初始`accumulator`就是`arr[0]`，从数组第2个元素开始迭代。
+> 
+> 即`accumulator`是`arr[0]`，`currentValue`（当前值）是`arr[1]`。
 
 ```js
 var a = [0,1,2,3];
@@ -1912,11 +1915,10 @@ res = a.reduce((acc, v, i, arr) => {
     return (acc + v) << 1; // 每次累加后，*2，而后继续累加
 });
 
-// (0 + 0) * 2 = 0
 // (0 + 1) * 2 = 2
 // (2 + 2) * 2 = 8
 // (8 + 3) * 2 = 22
-console.log(res);
+console.log(res); // 22
 ```
 
 ## 64. 在继承体系中如何判断一个对象是子类实例还是父类实例？
