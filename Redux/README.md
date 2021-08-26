@@ -25,6 +25,7 @@ npm i redux
   - [3.3 该这个了](#33-该这个了)
 - [4、深入理解](#4深入理解)
   - [4.1、*`dispatch`*](#41dispatch)
+  - [4.2、`redux-thunk`](#42redux-thunk)
 
 
 ## 1. 介绍
@@ -603,5 +604,99 @@ function dispatch(action: A) {
   }
 
   return action
+}
+```
+
+### 4.2、`redux-thunk`
+
+redux-thunk的源码非常简单：
+
+```ts
+function createThunkMiddleware(extraArgument) {
+  // 返回的这个函数就是thunk中间件，所有中间件都要符合这个签名，即接收一个对象（其中有dispatch、getState，这是redux暴露给中间件的），返回一个函数，这个函数参数是一个符合store.dispatch接口的函数，因为前一个中间件的返回结果，将会作为下一个中间件的输入，每个中间件都要能够处理dispatch。
+  // 当上层调用store.dispatch时，thunk判断如果传入的action是一个函数，则直接调用它并返回。如果不是，则调用next传递给下一个中间件处理。
+  return ({ dispatch, getState }) => (next) => (action) => {
+    if (typeof action === 'function') {
+      return action(dispatch, getState, extraArgument);
+    }
+
+    return next(action);
+  };
+}
+
+const thunk = createThunkMiddleware();
+thunk.withExtraArgument = createThunkMiddleware;
+
+export default thunk;
+```
+
+```ts
+import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+
+const store = createStore(rootReducer, applyMiddleware(thunk));
+
+```
+
+`applyMiddleware`
+
+中间件源码：
+
+```ts
+export default function applyMiddleware(
+  ...middlewares: Middleware[]
+): StoreEnhancer<any> {
+  return (createStore: StoreEnhancerStoreCreator) =>
+    <S, A extends AnyAction>(
+      reducer: Reducer<S, A>,
+      preloadedState?: PreloadedState<S>
+    ) => {
+      const store = createStore(reducer, preloadedState)
+      let dispatch: Dispatch = () => {
+        throw new Error(
+          'Dispatching while constructing your middleware is not allowed. ' +
+            'Other middleware would not be applied to this dispatch.'
+        )
+      }
+
+      const middlewareAPI: MiddlewareAPI = {
+        getState: store.getState,
+        dispatch: (action, ...args) => dispatch(action, ...args)
+      }
+      const chain = middlewares.map(middleware => middleware(middlewareAPI))
+      dispatch = compose<typeof dispatch>(...chain)(store.dispatch)
+
+      return {
+        ...store,
+        dispatch
+      }
+    }
+}
+```
+
+
+```ts
+// compose中，对funcs执行了reduce，看着很晕。。对中间件数组从后到前执行的？错，从前到后，按数组下标顺序执行。
+// 假设数组为[a, b, c]，那么返回的这个函数执行时，会将参数args给c执行，c返回的结果再作为b的输入，b的输出再作为a的输入。
+// 返回的composedFunc为: a(b(c(d(store.dispatch))))的执行结果，它是一个函数。
+// 这个composedFunc赋值给了store.dispatch。当上层调用时，先调用中间件a，如果a不拦截，a里会调用next(action)以将action委托为下一个中间件b处理，以此类推直到跑完所有中间件，如果都没人处理，就用redux原生的store.dispatch来处理。
+return funcs.reduce(
+  (a, b) =>
+    (...args: any) =>
+      a(b(...args))
+)
+```
+
+每个chain中的元素都是这样的格式：接收1个参数next，返回一个函数。
+
+实质上从中间件chain最开始执行时，传入的参数就是`store.dispath`。它经过这些中间件挨个处理，
+
+```ts
+(next) => (action) => {
+  if (typeof action === 'function') {
+    return action(dispatch, getState, extraArgument);
+  }
+
+  return next(action);
 }
 ```
