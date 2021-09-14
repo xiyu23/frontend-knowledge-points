@@ -57,6 +57,7 @@
   - [49. 查看当前工程关联的远程仓库地址](#49-查看当前工程关联的远程仓库地址)
   - [50. 修改当前工程对应的远程仓库地址](#50-修改当前工程对应的远程仓库地址)
   - [51. 克隆别人的仓库，作为自己的](#51-克隆别人的仓库作为自己的)
+  - [52. 把拉下来的代码，修改远程指向自己的remote](#52-把拉下来的代码修改远程指向自己的remote)
 
 ## 1. 将一个目录初始化为git repo
     # 记得先在git创建一个仓库，而后在本地工程目录下，依次执行下面的命令：
@@ -472,3 +473,37 @@ e.g
    ```
 
 5. 如此，新仓库就已经复制成功
+
+## 52. 把拉下来的代码，修改远程指向自己的remote
+
+1. 在git上新建一个仓库
+
+2. 在拉下来的别人代码仓库之中，查看remote
+
+    ```bash
+    $ git remote -v
+    ```
+
+    发现有这些remote    
+
+    ```bash
+    origin  https://github.com/ankeetmaini/react-infinite-scroll-component.git (fetch)
+    origin  https://github.com/ankeetmaini/react-infinite-scroll-component.git (push)
+    upstream        https://git.woa.com/yuhui/wemeet-react-infinite-scroll-component.git (fetch)
+    upstream        https://git.woa.com/yuhui/wemeet-react-infinite-scroll-component.git (push)
+    ```
+
+3. 移除别人的remote，设置自己的remote
+   
+    ```bash
+    $ git remote remove origin
+    $ git remote remove upstream
+    ```
+
+    再用`$ git remote -v`查看发现已经空了，设置自己的remote：
+
+    ```bash
+    $ git remote add origin https://git.woa.com/yuhui/wemeet-react-infinite-scroll-component.git
+    ```
+
+4. 此时查看git graph发现不再显示之前的远程仓库信息了，现在就可以push到自己的仓库。
