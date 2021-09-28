@@ -1852,6 +1852,19 @@ export type Hook = {|
 |};
 ```
 
+
+示例代码
+```tsx
+function Foo() {
+  const [count, setCount] = useState(0);
+  const [step, setStep] = useState(1);
+  // ...
+}
+```
+
+React第一次执行Foo时，创建一个单链表，挂载形如：
+
+
 ### 4. 为什么React元素只能有一个根？
 
 ### 5. function component vs class component
