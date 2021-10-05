@@ -1499,6 +1499,18 @@ const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
 
 传给`userMemo`的函数（第一个参数）在*rendering*阶段运行。
 
+首次执行时（实际调用`mountMemo`），在memo这个hook上缓存了value和deps，像这样：
+
+```ts
+hook.memoizedState = [prevValue, prevDeps];
+```
+
+`useMemo`将计算的值返回。
+
+后续执行时（实际调用`updateMemo`），会先判断上一次的`prevDeps`和当前的`deps`是否***相同***，如果相同则返回`prevValue`，无需计算，不同则需要重新计算。
+
+***相同***：内部使用`Object.is` (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is) 来判断是否相同。
+
 ### 22.7 Callback Hook: `useCallback`
 
 ```js
