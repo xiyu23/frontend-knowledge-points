@@ -2538,7 +2538,20 @@ console.log(foo());
 console.log(x);
 ```
 
+## 82. Could not find a declaration file for module 'xxx'. '/path/to/xxx.js' implicitly has an 'any' type
 
+原因：这个module没有ts声明文件。
+
+解决方法：
+
+1、`$ npm i -D @types/xxx`来尝试安装它的types
+
+2、如果不存在这个types，那就手动创建一个`xxx.d.ts`声明文件：
+
+```ts
+// xxx.d.ts
+declare module 'xxx';
+```
 
 ---CSS---
 ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference

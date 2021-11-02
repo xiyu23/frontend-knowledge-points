@@ -9,12 +9,12 @@
       - [2.3.2 大小写不敏感(`~*`)](#232-大小写不敏感)
   - [3. server](#3-server)
   - [4. nginx是如何处理一个请求的](#4-nginx是如何处理一个请求的)
-  - [4. `proxy_pass`是什么？](#4-proxy_pass是什么)
-  - [5. `upstream`](#5-upstream)
-  - [6. `nginx.conf`配置文件的开头](#6-nginxconf配置文件的开头)
-  - [7. `root`](#7-root)
-  - [8. 以`/`结尾的请求代表什么意思？](#8-以结尾的请求代表什么意思)
-  - [9. `nginx -V`](#9-nginx--v)
+  - [5. `proxy_pass`是什么？](#5-proxy_pass是什么)
+  - [6. `upstream`](#6-upstream)
+  - [7. `nginx.conf`配置文件的开头](#7-nginxconf配置文件的开头)
+  - [8. `root`](#8-root)
+  - [9. 以`/`结尾的请求代表什么意思？](#9-以结尾的请求代表什么意思)
+  - [10. `nginx -V`](#10-nginx--v)
 
 
 ## 1. CMD
@@ -141,28 +141,37 @@ nginx拿着请求头中的`Host`在配置中匹配，找到应该由哪个server
 
 nginx tests only the request’s header field “Host” to determine which server the request should be routed to
 
-## 4. `proxy_pass`是什么？
+## 5. `proxy_pass`是什么？
 
 把请求转发给另一个服务器。
 
-例如：
-```
-location /some/path/ {
-    proxy_pass http://www.example.com/link/;
-}
-```
+两种情况，
 
-当请求匹配到`/some/path`时，nginx会用`proxy_pass`指定代理服务器的`URI`(这里是`/link/`)替换匹配的`location`。
+- 指定了`URI`
+  ```
+  location /some/path/ {
+      proxy_pass http://www.example.com/link/;
+  }
+  ```
+  当请求匹配到`/some/path`时，nginx会用`proxy_pass`指定代理服务器的`URI`(这里是`/link/`)替换匹配的`location`。
 
-如有个请求带有`URI`是`/some/path/page.html`，它会被代理给`http://www.example.com/link/page.html`。
+  如有个请求带有`URI`是`/some/path/page.html`，它会被代理给`http://www.example.com/link/page.html`。
 
-当然如果`proxy_pass`没有`URI`，那么请求中的整个`URI`都会被传递过去(the full request URI is passed)。
+- 没指定`URI`
+  ```
+  location /some/path/ {
+      proxy_pass http://www.example.com;
+  }
+  ```
+  如果`proxy_pass`没有指定`URI`，那么请求中的整个`URI`都会被传递过去(the full request URI is passed)。
+  
+  如请求的是`http://www.hello.com/some/path/page.html`，则完整地转发给`http://www.example.com/some/path/page.html`。
 
 > The proxy_pass directive passes the request to the proxied server accessed with the configured URL
 
 **proxied server**，翻译过来就是*被代理的服务器*，它就是最终处理请求的业务服务器。*被代理*，其实就是被nginx代理了嘛，很多服务器都可以由nginx来代理，那这些服务器都称之为*proxied server*。
 
-## 5. `upstream`
+## 6. `upstream`
 
 定义一组server，可以在其他指令定义时引用。
 
@@ -182,7 +191,7 @@ server {
     }
 }
 ```
-## 6. `nginx.conf`配置文件的开头
+## 7. `nginx.conf`配置文件的开头
 
 ```
 user nginx;
@@ -191,7 +200,7 @@ worker_processes auto;
 
 `user`表示当前nginx进程运行在哪个用户权限下，user需要具有一定的访问权限才可以。
 
-## 7. `root`
+## 8. `root`
 
 `root`描述了在哪个根目录下寻找请求的文件。
 
@@ -220,7 +229,7 @@ server {
 第二个location中，将会落在`/www/data/images/`目录下；
 第三个location中，由于又定义了`root`，会覆盖外层作用域的定义，即会落在`/www/media/`目录下。
 
-## 8. 以`/`结尾的请求代表什么意思？
+## 9. 以`/`结尾的请求代表什么意思？
 
 如果一个请求URI以`/`结尾，代表它**请求的是一个目录**，并试图返回目录下面的**index文件**。
 
@@ -236,7 +245,7 @@ location / {
 }
 ```
 
-## 9. `nginx -V`
+## 10. `nginx -V`
 
 运行命令得到以下输出：
 
