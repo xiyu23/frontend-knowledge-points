@@ -1380,6 +1380,8 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Obje
 
 ### 48.3 函数解构
 
+**例子1**
+
 用途：给函数传一个对象作为参数时，可以在声明函数的参数时就用解构的写法，直接把属性都拿出来。这样就不必在函数体内再解构。
 
 before:
@@ -1397,6 +1399,24 @@ after:
 function foo({ name, age }) {
   console.log(`${name} is ${age} years old.`);
 }
+```
+
+**例子2**
+
+需要取每个元素的第2个值来判断。
+
+```js
+var arr = [
+  ['可能是吃习惯了八合里的Q弹，这个不够弹，软piapia的', 'abc'],
+  ['老婆说不好吃，那就是不好吃。差评。','bcd'],
+];
+
+var matches = arr.find(([, second], index, array) => {
+  console.log(second);
+  return second === 'bcd';
+});
+
+console.log(matches);
 ```
 
 ### 48.4 解构内嵌引用类型(destructing nested objects)
