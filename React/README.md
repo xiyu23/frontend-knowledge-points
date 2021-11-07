@@ -79,7 +79,8 @@
     - [22.6 Memo Hook: `useMemo`](#226-memo-hook-usememo)
     - [22.7 Callback Hook: `useCallback`](#227-callback-hook-usecallback)
     - [22.8 Ref Hook: `useRef`](#228-ref-hook-useref)
-    - [22.9 函数组件内使用`useState`，渲染更新逻辑是怎样的？](#229-函数组件内使用usestate渲染更新逻辑是怎样的)
+    - [22.9 `useContext`](#229-usecontext)
+    - [22.12 函数组件内使用`useState`，渲染更新逻辑是怎样的？](#2212-函数组件内使用usestate渲染更新逻辑是怎样的)
   - [23. Refs and the DOM](#23-refs-and-the-dom)
   - [24. 如何为`className`写多个值？](#24-如何为classname写多个值)
   - [25. 生命周期](#25-生命周期)
@@ -1561,7 +1562,63 @@ myRef.current === 5; // true
 
 和`{ current: xxx }`的区别？`useRef`所创建的对象会保持不变，每当重新渲染时，`useRef`所创建的对象引用都是一样的。而*plain javascript object*则每次都会不一样。
 
-### 22.9 函数组件内使用`useState`，渲染更新逻辑是怎样的？
+### 22.9 `useContext`
+
+
+```tsx
+import React, { useContext } from 'react';
+
+const theme = {
+  foreground: "#000000",
+  background: "#eeeeee",
+};
+
+const myContext = React.createContext(theme);
+
+function ChildComponent() {
+  const ctx = useContext(myContext);
+  // ctx is theme
+}
+```
+
+但如果`myContext`改变了，没办法触发*ChildComponent*重新渲染。为了触发它渲染，可以通过渲染它的外层节点来间接触发。
+
+```diff
+import React, { useContext } from 'react';
+
+const theme = {
+  foreground: "#000000",
+  background: "#eeeeee",
+};
+
+const myContext = React.createContext(theme);
+
+function ChildComponent() {
+  const ctx = useContext(myContext);
+  // ctx is theme
+}
+
++ <myContext.Provider value={theme}>
++   <ChildComponent />
++ </myContext.Provider>
+```
+
+React也会把`<Provider>`作为组件的一种类型来渲染。`value`变化时，触发其渲染，继而触发子组件的渲染。
+
+子组件通过`useContext`读取到最新的*value*值。
+
+```ts
+// 这里的语法是flow的，"mixed"类似于any
+// https://flow.org/en/docs/types/mixed/
+const contextItem = {
+  context: ((context: any): ReactContext<mixed>),
+  memoizedValue: value,
+  next: null,
+};
+```
+
+
+### 22.12 函数组件内使用`useState`，渲染更新逻辑是怎样的？
 
 `useState`创建一个闭包，返回一个数组`[state, setState]`。
 
