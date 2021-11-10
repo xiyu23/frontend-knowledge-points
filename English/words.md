@@ -38,3 +38,6 @@
 
 - entangled  
   被缠入的，卷入的
+
+- petition
+  

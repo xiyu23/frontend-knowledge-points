@@ -15,6 +15,7 @@
   - [8. `root`](#8-root)
   - [9. 以`/`结尾的请求代表什么意思？](#9-以结尾的请求代表什么意思)
   - [10. `nginx -V`](#10-nginx--v)
+  - [11.](#11)
 
 
 ## 1. CMD
@@ -171,6 +172,30 @@ nginx tests only the request’s header field “Host” to determine which serv
 
 **proxied server**，翻译过来就是*被代理的服务器*，它就是最终处理请求的业务服务器。*被代理*，其实就是被nginx代理了嘛，很多服务器都可以由nginx来代理，那这些服务器都称之为*proxied server*。
 
+nginx会设置请求头中的`Host`，有几个常用的值：
+
+- `$proxy_host`：这个就是`proxy_pass`定义的代理服务器地址，域名或者ip+port
+- `$http_host`：请求头中的字段值，在nginx中都可以用`$http_`这样的前缀来获取。字段都是lowercase，必要时以`_`分隔。这个变量的值就是来自客户端请求头中的`Host`。
+- `$host`：这个值按优先级取自请求的*hostname*、`Host` header、*server name*（不太好理解）。大多数情况下，都用的是`$host`。
+
+```
+location /match/here {
+  # 设置请求头'HOST'为$host变量
+  proxy_set_header HOST $host;
+
+  # 设置请求头'X-Forwarded-Proto'为请求的协议（http或https）
+  proxy_set_header X-Forwarded-Proto $scheme;
+
+  # 设置请求头'X-Real-IP'为客户端IP
+  proxy_set_header X-Real-IP $remote_addr;
+
+  # 'X-Forwarded-For'是一个list，每个元素是一个代理节点的IP地址。这个list表示这个请求到现在为止，都经历了哪些代理。$proxy_add_x_forwarded_for变量从请求头中取`X-Forwarded-For`，而后添加当前代理ip到末尾。
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+  proxy_pass http://example.com/new/prefix;
+}
+```
+
 ## 6. `upstream`
 
 定义一组server，可以在其他指令定义时引用。
@@ -291,3 +316,5 @@ $ ./nginx.exe -V
 --with-mail_ssl_module
 --with-stream_ssl_module
 ```
+
+## 11. 
