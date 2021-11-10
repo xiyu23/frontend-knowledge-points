@@ -196,11 +196,15 @@ location /match/here {
 }
 ```
 
+doc: https://www.digitalocean.com/community/tutorials/understanding-nginx-http-proxying-load-balancing-buffering-and-caching
+
 ## 6. `upstream`
 
 定义一组server，可以在其他指令定义时引用。
 
 ```
+# http context
+
 upstream backend {
   server backend1.example.com       weight=5;
   server backend2.example.com:8080;
@@ -216,6 +220,9 @@ server {
     }
 }
 ```
+
+upstream定义了一组servers，这些都可以处理请求。默认是令牌环的负载均衡机制，即依次轮流服务一个请求。默认每个server的权重`weight`是1，如果配置成5，即表示它的流量是其他服务器的5倍。
+
 ## 7. `nginx.conf`配置文件的开头
 
 ```
