@@ -1093,7 +1093,7 @@ return <div> {props.children} </div>
 
 先来看区别：
 
-ref/React.forwardRef, React.createRef/React.useRef
+ref/React.forwardRef, React.createRef/React.useRef, useImperativeHandle
 
 `ref`是基础，用于方便地引用到DOM节点、React组件实例；
 `React.forwardRef`只是用于包裹，把ref传递下去；
@@ -1101,6 +1101,8 @@ ref/React.forwardRef, React.createRef/React.useRef
 这俩都返回一个普通的js对象，但所用作用域不同；
 `React.createRef`可以用在全局作用域，或者类组件构造函数内，因为它没有缓存机制，仅仅是帮你新建了一个对象而已；（后面有源码一看你就懂）
 `React.useRef`它**只能**用于函数组件内（因为像`useState`一样有缓存）；
+
+`useImperativeHandle`也是配合*ref*用的，*ref*暴露出去的属性太多，用它可以自定义暴露哪些东西（比如不暴露DOM节点，而是暴露几个方法就行）。
 
 再来讲细节。
 
@@ -1201,6 +1203,71 @@ function Parent() {
   return <Child ref={ref} />;
 }
 ```
+
+来看看`useImperativeHandle`。
+
+函数签名：
+```ts
+useImperativeHandle<T>(
+  ref: { current: T | null } | null | void,
+  createHandle: () => T,
+  deps: Array<any> | null | void,
+): void
+```
+
+重点是*createHandle*，它是一个函数，返回值将给赋值给`ref.current`。
+
+```tsx
+// child
+import React, { useRef, useImperativeHandle } from 'react';
+
+function MyInput(props: any) {
+  const ref = useRef<HTMLInputElement>(null);
+  const {
+    forwardedRef, // 接收父组件传下来的ref
+  } = props;
+
+  // 子组件只暴露focus方法，不暴露DOM节点
+  useImperativeHandle(forwardedRef, () => {
+    return {
+      focus: () => {
+        if (ref.current) {
+          ref.current.focus();
+        }
+      },
+    };
+  });
+
+  return <input type='text' ref={ref} />
+}
+
+export default React.forwardRef((props, ref) => {
+  return <MyInput {...props} forwardedRef={ref} />
+});
+```
+
+```tsx
+// parent
+import React, { useRef } from 'react';
+import Child from './child';
+
+function Parent() {
+  const ref = useRef<any>(null);
+  const focusInput = () => {
+    console.log(ref.current);
+    ref.current?.focus(); // 注意！此时的ref.current只是一个普通的对象，而不再是DOM节点了
+  };
+  return (<div>
+    <Child ref={ref} />
+    <button onClick={focusInput}>focus input(useImperativeHandle)</button>
+  </div>
+  );
+}
+
+export default Parent;
+```
+
+
 
 ## 14. HOC(Higher-Order Components)
 HOC是一个*接受一个component作为参数、并返回一个新的component*的函数。
