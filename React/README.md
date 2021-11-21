@@ -1091,32 +1091,115 @@ return <div> {props.children} </div>
 
 ## 13. Forwarding Refs
 
-组件接收到一个`ref`，传递给它里面的孩子节点，这就叫做`forwarding`。
+先来看区别：
 
-外部组件或代码想要访问component内部的某个DOM或子组件，这种情形下使用*Forwarding refs*。
+ref/React.forwardRef, React.createRef/React.useRef
 
-16.3+可通过`React.fowardRef`定义一个component（记为A），该函数第2个参数为`ref`，即可通过这个`ref`关联到A中的子组件或DOM节点。
+`ref`是基础，用于方便地引用到DOM节点、React组件实例；
+`React.forwardRef`只是用于包裹，把ref传递下去；
 
-客户代码通过`React.createRef`创建一个`ref`，在使用A的地方把`ref`作为参数传入，A将`ref`与想要关联的子组件或DOM节点关联，这样客户代码就可通过`ref`以提供对A内部组件or节点的访问。
+这俩都返回一个普通的js对象，但所用作用域不同；
+`React.createRef`可以用在全局作用域，或者类组件构造函数内，因为它没有缓存机制，仅仅是帮你新建了一个对象而已；（后面有源码一看你就懂）
+`React.useRef`它**只能**用于函数组件内（因为像`useState`一样有缓存）；
 
-```js
-const FancyButon = React.forwardRef((props, ref) => 
-    <button ref={ref} className={props.className}>{props.children}</button>
-);
+再来讲细节。
 
-const ref = React.createRef();
-ReactDOM.render(
-    (
-        <FancyButon ref={ref} className='red'>
-            Click Me!
-        </FancyButon>
-    ),
-    document.getElementById('divRefs')
-)
+从`ref`开始说起。
 
-//use ref
-ref.current.value = 'button value';
-ref.current.innerText = 'new button name';
+比如React里要给`<input />`设置focus，只能通过DOM API来操作，*ref*这就派上用场了。
+
+```tsx
+import React, { useRef } from 'react';
+
+export default function CustomInput() {
+  // 错误！没有给类型，默认为never。ts提示ref.current可能不存在focus方法
+  // const ref = useRef(null);
+
+  // 可以！
+  const ref = useRef<HTMLInputElement>(null);
+
+  // 或者给个any类型
+  // const ref = useRef<any>(null);
+
+  const foucsInput = () => {
+    if (ref.current) { // 不然ts提示ref.current可能为空
+      ref.current.focus();
+    }
+  };
+  return (<div>
+    <input type="text" ref={ref} />
+    <button onClick={foucsInput}>focus input</button>
+  </div>
+  );
+}
+```
+
+> `ref`属性只能用在DOM节点、类组件、用React.forwardRef包裹后的函数组件上。
+
+Q1：为什么*ref*可用于类组件，而不能用于函数组件？
+
+A1：类组件创建一个实例后，*ref*引用的就是这个实例对象，这样就可以调用类上的成员方法了；而函数组件没有实例，渲染的时候是再重新执行一遍函数，没有实例的概念。因此*ref*引用不了。
+
+接着来看`React.forwardRef`。
+
+使用`React.forwardRef`创建一个组件，接收父组件传来的`ref`，继续向下传递给子组件。相当于是一个hoc，包裹子组件，决定了ref传给谁。
+
+`React.forwardRef`的参数是一个`render`函数，这个render函数第2个参数为`ref`，即可通过这个`ref`关联到A中的子组件或DOM节点。
+
+```tsx
+/* 子组件 ChildComponent.tsx */
+import React from 'react';
+
+function ChildComponent(props) {
+  const {
+    fowardedRef,
+  } = props;
+  return <input type='text' ref={fowardedRef} />
+}
+
+// 用forwardRef包裹后导出
+const WrappedChildComponent = React.forwardRef((props, ref) => {
+  // 把ref通过子组件的prop传进去
+  return <ChildComponent {...props} fowardedRef={ref} />
+});
+
+export default WrappedChildComponent;
+
+/* 父组件 ParentComponent.tsx */
+import React from 'react';
+import Child from './ChildComponent';
+
+const myRef = React.createRef(); // 返回一个对象 { current: null }
+function ParentComponent() {
+  return <Child ref={myRef} />
+}
+```
+
+`React.forwardRef`的源码：
+
+```ts
+function forwardRef<Props, ElementType: React$ElementType>(
+  render: (props: Props, ref: React$Ref<ElementType>) => React$Node,
+) {
+  return {
+    $$typeof: REACT_FORWARD_REF_TYPE,
+    render,
+  };
+}
+```
+
+> 注意：只有用`React.forwardRef`包裹时，`render`方法的第二个参数才有`ref`。
+
+比如这样是错的，`ref`只是当作一个普通的prop传进去了：
+```ts
+function Child() {
+  return <input type='text' />;
+}
+
+function Parent() {
+  // 错误！ref仅仅是一个普通属性，因为Child是一个普通的函数组件
+  return <Child ref={ref} />;
+}
 ```
 
 ## 14. HOC(Higher-Order Components)
