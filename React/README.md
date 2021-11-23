@@ -1104,6 +1104,8 @@ ref/React.forwardRef, React.createRef/React.useRef, useImperativeHandle
 
 `useImperativeHandle`也是配合*ref*用的，*ref*暴露出去的属性太多，用它可以自定义暴露哪些东西（比如不暴露DOM节点，而是暴露几个方法就行）。
 
+---
+
 再来讲细节。
 
 从`ref`开始说起。
@@ -1154,25 +1156,26 @@ import React from 'react';
 
 function ChildComponent(props) {
   const {
-    fowardedRef,
+    forwardedRef,
   } = props;
-  return <input type='text' ref={fowardedRef} />
+  return <input type='text' ref={forwardedRef} />
 }
 
 // 用forwardRef包裹后导出
 const WrappedChildComponent = React.forwardRef((props, ref) => {
   // 把ref通过子组件的prop传进去
-  return <ChildComponent {...props} fowardedRef={ref} />
+  return <ChildComponent {...props} forwardedRef={ref} />
 });
 
 export default WrappedChildComponent;
 
 /* 父组件 ParentComponent.tsx */
-import React from 'react';
+import React, { useRef } from 'react';
 import Child from './ChildComponent';
 
-const myRef = React.createRef(); // 返回一个对象 { current: null }
+// const myRef = React.createRef();
 function ParentComponent() {
+  const myRef = useRef(); // 返回一个对象 { current: null }
   return <Child ref={myRef} />
 }
 ```
