@@ -81,6 +81,10 @@
     - [22.8 Ref Hook: `useRef`](#228-ref-hook-useref)
     - [22.9 `useContext`](#229-usecontext)
     - [22.12 函数组件内使用`useState`，渲染更新逻辑是怎样的？](#2212-函数组件内使用usestate渲染更新逻辑是怎样的)
+      - [postMessage](#postmessage)
+      - [queueMicrotask](#queuemicrotask)
+      - [MessageChannel](#messagechannel)
+      - [event loop](#event-loop)
   - [23. Refs and the DOM](#23-refs-and-the-dom)
   - [24. 如何为`className`写多个值？](#24-如何为classname写多个值)
   - [25. 生命周期](#25-生命周期)
@@ -1534,7 +1538,7 @@ const { useState, useEffect } = React;
 
 function Counter() {
   const [count, setCount] = useState(0);
-  
+
   useEffect(() => {
     console.log(`updated in useEffect: ${count}`);
     return () => {
@@ -1791,6 +1795,89 @@ useState(initialValue) {
 相当于啥都不会发生。（如果当前值是false，而初始值是true，岂不是渲染后会变成true？？）
 
 如何开启`enableDebugTracing`，就可以打印state的更新log
+
+
+```tsx
+const onTriggerMultiSetState = () => {
+  console.log(`before 1st setName: name=${name}`);
+  setName('alpha');
+  console.log(`before 2nd setName: name=${name}`);
+  setName('beta');
+  console.log(`before 3rd setName: name=${name}`);
+  setName('charlie');
+  console.log(`after setNames: name=${name}`);
+};
+```
+
+第一次setName时，state `name`对应hook的*pending*为空，给`hook.queue.pending`维护一个循环单链表。而后添加一个异步**宏任务***task*。调用链：
+```ts
+scheduleUpdateOnFiber
+ensureRootIsScheduled
+scheduleSyncCallback
+Scheduler_scheduleCallback
+requestHostCallback
+port.postMessage(null) // 用到了MessageChannel，port2发出消息，port1接收并用performWorkUntilDeadline处理
+```
+
+> 事件处理函数`performWorkUntilDeadline`中，执行的`scheduledHostCallback`实际上执行的就是`flushWork`。`flushWork`需要返回一个boolean，表示是否还有work需要做。如还有，则再通过`port.postMessage(null)`的方式*schedule*这个任务（看代码代表任务的那个callback其实并没变，可能是任务本身可重入，像执行到某个地方了下次可以断点继续执行？）.
+> 
+> `flushWork`是在`requestHostCallback`传入的。当安排的这个宏任务开始执行时，它后续会触发`beginWork`，最终到`updateFunctionComponent`渲染我们的组件。
+> 执行
+> 3 
+
+
+第二次setName时，state `name`对应hook的*pending*不空，插入一个新的*Update*节点，维护循环单链表（此时`pending`指向新插入的节点）。在执行`ensureRootIsScheduled`时发现之前已经有了一个task，且优先级一样，直接复用现有的task，返回。
+
+第三次setName时，类似于上次。
+
+
+#### postMessage
+
+ref: https://html.spec.whatwg.org/multipage/web-messaging.html#posted-message-task-source
+
+作用：不同的*browsing context*之间可以通信。
+
+用法：
+
+```js
+// window1，给window2发消息
+// 页面域名：www.example.com
+const targetWindow = getTargetWindow() // 获取到目标window对象
+targetWindow.postMessage('this is message from example.com', { targetOrigin : 'https://www.target.com' })
+```
+
+```js
+// window2，接收消息（需要判断是否是来自window1）
+// 页面域名：www.target.com
+window.addEventListener('message', receiver, false);
+function receiver(e) {
+  if (e.origin == 'https://www.target.com') {
+    if (e.data == 'this is message from example.com') {
+      e.source.postMessage('i got it', e.origin);
+    } else {
+      // ...
+    }
+  }
+}
+```
+
+原理：
+
+在目标*targetWindow*调用`postMessage`时，会向*event loop*的[**posted message task source**](https://html.spec.whatwg.org/multipage/web-messaging.html#posted-message-task-source)添加一个任务，这个任务派发出一个`message`事件，再被*targetWindow*接收处理。
+
+> Queue a global task on the posted message task source
+
+（看起来这里有两次异步？1次post message，1次dispatch event？派发事件确认是异步的？）
+
+
+#### queueMicrotask
+
+#### MessageChannel
+
+
+#### event loop
+
+
 
 
 ## 23. Refs and the DOM
