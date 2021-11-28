@@ -82,8 +82,9 @@
     - [22.9 `useContext`](#229-usecontext)
     - [22.12 函数组件内使用`useState`，渲染更新逻辑是怎样的？](#2212-函数组件内使用usestate渲染更新逻辑是怎样的)
       - [postMessage](#postmessage)
-      - [queueMicrotask](#queuemicrotask)
       - [MessageChannel](#messagechannel)
+      - [postMessage vs MessageChannel](#postmessage-vs-messagechannel)
+      - [queueMicrotask](#queuemicrotask)
       - [event loop](#event-loop)
   - [23. Refs and the DOM](#23-refs-and-the-dom)
   - [24. 如何为`className`写多个值？](#24-如何为classname写多个值)
@@ -1835,7 +1836,7 @@ port.postMessage(null) // 用到了MessageChannel，port2发出消息，port1接
 
 ref: https://html.spec.whatwg.org/multipage/web-messaging.html#posted-message-task-source
 
-作用：不同的*browsing context*之间可以通信。
+作用：不同的*browsing context*之间可以通信。比如window和内嵌的iframe之间。
 
 用法：
 
@@ -1863,20 +1864,118 @@ function receiver(e) {
 
 原理：
 
-在目标*targetWindow*调用`postMessage`时，会向*event loop*的[**posted message task source**](https://html.spec.whatwg.org/multipage/web-messaging.html#posted-message-task-source)添加一个任务，这个任务派发出一个`message`事件，再被*targetWindow*接收处理。
+在目标*targetWindow*调用`postMessage`时，会向*event loop*的[**posted message task source**](https://html.spec.whatwg.org/multipage/web-messaging.html#posted-message-task-source)添加一个任务（因此它是一个**宏任务**），这个任务派发出一个`message`事件，再被*targetWindow*接收处理。
 
-> Queue a global task on the posted message task source
+> Queue a global task on the posted message task source[<sup>1</sup>](https://html.spec.whatwg.org/multipage/web-messaging.html#posted-message-task-source)
 
 （看起来这里有两次异步？1次post message，1次dispatch event？派发事件确认是异步的？）
+
+#### MessageChannel
+
+作用：使得不同*browsing contexts*之间的代码可以通信。
+
+用法：
+
+```js
+// 创建一个message channel
+var channel = new MessageChannel();
+
+// 首先得持有另一个window的引用`otherWindow`，而后通过postMessage关联这两个port
+// 把port1留给本地(local code)用，port2丢给另一端的window
+otherWindow.postMessage('hi from port1', 'https://whatsbest.com', [channel.port2]);
+
+// 此时port1、port2已对接，可以发消息了
+// 调用port上的方法发送消息
+channel.port1.postMessage('hello');
+
+// -----------------------------------------------------------
+
+// 另一端，接收消息
+window.addEventListener("message", (event: { data: any, origin: string, source: Object }) => {
+  // origin: 对方通过postMessage发送消息时的origin
+  // source: 一个引用，指向发送消息的window
+  if (event.origin !== "https://whatsbest.com") {
+    return;
+  }
+
+  // 可信来源
+  
+  // ...
+}, false);
+
+channel.port1.onmessage = handleMessage;
+function handleMessage(event) {
+  // message is in event.data
+  // ...
+}
+```
+
+原理：
+
+`postMessage`调用后，将会派发一个*MessageEvent*事件，不过这个事件会等待执行栈执行完毕后（*after all pending execution contexts have finished*）才会派发。
+
+
+> Messages are delivered as DOM events, without interrupting or blocking running tasks[<sup>2</sup>](https://html.spec.whatwg.org/multipage/web-messaging.html#message-channels)
+
+> After postMessage() is called, the MessageEvent will be dispatched only after all pending execution contexts have finished.[<sup>3</sup>](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage)
+
+#### postMessage vs MessageChannel
+
+1. postMessage每次都要在`window.addEventListener('message', ...)`检查域名来源，MessageChannel只有建立连接的第一次要，后续就在一对port之间传输数据；
+2. 好像没别的了？
+
+> When you create a new MessageChannel object, it has two connected MessagePort objects (port1 and port2). One of the ports is sent to another window or frame, and messages can be sent and received without repeated origin checking that is needed when using window.postMessage. Validation of the origin of a port and messages need only be done when a port is sent to windows other than the one that created them. MessagePort simplifies the messaging process by sending and receiving messages through two (and only those two) connected ports. Messages are posted between the ports using postMessage. Since the ports will only accept messages between the connected ports, no further validation is required once the connection is established. MessageChannel enables asynchronous communication between IFrameElements, cross-domain windows, or same page communications[<sup>4</sup>](https://stackoverflow.com/questions/18934027/whats-difference-between-web-messaging-with-messagechannel-and-without). http://msdn.microsoft.com/en-us/library/windows/apps/hh441303.aspx
 
 
 #### queueMicrotask
 
-#### MessageChannel
+
 
 
 #### event loop
 
+每个user agent都有一个event loop来协调事件、脚本、网络等事件的运行。
+window中的叫做*window event loop*，worker中的叫做*worker event loop*。
+
+一个event loop有多个*task queue*，1个*microtask queue*。
+
+task queue: **注意它是一个set而不是queue**，运行时从这些*task queues*中按某个算法机制选择一个当前可运行的task（runnable task）来执行。
+某一类型的task都会放在一种task queue里。
+不同类的task source(和task queue是一一对应关系？好像是近义词？）可以有不同的有优先级，通用的有：
+- DOM manipulation
+- User interaction
+- Networking
+- History traversal（history API）
+
+microtask queue: **它的确是一个队列**，存放微任务（*microtasks*）。
+
+microtask: 可以通过这些方法来schedule一个微任务：**Promise**、**MutationObserver**、**queueMicrotask**。
+
+> A microtask is a short function which is executed after the function or program which created it exits and only if the JavaScript execution stack is empty, but before returning control to the event loop being used by the user agent to drive the script's execution environment.
+
+macrotask: task queue中的任务都是**宏任务**，也可以通过`setTimeout`、`setInterval`等来schedule一个宏任务。
+注意：**执行一段代码本身就是一个宏任务。**
+
+event loop的[执行顺序模型](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model)：
+
+1. 选一个task queue（它必须有可运行的task），而后从中取出第一个可运行的task
+2. 运行这个task
+3. 检查microtask queue是否有任务，如有则将它们依次按顺序出队执行完毕。注意，如果微任务处理过程中又新增了微任务，则这些新增的微任务也会在当前的迭代(*iteration*)中依次执行完毕
+4. Update the rendering（复杂很，没看太懂），总之就是60HZ的频率，16.7ms得来一次这样的iteration
+
+
+例1 微任务
+```js
+console.log("Before enqueueing the microtask");
+queueMicrotask(() => {
+  console.log("The microtask has run.")
+});
+console.log("After enqueueing the microtask");
+```
+
+ref:
+
+微任务可以用来批处理任务（这篇文章好好读）：https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide#batching_operations
 
 
 
