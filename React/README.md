@@ -1810,6 +1810,10 @@ const onTriggerMultiSetState = () => {
 };
 ```
 
+> ***`v17.0.2`(2021.2.19)的版本，和`ca106a02`(2021.11.15)的版本不一样[捂脸]***
+>
+> 这里以`v17.0.2`为例。后者把任务放进一个react自己维护的synccallbackqueue里了，而后会schedule一个微任务来刷新这个queue。看起来比之前更快了？
+
 第一次setName时，state `name`对应hook的*pending*为空，给`hook.queue.pending`维护一个循环单链表。而后添加一个异步**宏任务***task*。调用链：
 ```ts
 scheduleUpdateOnFiber
@@ -1823,7 +1827,7 @@ port.postMessage(null) // 用到了MessageChannel，port2发出消息，port1接
 > 事件处理函数`performWorkUntilDeadline`中，执行的`scheduledHostCallback`实际上执行的就是`flushWork`。`flushWork`需要返回一个boolean，表示是否还有work需要做。如还有，则再通过`port.postMessage(null)`的方式*schedule*这个任务（看代码代表任务的那个callback其实并没变，可能是任务本身可重入，像执行到某个地方了下次可以断点继续执行？）.
 > 
 > `flushWork`是在`requestHostCallback`传入的。当安排的这个宏任务开始执行时，它后续会触发`beginWork`，最终到`updateFunctionComponent`渲染我们的组件。
-> 执行
+> 在渲染函数组件时，又执行到`useState`这一行，react将维护的`hook.queue.pending`拿出来，合并到`hook.baseQueue`上，而后循环处理每个update，最后计算出一个最终的state值返回。
 > 3 
 
 
