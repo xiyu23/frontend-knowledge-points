@@ -1836,6 +1836,19 @@ port.postMessage(null) // 用到了MessageChannel，port2发出消息，port1接
 第三次setName时，类似于上次。
 
 
+1. fiber vs fiber.alternate  
+每个ReactElement都用一个FiberNode对象表示，当前已渲染的节点对应的fiber叫做*current fiber*；在更新过程中（workInProgress），react为每个ReactElement创建对应的FiberNode，称之为*alternate fiber*(workInProgressFiber)。Fiber有一个`alternate`字段指向alternate。
+https://indepth.dev/posts/1008/inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react#current-and-work-in-progress-trees
+2. fiber.memoizedState vs fiber.alternate.memoizedState
+3. currentHook vs workInProgressHook  
+currentHook用于对当前状态下的hook list进行遍历； 
+workInProgressHook是在更新阶段，从hook list clone一个节点、并更新它的state，而后再clone并尾插入list、更新（更新时，实际上修改的是这个新clone的hook中的state，并没有改当前hook中的state，见`updateReducer`），最后形成了一个updated list。
+
+
+
+
+1. 
+
 #### postMessage
 
 ref: https://html.spec.whatwg.org/multipage/web-messaging.html#posted-message-task-source
