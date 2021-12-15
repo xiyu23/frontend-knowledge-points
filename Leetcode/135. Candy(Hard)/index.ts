@@ -1,7 +1,10 @@
-import testCasesHelper from '../testCasesHelper';
-
+/**
+ * 1664ms, 93%?
+ * @param ratings
+ * @returns
+ */
 function candy(ratings: number[]): number {
-  const candies = [];
+  const candies: number[] = [];
   for (let i = 0, l = ratings.length; i < l; i++) {
     const leftRating = ratings[i - 1] || 0;
     const leftCandies = candies[i - 1] || 0;
@@ -47,107 +50,5 @@ function candy(ratings: number[]): number {
   return candies.reduce((acc, current) => acc + current, 0);
 }
 
-// test cases
-const testCases = [
-  {
-    input: [
-      [],
-    ],
-    expected: 0,
-  },
-  {
-    input: [
-      [0],
-    ],
-    expected: 1,
-  },
-  {
-    input: [
-      [1],
-    ],
-    expected: 1,
-  },
-  {
-    input: [
-      [2],
-    ],
-    expected: 1,
-  },
-  {
-    input: [
-      [2, 1],
-    ],
-    expected: 3,
-  },
-  {
-    input: [
-      [1, 1],
-    ],
-    expected: 2,
-  },
-  {
-    input: [
-      [1, 2],
-    ],
-    expected: 3,
-  },
-  {
-    input: [
-      [1, 1, 1],
-    ],
-    expected: 3,
-  },
-  {
-    input: [
-      [1, 2, 3],
-    ],
-    expected: 6,
-  },
-  {
-    input: [
-      [3, 2, 1],
-    ],
-    expected: 6,
-  },
-  {
-    input: [
-      [1, 2, 1],
-    ],
-    expected: 4,
-  },
-  {
-    input: [
-      [1, 2, 2],
-    ],
-    expected: 4,
-  },
-  {
-    input: [
-      [2, 1, 2],
-    ],
-    expected: 5,
-  },
-  {
-    input: [
-      [1, 3, 2],
-    ],
-    expected: 4,
-  },
-  {
-    input: [
-      [1, 3, 3, 2],
-    ],
-    expected: 6,
-  },
-  {
-    input: [
-      [1, 3, 3, 2],
-    ],
-    expected: 6,
-  },
-];
-
-testCasesHelper(candy, testCases);
-
 // to fix ts complains: Cannot redeclare block-scoped variable 'testCases'
-export { };
+export { candy as candyMethod1 };

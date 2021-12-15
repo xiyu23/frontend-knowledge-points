@@ -58,3 +58,5 @@ if (failureNum === 0) {
 } else {
   console.error(`test cases passed: ${testCases.length - failureNum}/${testCases.length}`);
 }
+
+export { };

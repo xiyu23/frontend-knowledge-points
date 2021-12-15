@@ -20,18 +20,18 @@ function assignCookies(kids, cookies) {
 }
 // test cases
 var testCases = [
-    { kids: [], cookies: [], expected: 0 },
-    { kids: [], cookies: [1, 2], expected: 0 },
-    { kids: [1], cookies: [], expected: 0 },
-    { kids: [1, 2], cookies: [1, 2], expected: 2 },
-    { kids: [1, 3], cookies: [2, 2], expected: 1 },
-    { kids: [3, 4], cookies: [2, 2], expected: 0 },
-    { kids: [1, 2], cookies: [1, 2, 2], expected: 2 },
-    { kids: [1, 2], cookies: [1, 1, 1], expected: 1 },
-    { kids: [2, 2], cookies: [1, 1, 1], expected: 0 },
-    { kids: [1, 2, 2], cookies: [1, 1], expected: 1 },
-    { kids: [2, 2, 2], cookies: [1, 1], expected: 0 },
-    { kids: [3, 4], cookies: [4, 5, 6], expected: 2 },
+    { kids: [], cookies: [], expected: 0, },
+    { kids: [], cookies: [1, 2], expected: 0, },
+    { kids: [1], cookies: [], expected: 0, },
+    { kids: [1, 2], cookies: [1, 2], expected: 2, },
+    { kids: [1, 3], cookies: [2, 2], expected: 1, },
+    { kids: [3, 4], cookies: [2, 2], expected: 0, },
+    { kids: [1, 2], cookies: [1, 2, 2], expected: 2, },
+    { kids: [1, 2], cookies: [1, 1, 1], expected: 1, },
+    { kids: [2, 2], cookies: [1, 1, 1], expected: 0, },
+    { kids: [1, 2, 2], cookies: [1, 1], expected: 1, },
+    { kids: [2, 2, 2], cookies: [1, 1], expected: 0, },
+    { kids: [3, 4], cookies: [4, 5, 6], expected: 2, },
 ];
 var failureNum = 0;
 for (var i = 0, l = testCases.length; i < l; i++) {
