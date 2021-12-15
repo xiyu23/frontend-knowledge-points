@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 function testCasesHelper(func, testCases) {
     var failureNum = 0;
     for (var i = 0, l = testCases.length; i < l; i++) {
@@ -18,4 +18,4 @@ function testCasesHelper(func, testCases) {
         console.error("test cases passed: " + (testCases.length - failureNum) + "/" + testCases.length);
     }
 }
-exports["default"] = testCasesHelper;
+exports.default = testCasesHelper;

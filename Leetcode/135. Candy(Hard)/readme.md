@@ -75,3 +75,24 @@ buggy#1处是有问题的，如[1,3,3,2]。
 一个孩子需要和相邻的两个孩子对比，可以看成两步骤。对这一列中的每个孩子k<sub>i</sub>，先保证他相比于左边的孩子，满足题干规则。那就从左向右遍历，只看左边的这个k<sub>i-1</sub>与自己的关系；遍历完成后，每个孩子相较于左边的孩子，糖果数是符合题干约束的。第二次再考虑他和右边孩子的关系，从最右侧开始向左遍历， 如果左孩子比右孩子大，且糖果数不大于右孩子，那么令左孩子糖果数=右孩子糖果数+1。
 
 两次遍历完成后，对任意一个孩子而言，左、右两侧孩子与自己的关系已经正确了。
+
+伪代码
+```
+assign 1 candy for every children
+
+// starts from [1]
+for each rating in ratings
+  if (leftRating < rating) {
+    candies[i] = candies[i-1] + 1
+  }
+
+// starts from [len - 2]
+for each rating in ratings
+  if (rightRating < rating && rightCandies >= currentCandies) {
+    candies[i] = candies[i + 1] + 1
+  }
+
+result = candies.reduce((acc, current) => {
+  return acc + current
+})
+```
