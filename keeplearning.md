@@ -2573,6 +2573,23 @@ console.log(x);
 declare module 'xxx';
 ```
 
+## 83. iframe cookie not set on safari
+
+问题：网站A内嵌了一个iframe（网站B），网站B登录后的回包中设置了`Set-Cookie`，但是在safari浏览器中，B网站的cookie为空。
+
+原因：Safari 13+的隐私策略，默认阻止第三方cookie。
+
+解决方案：
+
+分析：为什么不让设置B网站的cookie？
+
+first-party cookies: 是指用户正在访问的页面中的cookie，也就是当前URL地址栏显示的；
+
+third-party cookies: 是指非当前域名所设置的cookie。比如内嵌的网站B所设置的cookie，这个cookie就属于第三方cookie。
+
+B自己设自己的，为啥不允许呢？
+
+
 ---CSS---
 ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
 
