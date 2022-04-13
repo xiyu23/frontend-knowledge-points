@@ -58,6 +58,7 @@
   - [50. 修改当前工程对应的远程仓库地址](#50-修改当前工程对应的远程仓库地址)
   - [51. 克隆别人的仓库，作为自己的](#51-克隆别人的仓库作为自己的)
   - [52. 把拉下来的代码，修改远程指向自己的remote](#52-把拉下来的代码修改远程指向自己的remote)
+  - [53. git@github.com: permission denied (publickey). fatal: could not read from remote repository.](#53-gitgithubcom-permission-denied-publickey-fatal-could-not-read-from-remote-repository)
 
 ## 1. 将一个目录初始化为git repo
     # 记得先在git创建一个仓库，而后在本地工程目录下，依次执行下面的命令：
@@ -507,3 +508,44 @@ e.g
     ```
 
 4. 此时查看git graph发现不再显示之前的远程仓库信息了，现在就可以push到自己的仓库。
+
+## 53. git@github.com: permission denied (publickey). fatal: could not read from remote repository.
+
+问题：新搞了个仓库，本地关联push时提示上面失败信息。
+
+原因：没授权。
+
+解决方案：生成一对ssh key，把public key添加到git账户中。
+
+1. 检查ssh是否生效
+
+正常情况下会输出下面的，这里应该会输出没权限之类的（`> Permission denied (publickey).`），继续往下看。
+
+```
+$ ssh -T git@github.com
+Hi xiyu23! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+2. 生成一对ssh key
+
+如果有，当然就不用了，直接下一步。
+
+生成新的ssh key（生成时会问*passphrase*，直接回车，不然以后每次push都要输）：
+
+```
+$ ssh-keygen -t ed25519 -C "your_email@example.com"
+```
+
+查找系统中的ssh key，`*.pub`是公钥，相同文件名没带后缀的是私钥。比如我的是`id_ed25519`、`id_ed25519.pub`。
+
+```
+$ ls -al ~/.ssh
+```
+
+3. 把公钥文件内的纯文本内容，添加到github账户
+
+4. 测试连接
+
+```
+$ ssh -T git@github.com
+```
