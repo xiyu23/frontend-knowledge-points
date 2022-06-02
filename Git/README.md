@@ -59,6 +59,7 @@
   - [51. 克隆别人的仓库，作为自己的](#51-克隆别人的仓库作为自己的)
   - [52. 把拉下来的代码，修改远程指向自己的remote](#52-把拉下来的代码修改远程指向自己的remote)
   - [53. git@github.com: permission denied (publickey). fatal: could not read from remote repository.](#53-gitgithubcom-permission-denied-publickey-fatal-could-not-read-from-remote-repository)
+  - [54、github.com网站打不开](#54githubcom网站打不开)
 
 ## 1. 将一个目录初始化为git repo
     # 记得先在git创建一个仓库，而后在本地工程目录下，依次执行下面的命令：
@@ -548,4 +549,18 @@ $ ls -al ~/.ssh
 
 ```
 $ ssh -T git@github.com
+```
+
+## 54、github.com网站打不开
+
+问题：github.com网站打不开，Connection refused
+
+试了vpn换连接点、重启电脑都不行，之前还好好的。
+
+解决方案：
+
+`C:\Windows\System32\drivers\etc\hosts`文件增加如下两行：
+```
+140.82.112.4 github.com
+199.232.69.194 github.global.ssl.fastly.net
 ```

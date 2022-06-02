@@ -40,4 +40,7 @@
   被缠入的，卷入的
 
 - petition
-  
+  v/n. 请愿，祈求
+
+- permutation
+  排列、组合

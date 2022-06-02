@@ -1996,6 +1996,51 @@ ref:
 
 微任务可以用来批处理任务（这篇文章好好读）：https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide#batching_operations
 
+Q1、`resolve`都做了啥？是否会立即执行后续的代码？
+
+#1返回后，是否立即执行#2？- 否
+
+```js
+bar();
+console.log(3);
+
+async function bar() {
+  console.log('bar')
+  const ret = await foo(); // #1
+  console.log(ret) // #2
+}
+
+function foo() {
+  console.log('foo')
+  return new Promise((resolve, reject) => {
+    console.log(1);
+    resolve(2);
+  })
+}
+```
+
+运行结果：
+```
+bar
+foo
+1
+3
+2
+```
+
+`bar`中的*async...await*等价于：
+
+```js
+function bar() {
+  console.log('bar')
+  foo().then((ret) => {
+    console.log(ret)
+  })
+}
+```
+问题实质上等价于，某个promise resolve了，后续chain上的是否会立即执行。
+
+答案是不会。当前task执行完，才会检查微任务队列，因此3出现在2之前。
 
 
 ## 23. Refs and the DOM
