@@ -44,3 +44,12 @@
 
 - permutation
   排列、组合
+
+- compensation 补偿,薪水
+- mandate 授权
+- acyclic graph 无环图
+- cyclic 有环的
+- amounts to 等同，接近
+
+- pruning `[ˈpruːnɪŋ]` 修剪，裁掉树枝不必要的部分
+The elimination of a large group of possibilities in one step is known as *pruning*.
