@@ -53,3 +53,8 @@
 
 - pruning `[ˈpruːnɪŋ]` 修剪，裁掉树枝不必要的部分
 The elimination of a large group of possibilities in one step is known as *pruning*.
+
+- analogy 类比，比拟  
+- polynomial 多项式的  
+- constitute 构成
+- diagonal  斜线，对角线
