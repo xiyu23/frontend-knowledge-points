@@ -57,4 +57,5 @@ The elimination of a large group of possibilities in one step is known as *pruni
 - analogy 类比，比拟  
 - polynomial 多项式的  
 - constitute 构成
-- diagonal  斜线，对角线
+- diagonal  斜线，对角线  
+- Cantor's diagonal  康托对角线，运用于No.1980

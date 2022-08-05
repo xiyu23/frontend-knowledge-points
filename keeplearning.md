@@ -2589,6 +2589,15 @@ third-party cookies: 是指非当前域名所设置的cookie。比如内嵌的�
 
 B自己设自己的，为啥不允许呢？
 
+## 84. Chrome浏览器打开网页报错`DNS_PROBE_FINISHED_NXDOM`，IE正常
+
+解决方案：刷新dns缓存，再刷新网页即可。
+
+windows：
+```
+$ ipconfig/flushdns
+```
+
 
 ---CSS---
 ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
