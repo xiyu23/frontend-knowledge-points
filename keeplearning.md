@@ -2598,6 +2598,23 @@ windows：
 $ ipconfig/flushdns
 ```
 
+## 85. 目录匹配`**`与`*`
+ref: https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
+
+- `*`匹配任何字符串，包括空
+- `**`匹配所有文件、0或多个文件夹以及其子文件夹；
+- `**`后面跟`/`，则`**`只匹配文件夹和子文件夹。
+
+```
+# 匹配文件夹myworkspace下的所有文件、文件夹
+myworkspace/**
+
+# 匹配文件夹myworkspace下的所有.js文件（含子文件夹内的）
+myworkspace/**/*.js
+
+# 匹配文件夹myworkspace下的所有.js文件（仅当前目录下）
+myworkspace/*.js
+```
 
 ---CSS---
 ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
