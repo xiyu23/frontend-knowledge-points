@@ -1,4 +1,125 @@
-﻿# 前端知识点
+﻿- [前端知识点](#前端知识点)
+  - [1. 正则](#1-正则)
+    - [1.1 断言](#11-断言)
+      - [1.1.1 Lookahead assertion(先行断言)](#111-lookahead-assertion先行断言)
+      - [1.1.2 Negative lookahead assertion(先行否定断言)](#112-negative-lookahead-assertion先行否定断言)
+      - [1.1.3 Lookbehind assertion(后行断言)](#113-lookbehind-assertion后行断言)
+      - [1.1.4 Negative lookbehind assertion(后行否定断言)](#114-negative-lookbehind-assertion后行否定断言)
+    - [1.2 实践](#12-实践)
+      - [1.2.1 提取xxx后面的yyy](#121-提取xxx后面的yyy)
+  - [2. `prototype`, prototype chain](#2-prototype-prototype-chain)
+  - [3. `is`, `typeof`, `==`, `===`](#3-is-typeof--)
+    - [3.1 `valueOf`](#31-valueof)
+  - [4. \[html\]常见的浏览器端的存储技术有哪些？](#4-html常见的浏览器端的存储技术有哪些)
+    - [4.1 cookie:（8KB）](#41-cookie8kb)
+    - [4.2 web storage](#42-web-storage)
+    - [4.3 \[JSON Web Tokens (JWTs)\]](#43-json-web-tokens-jwts)
+  - [5. 构造函数](#5-构造函数)
+  - [6. iief](#6-iief)
+  - [7. `var` vs `let`](#7-var-vs-let)
+    - [7.1 Temporal dead zone](#71-temporal-dead-zone)
+    - [7.2 hoisting(提升)](#72-hoisting提升)
+  - [8. event loop](#8-event-loop)
+  - [9. closure](#9-closure)
+  - [10. enclosing function](#10-enclosing-function)
+  - [11. Module Pattern](#11-module-pattern)
+  - [12. strict mode](#12-strict-mode)
+  - [13. prototypal inheritance(原型继承)](#13-prototypal-inheritance原型继承)
+    - [13.1 `prototype` vs `this`](#131-prototype-vs-this)
+    - [13.2 `Object.create` vs `{}`](#132-objectcreate-vs-)
+  - [14. how does `this` work?](#14-how-does-this-work)
+  - [15. event bubbling](#15-event-bubbling)
+  - [16. 描述客户端和服务端之间进行通信的一些方式，网络协议等（IP, TCP, HTTP/S/2, UDP, RTC, DNS, etc.）](#16-描述客户端和服务端之间进行通信的一些方式网络协议等ip-tcp-https2-udp-rtc-dns-etc)
+    - [DNS](#dns)
+    - [域名发散](#域名发散)
+    - [SPeeDY](#speedy)
+      - [HTTP/1.x的一些缺点](#http1x的一些缺点)
+      - [HTTP/2要解决的问题](#http2要解决的问题)
+      - [HTTP/2解决问题的方式](#http2解决问题的方式)
+    - [HTTP Caching](#http-caching)
+  - [17. `for...in` vs `for...of`](#17-forin-vs-forof)
+    - [spread syntax](#spread-syntax)
+  - [18. call vs apply vs bind(ES5)](#18-call-vs-apply-vs-bindes5)
+  - [24. http vs https](#24-http-vs-https)
+    - [websocket vs http](#websocket-vs-http)
+  - [35. HTTP状态码](#35-http状态码)
+  - [48.\[ES6\]Destructuring assignment解构](#48es6destructuring-assignment解构)
+    - [48.1 数组解构](#481-数组解构)
+    - [48.2 对象解构](#482-对象解构)
+    - [48.3 函数解构](#483-函数解构)
+    - [48.4 解构内嵌引用类型(destructing nested objects)](#484-解构内嵌引用类型destructing-nested-objects)
+  - [52. `generator` and `yield`](#52-generator-and-yield)
+  - [54. IaaS/PaaS/SaaS](#54-iaaspaassaas)
+  - [55. TLS/](#55-tls)
+  - [56. js类中定义静态变量/方法：`static`](#56-js类中定义静态变量方法static)
+    - [1. 如何定义？](#1-如何定义)
+    - [2. 如何在类外引用？](#2-如何在类外引用)
+    - [3. 如何在类内的**静态函数**中引用？](#3-如何在类内的静态函数中引用)
+    - [4. 如何在类内的**非静态函数**中引用？](#4-如何在类内的非静态函数中引用)
+  - [57. 关于`constructor`所应该知道的](#57-关于constructor所应该知道的)
+  - [58. 如何在js的类中定义私有变量/方法？](#58-如何在js的类中定义私有变量方法)
+  - [59.在js中如何定义**私有构造函数**（类似于C++那样）？](#59在js中如何定义私有构造函数类似于c那样)
+  - [60.领域对象、领域类（于《重构》-P189发现）](#60领域对象领域类于重构-p189发现)
+  - [61. JS的一些小技巧](#61-js的一些小技巧)
+  - [62.`require`的原理是什么？](#62require的原理是什么)
+  - [63. reduce](#63-reduce)
+  - [64. 在继承体系中如何判断一个对象是子类实例还是父类实例？](#64-在继承体系中如何判断一个对象是子类实例还是父类实例)
+  - [65. `export`(ES6, ECMA-262)](#65-exportes6-ecma-262)
+    - [65.1 Named Exports (Zero or more exports per module)](#651-named-exports-zero-or-more-exports-per-module)
+    - [65.2 Default Exports (One per module)](#652-default-exports-one-per-module)
+  - [66. `import`(ES6, ECMA-262)](#66-importes6-ecma-262)
+    - [66.1 语法：](#661-语法)
+    - [66.2 dynamic import: `import()`](#662-dynamic-import-import)
+    - [66.3 原理：`import`是怎么导入的？](#663-原理import是怎么导入的)
+    - [66.4](#664)
+      - [webpack](#webpack)
+        - [遇到的问题：](#遇到的问题)
+          - [1. `loaders`](#1-loaders)
+          - [2. `npm i`错误：Refusing to delete](#2-npm-i错误refusing-to-delete)
+          - [3. webpack打包时：SyntaxError: Unexpected reserved word](#3-webpack打包时syntaxerror-unexpected-reserved-word)
+  - [67. 浏览器右键复制/粘贴/剪切/全选怎么实现？](#67-浏览器右键复制粘贴剪切全选怎么实现)
+    - [67.1 基础概念](#671-基础概念)
+      - [1. `Selection`](#1-selection)
+      - [2. `Range`](#2-range)
+  - [设置Range包含一个`Node`的内容, 将*referenceNode*作为这个`Node`.那么此时,\`startOffset就是0(因为我们的Range已设置为一个Node),而endOffset就是*referenceNode*的孩子Node数(或者是它里面的字符个数)](#设置range包含一个node的内容-将referencenode作为这个node那么此时startoffset就是0因为我们的range已设置为一个node而endoffset就是referencenode的孩子node数或者是它里面的字符个数)
+  - [68. `Touch`相关](#68-touch相关)
+    - [68.1 基础概念](#681-基础概念)
+    - [68.2 `touchstart`](#682-touchstart)
+    - [68.3 `touchend`](#683-touchend)
+    - [68.4 `touchmove`](#684-touchmove)
+    - [68.5 `touchcancel`](#685-touchcancel)
+  - [69. 剪贴板(*Clipboard*)](#69-剪贴板clipboard)
+  - [70. `currentTarget` vs `target`](#70-currenttarget-vs-target)
+  - [71. `blob`](#71-blob)
+  - [72.](#72)
+    - [72.1 如何选中文本](#721-如何选中文本)
+    - [72.2 选中一个`<img>`元素](#722-选中一个img元素)
+    - [72.3](#723)
+      - [72.3.1 **Selection**](#7231-selection)
+      - [72.3.2 **Range**](#7232-range)
+  - [73. **Draftjs**](#73-draftjs)
+    - [73.1 SelectionState](#731-selectionstate)
+  - [74. var a = Object.create(null) vs var a = {}](#74-var-a--objectcreatenull-vs-var-a--)
+  - [75. windows中的剪贴板是如何工作的？](#75-windows中的剪贴板是如何工作的)
+    - [75.1](#751)
+  - [76. `defineProperty`](#76-defineproperty)
+  - [77. HTTP Header](#77-http-header)
+  - [78. CORS(Cross-Origin Resource Sharing)跨域](#78-corscross-origin-resource-sharing跨域)
+    - [78.1 `Access-Control-Allow-Origin`](#781-access-control-allow-origin)
+    - [78.2 `Access-Control-Allow-Credentials`](#782-access-control-allow-credentials)
+  - [79. CSS env/constant](#79-css-envconstant)
+  - [80. 调用`window.history.back()`后发生了什么？](#80-调用windowhistoryback后发生了什么)
+  - [81. `try...catch...finally`](#81-trycatchfinally)
+  - [82. Could not find a declaration file for module 'xxx'. '/path/to/xxx.js' implicitly has an 'any' type](#82-could-not-find-a-declaration-file-for-module-xxx-pathtoxxxjs-implicitly-has-an-any-type)
+  - [83. iframe cookie not set on safari](#83-iframe-cookie-not-set-on-safari)
+  - [84. Chrome浏览器打开网页报错`DNS_PROBE_FINISHED_NXDOM`，IE正常](#84-chrome浏览器打开网页报错dns_probe_finished_nxdomie正常)
+  - [85. 目录匹配`**`与`*`](#85-目录匹配与)
+  - [86. `npm create xxx` == `npm init xxx`](#86-npm-create-xxx--npm-init-xxx)
+  - [87. pinia](#87-pinia)
+  - [88. pnpm link做了什么](#88-pnpm-link做了什么)
+  - [6. jsonp vs jsonpCallback（跨域访问的解决方法之一）](#6-jsonp-vs-jsonpcallback跨域访问的解决方法之一)
+
+# 前端知识点
 ## 1. 正则
 
 ### 1.1 断言
@@ -2616,6 +2737,42 @@ myworkspace/**/*.js
 myworkspace/*.js
 ```
 
+## 86. `npm create xxx` == `npm init xxx`
+Actually, it's an alias.
+https://github.com/npm/cli/blob/b1c3256d62250b5dca113dd99bf1bd99f2500318/lib/utils/cmd-list.js#L95C18-L95C18
+
+```
+$ npm init <initializer>
+```
+
+Used to set up a new or existing npm package.
+
+step1. npm will install package `create-<initializer>`
+step2. after installed, run the main bin of that pkg
+
+## 87. pinia
+vue的一个状态管理工具，它实现了很多vuex 5所拥有的一些特性。
+尤其是和ts配合，具有不错的类型推断支持
+
+vuex 3.x is for vue 2
+vuex 4.x is for vue 3
+
+pinia 和 vuex <=4 的区别：
+1. mutations no longer exist.
+2. No need to create custom complex wrappers to support TypeScript,  everything is typed
+3. No more magic strings to inject, import the functions, call them
+4. No need to dynamically add stores, they are all dynamic by default
+5. No more nested structuring of modules.
+6. No namespaced modules
+
+提供composition-api style，和vue3类似
+
+## 88. pnpm link做了什么
+1.拉pnpm代码
+2.根目录下$ pnpm run compile
+3.用当前pnpm包测试：$ node pnpm/bin/pnpm.cjs -v
+
+
 ---CSS---
 ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
 
@@ -2663,7 +2820,6 @@ used value/actual value: 最终使用的值，如有的浏览器只能渲染整�
 1. 块格式上下文：Block formatting context
 它是块级元素和float元素呆的地方。(It is the region in which the layout of block boxes occurs and in which floats interact with other elements.)
 A block formatting context is created by at least one of the following:
-<html>
 floats(元素的float属性不为none)
 绝对定位元素(position为absolute或fixed)
 inline-blocks(元素display:inline-block)
@@ -2699,6 +2855,7 @@ flex-basis：指明item初始的size，即content-box的宽度（当flex-directi
 
 5. css函数：linear-gradient() //gradient:坡度，斜率，倾斜度，梯度变化曲线
 它创建一个image，由2个或以上的颜色约束，并沿着一条梯度线渐变色的图片。它是一个特殊的<image>，因此可以用在任何<image>的地方。
+```
 linear-gradient([ to <side-or-corner> | <angle> ]? <color-stop-list>)
                 \Definition of the gradient line/  \List of color stops/
 <side-or-corner>如：to bottom, to top, to left, to right。分别等价于指定<angle>：180deg，0deg, 270deg, 90deg。
@@ -2708,6 +2865,7 @@ linear-gradient([ to <side-or-corner> | <angle> ]? <color-stop-list>)
 
 background: linear-gradient(#e66465, #9198e5); //正确
 background-color: linear-gradient(#e66465, #9198e5); //错误，因为它是一个image，而不是一个color
+```
 
 gradient line由包含此背景图片的box的中心点，以及角度来确定。
 color stops，即在这条线上有多个颜色的stop point。starting point是box corner到gradient line的垂线的交点；ending point正好和starting point对称。
