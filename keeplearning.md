@@ -2771,7 +2771,7 @@ pinia 和 vuex <=4 的区别：
 1.拉pnpm代码
 2.根目录下$ pnpm run compile
 3.用当前pnpm包测试：$ node pnpm/bin/pnpm.cjs -v
-
+4.link代码在：pkg-manager\plugin-commands-installation\src\link.ts
 
 ---CSS---
 ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference

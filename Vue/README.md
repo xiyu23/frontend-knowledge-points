@@ -509,6 +509,45 @@ vm.$set(vm.students, 0, vm.students[0]); // second, update using vm.$set
 
 </pre>
 
+### 9. `<script setup>`
+theory:
+the code inside it is compiled as the content of the component's `setup()` function.
+
+1. syntatic suger in compile-time
+2. more succinct code
+3. code inside it would be ran every time an instance of the component is created, instead of runnig only at the first import
+4. use the imported function directly in template, instead of put it into `methods` first
+5. any top level variables are accessiable to template
+6. local custom directives should be named as `vNameOfDirective`
+7. `defineProps()` & `defineEmits()` are compiler macros, only used in this script. accept same values passed to `props` & `emits` options.
+8. the options passed to both **cannot** reference any local variables because the two will be **hoisted** out of the setup into module scope. Thus, they can reference anything inside module scope
+9. `[withDefaults](https://vuejs.org/api/sfc-script-setup.html#default-props-values-when-using-type-declaration)` used to combine with type declaration to enable default values for props
+10. `defineModel` (3.4+), can be used with `v-model`
+11. `defineExpose` ??
+12. `defineOptions` (3.3+) ??
+13. `defineSlots` ??
+14. variables created inside are **NOT** added as properties to the component instance ??
+15. `await` can be used since they would be compiled as `async setup()` function
+
+### 10. `Options API` vs `Composition API`
+
+
+### 11. `mixins` vs `composable`
+good article: https://vueschool.io/articles/vuejs-tutorials/what-is-a-vue-js-composable/
+
+mixins 之于 Options API，相当于 composable 之于 Composition API
+
+1. they all are the techinic to reuse code logic
+2. composable does better
+3. problem: data source obscured. For mixins, you don't know from which mixin does the data comes; but composable does, it requires you to import and destructure the imported object to get it explicitly
+4. problem: naming collisions. For mixins, you must be afraid of same names appear in mixins; but for composable, the composables are independent, it's up to you!
+5. problem: cannot safeguard it's own reactive data. For mixins, the data is mixined with the data of consuming component which lead to unexpected change caused either by module it self or the component. It's a mess actually! For composable, we can expose the reactive data by wrapping them with `readonly` api from `vue`
+6. 
+
+
+
+
+
 # 附: Vue源码学习
 ## 0. Vue是如何初始化的？
 ### 0.1 init

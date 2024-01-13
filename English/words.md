@@ -1,3 +1,7 @@
+- inception /ɪnˈsep.ʃən/ the beginning of sth
+- succinct /səkˈsɪŋkt/ means "short concise expression"
+
+
 - fast-paced
 
   happening very quickly
