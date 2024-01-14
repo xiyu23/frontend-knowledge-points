@@ -530,12 +530,22 @@ the code inside it is compiled as the content of the component's `setup()` funct
 15. `await` can be used since they would be compiled as `async setup()` function
 
 ### 10. `Options API` vs `Composition API`
+Options API: in SFC a component has all its data/method etc under single option, the data/method etc of different work placed in same place, which causes **difficult to find out a relative logic code in single one place**, but requires us to slide up and down to find them.
+
+Composition API: separate the code of a component into different modules that are relatively independent of each other. It benefits us to maintain the single logic in only 1 file. But the drawback is **difficult to get on this to separate into module**, it's absolutely not friendly to many developers.
+
+How to choose:
+  small & medium projects -> use options API is fine
+  large projects -> composition api helps in maintainability
 
 
 ### 11. `mixins` vs `composable`
 good article: https://vueschool.io/articles/vuejs-tutorials/what-is-a-vue-js-composable/
 
 mixins 之于 Options API，相当于 composable 之于 Composition API
+
+> composable: a "composable" is a function that leverages Vue's Composition API to encapsulate and reuse stateful logic. (reusable code logic using composition API)
+
 
 1. they all are the techinic to reuse code logic
 2. composable does better
@@ -544,6 +554,49 @@ mixins 之于 Options API，相当于 composable 之于 Composition API
 5. problem: cannot safeguard it's own reactive data. For mixins, the data is mixined with the data of consuming component which lead to unexpected change caused either by module it self or the component. It's a mess actually! For composable, we can expose the reactive data by wrapping them with `readonly` api from `vue`
 6. 
 
+### 12. Composition API vs React Hooks
+ref: https://vuejs.org/guide/extras/composition-api-faq.html
+(感觉vue净吹vue好，react难用)
+
+react hooks:
+1. need to set `deps` for hooks(useMemo, useCallback, etc) manually, which leads to bug even for seasoned react users; composition api has vue fine reactivity system that track dependencies at first run
+2. hooks need understanding about `stale` state because of closure; the composition api has no problem to worry about
+3. hooks runs in fixed order; composition api has no such limitation
+4. hooks runs every time the component updates; composition api only once
+5. react hooks may caused unnecessary updates if not used correctly; composition api no problem because only dependencies REALLY update can cause update
+
+### 13. Composition API
+![api](./composition-api.PNG)
+
+Reactivity Core
+1. ref
+将参数reactive化，返回一个RefImpl对象。
+读这个对象的`value`时，返回一个Proxy，它是对你才传入参数的代理，可以认为是你传入的参数。
+每次读value（`myRef.value`）都会收集依赖（track），每次改变值（`myRef.value = xx`）都会trigger effect（触发依赖了它的effec函数）
+注意，要通过`myRef.value`来引用到你传入的参数。
+2. computed
+3. reactive
+和ref类似，只不过reactive直接返回proxy而不是RefImpl对象了。
+ps: 那ref vs reactive有啥用？
+- ref要用.value，reactive不用
+- ref在js/template写法不同（.value/no .value），后者一致都是直接用
+- ref可接受primitive，后者只能接受对象（否则返回参数，相当于啥都没做）
+- 当参数是object，后续需要reassign时用ref（要直接改你的数据：myRef.value = xxx，这相当于修改对象了），否则用reactive
+- 后者不可以destructure（解构赋值），这样会丢失响应式状态，即set后没反应，应为解构的就变成了普通变量。额。why？？
+- 
+1. readonly
+用proxy包裹参数，返回一个readonly的proxy
+1. how does watchEffect know what state to track?
+2. watchEffect vs watch
+
+Reactivity Utilities
+1. toValue
+
+
+Lifecycle Hooks
+1. onMounted()
+2. onUpdated()
+3. onUnmounted()
 
 
 
