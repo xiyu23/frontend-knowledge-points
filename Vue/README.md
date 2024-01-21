@@ -513,21 +513,120 @@ vm.$set(vm.students, 0, vm.students[0]); // second, update using vm.$set
 theory:
 the code inside it is compiled as the content of the component's `setup()` function.
 
+what is `setup()` function?
+when you provide a setup function in options for vue component like
+```
+export default {
+  setup() {
+    // ...
+  },
+  // ...
+}
+```
+vue will run the setup function at init stage(right before event 'created', but after 'beforeCreated'). The return value should be either function or an object.
+- if you provide a function as return value, this function will be set as `render` option on current vue instance
+- if you provide an object, vue will iterate each of the key and add them to vue instance, and do wrap/unwrap stuff for `ref` if the value of that key is type of `ref`.(through Object.defineProperty)
+
+in single word, add the returned props on vue instance and unwrap for `ref`.
+
+after setup done, vue will init data. Which is the data option we defined.
+vue invoke `defineReactive` for each key in data(which uses Object.defineProperty).
+
+
 1. syntatic suger in compile-time
 2. more succinct code
 3. code inside it would be ran every time an instance of the component is created, instead of runnig only at the first import
 4. use the imported function directly in template, instead of put it into `methods` first
 5. any top level variables are accessiable to template
 6. local custom directives should be named as `vNameOfDirective`
-7. `defineProps()` & `defineEmits()` are compiler macros, only used in this script. accept same values passed to `props` & `emits` options.
-8. the options passed to both **cannot** reference any local variables because the two will be **hoisted** out of the setup into module scope. Thus, they can reference anything inside module scope
-9. `[withDefaults](https://vuejs.org/api/sfc-script-setup.html#default-props-values-when-using-type-declaration)` used to combine with type declaration to enable default values for props
-10. `defineModel` (3.4+), can be used with `v-model`
-11. `defineExpose` ??
-12. `defineOptions` (3.3+) ??
-13. `defineSlots` ??
-14. variables created inside are **NOT** added as properties to the component instance ??
-15. `await` can be used since they would be compiled as `async setup()` function
+7. `defineProps()`, `defineEmits()`, `defineExpose()`, `withDefaults()` are just **COMPILER MACROS**, only used in this script. accept same values passed to `props` & `emits` options.
+
+1.defineProps
+```ts
+<script setup lang="ts">
+  // way1
+  defineProps({
+    title: String,
+    likes: Number
+  })
+
+  // way2
+  defineProps<{
+    title?: string
+    likes?: number
+  }>()
+</script>
+```
+
+2.defineEmits: define what events we are gonna emit from this component. Note that we cannot use `$emit` in setup script which but can be used in template.
+```ts
+<script setup lang="ts">
+// way1: events no validation if defined with array
+const emit = defineEmits(['inFocus', 'submit'])
+
+function buttonClick() {
+  emit('submit')
+}
+
+// way2: events validation
+defineEmits({
+  click: null, // no validation
+  submit: (payload) => {
+    // valid, emit
+    if (do sth if ok) {
+      return true
+    }
+
+    // invalid, won't emit
+    return false
+  }
+})
+
+// way3: 
+const emit = defineEmits<{
+  (e: 'change', id: number): void
+  (e: 'update', value: string): void
+}>()
+</script>
+```
+
+3.defineExpose: used to define exported values, provided for who wants to use when they can get instance of current vue instance
+```ts
+<script setup lang="ts">
+import { ref } from 'vue'
+const a = 1
+const b = ref(2)
+defineExpose({
+  a,
+  b
+})
+</script>
+```
+
+4.withDefaults: used to help define **default value** for props
+```ts
+<script setup lang="ts">
+export interface Props {
+  msg?: string
+  labels?: string[]
+}
+const props = withDefaults(defineProps<Props>(), {
+  msg: 'hello',
+  labels: () => ['one', 'two']
+})
+</script>
+```
+
+
+
+1. the options passed to both **cannot** reference any local variables because the two will be **hoisted** out of the setup into module scope. Thus, they can reference anything inside module scope
+2.  `[withDefaults](https://vuejs.org/api/sfc-script-setup.html#default-props-values-when-using-type-declaration)` used to combine with type declaration to enable default values for props
+3.   `defineModel` (3.4+), can be used with `v-model`
+4.   `defineExpose` ??
+5.   `defineOptions` (3.3+) ??
+6.   `defineSlots` ??
+7.   variables created inside are **NOT** added as properties to the component instance ??
+8.   `await` can be used since they would be compiled as `async setup()` function
 
 ### 10. `Options API` vs `Composition API`
 Options API: in SFC a component has all its data/method etc under single option, the data/method etc of different work placed in same place, which causes **difficult to find out a relative logic code in single one place**, but requires us to slide up and down to find them.
@@ -576,12 +675,16 @@ Reactivity Core
 注意，要通过`myRef.value`来引用到你传入的参数。
 2. computed
 3. reactive
-和ref类似，只不过reactive直接返回proxy而不是RefImpl对象了。
-ps: 那ref vs reactive有啥用？
-- ref要用.value，reactive不用
+和ref类似，最主要的两点：
+- ref接收primitive、object；reactive只能接收object。这里的object是指 `typeof xxx` 结果为object的，数组也算
+- 只不过reactive直接返回proxy而不是RefImpl对象了
+
+
+ps: 那ref vs reactive有啥区别？
+- ref要用.value，reactive不用。因为reactive直接返回proxy，可以直接引用
 - ref在js/template写法不同（.value/no .value），后者一致都是直接用
 - ref可接受primitive，后者只能接受对象（否则返回参数，相当于啥都没做）
-- 当参数是object，后续需要reassign时用ref（要直接改你的数据：myRef.value = xxx，这相当于修改对象了），否则用reactive
+- 当参数是object，后续需要reassign时用ref（要直接修改时比如：myRef.value = xxx，这相当于修改对象了），否则用reactive
 - 后者不可以destructure（解构赋值），这样会丢失响应式状态，即set后没反应，应为解构的就变成了普通变量。额。why？？
 - 
 1. readonly

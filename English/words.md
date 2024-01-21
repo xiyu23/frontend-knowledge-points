@@ -1,3 +1,4 @@
+- backport 软件术语，将新版本中的部分内容作为补丁形式，打到老版本中，以使得老版本也具有新特性的能力
 - inception /ɪnˈsep.ʃən/ the beginning of sth
 - succinct /səkˈsɪŋkt/ means "short concise expression"
 
