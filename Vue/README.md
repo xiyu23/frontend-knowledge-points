@@ -646,12 +646,20 @@ mixins 之于 Options API，相当于 composable 之于 Composition API
 > composable: a "composable" is a function that leverages Vue's Composition API to encapsulate and reuse stateful logic. (reusable code logic using composition API)
 
 
-1. they all are the techinic to reuse code logic
+1. they all are the technic to reuse code logic
 2. composable does better
 3. problem: data source obscured. For mixins, you don't know from which mixin does the data comes; but composable does, it requires you to import and destructure the imported object to get it explicitly
 4. problem: naming collisions. For mixins, you must be afraid of same names appear in mixins; but for composable, the composables are independent, it's up to you!
-5. problem: cannot safeguard it's own reactive data. For mixins, the data is mixined with the data of consuming component which lead to unexpected change caused either by module it self or the component. It's a mess actually! For composable, we can expose the reactive data by wrapping them with `readonly` api from `vue`
-6. 
+5. problem: cannot safeguard it's own reactive data. For mixins, the data is mixined with the data of consuming component which lead to unexpected change caused either by module itself or the component. It's a mess actually! For composable, we can expose the reactive data by wrapping them with `readonly` api from `vue`
+
+**vue2.7中，mixins是怎么merge的？**
+就像普通对象的merge，不同key有不同的merge策略。
+  data: 递归合并，冲突时默认取组件的
+  props/methods/inject/computed: 合并，冲突时直接覆盖已有的
+  life cycle hooks: 合并为数组，component自己的放在末尾，所以hook被调用时，先调mixins的最后调component自己的
+  provide: 和data逻辑一样
+  watch: 合并为数组，按component -> mixins之间的声明顺序 调用
+
 
 ### 12. Composition API vs React Hooks
 ref: https://vuejs.org/guide/extras/composition-api-faq.html
@@ -671,13 +679,15 @@ Reactivity Core
 1. ref
 将参数reactive化，返回一个RefImpl对象。
 读这个对象的`value`时，返回一个Proxy，它是对你才传入参数的代理，可以认为是你传入的参数。
-每次读value（`myRef.value`）都会收集依赖（track），每次改变值（`myRef.value = xx`）都会trigger effect（触发依赖了它的effec函数）
+每次get（`myRef.value`）都会收集依赖（track），每次set（`myRef.value = xx`）都会trigger effect（触发依赖了它的effec函数）
 注意，要通过`myRef.value`来引用到你传入的参数。
 2. computed
 3. reactive
 和ref类似，最主要的两点：
 - ref接收primitive、object；reactive只能接收object。这里的object是指 `typeof xxx` 结果为object的，数组也算
 - 只不过reactive直接返回proxy而不是RefImpl对象了
+
+为啥ref返回一个包裹的，reactive却不？
 
 
 ps: 那ref vs reactive有啥区别？
@@ -686,7 +696,11 @@ ps: 那ref vs reactive有啥区别？
 - ref可接受primitive，后者只能接受对象（否则返回参数，相当于啥都没做）
 - 当参数是object，后续需要reassign时用ref（要直接修改时比如：myRef.value = xxx，这相当于修改对象了），否则用reactive
 - 后者不可以destructure（解构赋值），这样会丢失响应式状态，即set后没反应，应为解构的就变成了普通变量。额。why？？
-- 
+
+为啥要用ref?
+因为我们要track、trigger一个变量，js中无法直接对一个plain variable这样做，得包到object里才可以。
+
+
 1. readonly
 用proxy包裹参数，返回一个readonly的proxy
 1. how does watchEffect know what state to track?
@@ -701,7 +715,18 @@ Lifecycle Hooks
 2. onUpdated()
 3. onUnmounted()
 
+### 14. vue2.7 vs vue3
+|-|2.7|3|common|
+|-|-|-|-|
+|ref|returns a plain object|returns a RefImpl instance|myRef.value|
+|reactive|cannot pass array as it would not be tracked in watch; doesn't support collection types like Map / Set; |-|not for primitive|
+|-|-|-|-|
 
+### 15. $nextTick
+
+use microtask to schedule callback in an array, the callback array would be flushed (ran one by one) in the microtask checkpoint.
+
+when you invoke $nextTick many times, each time you invoke, the callback is just pushed into the callback array, and nothing happens until next checkpoint for microtask.
 
 
 # 附: Vue源码学习
