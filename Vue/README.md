@@ -728,6 +728,96 @@ use microtask to schedule callback in an array, the callback array would be flus
 
 when you invoke $nextTick many times, each time you invoke, the callback is just pushed into the callback array, and nothing happens until next checkpoint for microtask.
 
+### 16. Vuex: dispatch
+内部执行逻辑：
+从内部维护的`_actions`，取`type`对应的`actions`（一个数组）依次执行，参数就是payload，用Promise.all包裹。
+返回一个promise，成功时就是各action的返回值；失败时，就reject第一个失败的action的error。
+
+因此，action是可以写异步逻辑的，而且dispatch返回值也是一个promise，那么也可以等dispatch结束后再do sth:
+```js
+const resOfActionA = await dispatch('actionA')
+const resOfActionB = await dispatch('actionB')
+// ...
+```
+
+内部的`_actions`是一个plain object，通过`registerAction`注册action handler。对同type进行多次注册就会形成一个数组了。
+```ts
+_actions: {
+  [action_type: string]: function[]
+}
+```
+
+你传入的handler会被wrap，把handler的返回值转成Promise返回。
+```js
+// register `handler` for `type`
+const entry = store._actions[type] || (store._actions[type] = [])
+entry.push(function wrappedActionHandler (payload) {
+    let res = handler.call(store, {
+      // local
+      dispatch: local.dispatch,
+      commit: local.commit,
+      getters: local.getters,
+      state: local.state,
+
+      // root
+      rootGetters: store.getters,
+      rootState: store.state
+    }, payload)
+
+    // covert to Promise
+    if (!isPromise(res)) {
+      res = Promise.resolve(res)
+    }
+
+    return res
+})
+```
+
+注意handler的第一个参数对象，它的dispatch / commit / getters / state都是local，如果想dispatch到其它module，要用root store上挂的方法来做：
+```js
+// in module A
+function myAction({ dispatch }) {
+  // ❌ DO NOT USE LOCAL to dispatch
+  dispatch('moduleB/someAction')
+
+  // ✔ this is the function bound to root store
+  this.dispatch('moduleB/someAction')
+}
+
+
+// in module B
+function someAction({...}) {
+  // ...
+}
+```
+
+什么时候调的`registerAction`？
+在store初始化时，调installModule(root)，这是一个递归的过程，其中会先注册actions/getters/mutations，而后递归install子module。
+vuex内部主要有几个对象：Store，ModuleCollection，Module。Store是对外暴露的，Store的成员变量_modules可以理解为是一个树的根节点，注册的过程会创建各个module，形成一棵module collection树。
+不同层级的嵌套都是注册到store内部同一个对象上，只不过key不同。key可以反应嵌套的路径，这个路径是通过path加斜杠`/`连接表达。比如`/foo/train/bwc`。
+
+
+### 17. Vuex: commit
+内部执行逻辑：
+从内部维护的`_mutations`，取`type`对应的`mutations`（一个数组）依次执行，参数就是payload，同步代码。
+
+
+### 18. Vuex: 构建过程
+每个module形如:
+```js
+{
+  namespaced, // boolean
+  state, // function or plain object
+  getters,
+  actions,
+  mutations,
+}
+```
+每个module可以通过addChild添加它的子module。
+
+在installModule时，是一个递归的过程。
+把mod（module的简称）的state挂在
+ 
 
 # 附: Vue源码学习
 ## 0. Vue是如何初始化的？
