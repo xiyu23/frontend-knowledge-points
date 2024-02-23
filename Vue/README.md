@@ -540,6 +540,8 @@ vue invoke `defineReactive` for each key in data(which uses Object.definePropert
 5. any top level variables are accessiable to template
 6. local custom directives should be named as `vNameOfDirective`
 7. `defineProps()`, `defineEmits()`, `defineExpose()`, `withDefaults()` are just **COMPILER MACROS**, only used in this script. accept same values passed to `props` & `emits` options.
+8. `this` is not allowed in setup function. because the vue runtime gives it a `null` to act as the context
+9. you can think of setup as similar as created when talked about the lifecycle
 
 1.defineProps
 ```ts
@@ -604,7 +606,7 @@ defineExpose({
 ```
 
 4.withDefaults: used to help define **default value** for props
-```ts
+```ts 
 <script setup lang="ts">
 export interface Props {
   msg?: string
@@ -654,11 +656,19 @@ mixins 之于 Options API，相当于 composable 之于 Composition API
 
 **vue2.7中，mixins是怎么merge的？**
 就像普通对象的merge，不同key有不同的merge策略。
-  data: 递归合并，冲突时默认取组件的
-  props/methods/inject/computed: 合并，冲突时直接覆盖已有的
+  data: 递归合并（深度，即如果某个value也是对象，对这个对象也进行merge），冲突时取组件的
+  props/methods/inject/computed: 合并，冲突时使用组件本身的
   life cycle hooks: 合并为数组，component自己的放在末尾，所以hook被调用时，先调mixins的最后调component自己的
-  provide: 和data逻辑一样
-  watch: 合并为数组，按component -> mixins之间的声明顺序 调用
+  provide: 和data逻辑类似，但**不是递归**，即如果同名，则直接覆盖了。比如{a: {b: 1, c: 2} }, {a: {b:2} }，结果是{a: {b:2} }
+  watch: 同名的watch合并为数组，也是按 mixins声明的先后顺序调用，最后调component自己的
+
+vue组件实例是怎么创建的？
+1. 写的.vue文件，一般export都是一个对象`ctor`（当然也可以是Component, Function），接着调用到 createComponent 函数
+2. createComponent -> Vue.extend(extendOptions)，这里的`extendOptions`就是 vue组件的options对象
+3. 在 Vue.extend函数中，调用了 mergeOptions(super.options, extendOptions)，翻译过来就是 mergeOptions(vue基类的options，你组件的options)
+4. 即，把你组件的options merge到基类上，最终的options挂在你的组件实例
+5. mergeOptions是 先把组件的mixins挨个merge到super，当所有mixins merge完毕，最后把组件options merge过去。这就是为什么说生命周期钩子函数挨个执行，最后执行组件自己的。
+6. 随后，Sub是一个函数类（VueComponent），new它时会调用到 Vue._init。
 
 
 ### 12. Composition API vs React Hooks
@@ -817,6 +827,29 @@ vuex内部主要有几个对象：Store，ModuleCollection，Module。Store是�
 
 在installModule时，是一个递归的过程。
 把mod（module的简称）的state挂在
+
+### 19. Vuex 4 要求 Vue ^3.0.2
+```json
+// in vuex 4.0.0
+"peerDependencies": {
+  "vue": "^3.0.2"
+},
+```
+
+### 20. Vue.set(obj, key, val)
+vue 2.7里，本质上就干了一件事：
+  若obj是数组，则直接设置`obj[key]=val`
+  否则，
+    第一次调用Vue.set添加属性的话，
+      调用 `defineReactive` 在obj上定义一个reactive property，即 `obj[key] = val`。而后触发obj.dep.notify()，表示新属性添加到了obj上。
+    非第一次调用Vue.set，则直接简单赋值即可。因为属性已经存在，业已是reactive了。
+
+故，
+1. obj应是reactive的，否则只是普通赋值
+2. 新添加属性，obj的deps应该会收到反应才对
+  
+
+
  
 
 # 附: Vue源码学习
