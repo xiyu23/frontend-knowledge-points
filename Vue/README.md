@@ -848,9 +848,68 @@ vue 2.7里，本质上就干了一件事：
 1. obj应是reactive的，否则只是普通赋值
 2. 新添加属性，obj的deps应该会收到反应才对
   
+### 21. vm.$emit(eventName)
+触发事件，同步执行的。
+取vm上的_events，从中找匹配eventName的callbacks，拿出来挨个执行。
+注意，callback如果是异步的（即async），$emit也只是触发执行，不会await它，也没必要await。
+学习下人家catch callback异常的写法：
+```ts
+function invokeWithErrorHandling(
+  handler: Function,
+  context: any,
+  args: null | any[],
+) {
+  let res
+  try {
+    res = args ? handler.apply(context, args) : handler.call(context)
+    if (res && isPromise(res)) {
+      res.catch(e => console.error(e))
+    }
+  } catch (e) {
+    console.error(e)
+  }
+  return res
+}
 
+function isPromise(val: any): val is Promise<any> {
+  return (
+    isDef(val) &&
+    typeof val.then === 'function' &&
+    typeof val.catch === 'function'
+  )
+}
 
- 
+export function isDef<T>(v: T): v is NonNullable<T> {
+  return v !== undefined && v !== null
+}
+```
+
+### 22. vue修改一个属性，而后响应式系统是怎么处理的？
+假设这个属性是一个reactive state，每个reactive state都有对应的Dep对象。
+Dep理解为这个属性是一个observable，而依赖了这个属性的那些称之为observer，也就是用Watcher对象关联。比如我们写了一个computed属性，你会有一个函数来运行，它的返回值作为这个属性的值。vue会在初始化阶段，为这个computed属性创建一个watcher，watcher内维护了一个getter，这个getter就是你提供的函数。
+函数运行一次，所引用的reactive state都会触发Dep来收集依赖，即Dep知道有一个watcher依赖我。
+
+在某时刻，这个reactive state发生变化，即每次set后，会触发Dep.notify。notify会调用到watcher的update方法，最后会将这个watcher丢到queue里，而这个queue会在nextTick flush。
+
+nextTick的实现是利用promise，即nextTick就schedule了一个微任务而已。当然，如果环境不支持，则会尝试用`MutationObserver`，还不支持？就用setTimeout兜底。
+
+回到响应式系统的更新，当nextTick到达，queue被flush。每个watcher被取出来执行watcher.run。
+watcher.run此时先调用getter（即你提供的函数）计算一边最新的value，然后和oldValue对比，相同则啥都不做（如果是value是对象则例外）。
+
+value不同，则要触发callback。注意对computed而言，没有callback，因为initComputed的时候，给cb是noop。
+而对watch而言，cb是你给的callback，getter则是你指定watch的目标，比如给的"a.b.c"则内部会设置getter取vm上这个层级的数据；如果给的是function，就和computed类似了，watch的对象是一个function返回的结果，这有点像是不用定义computed属性，而直接在watch这里提供原本要给computed传的function。
+```ts
+vm.$watch(
+  // expOrFn, act as getter
+  function () {
+    return this.a + this.b
+  },
+  // cb
+  function (newVal, oldVal) {
+    
+  }
+)
+```
 
 # 附: Vue源码学习
 ## 0. Vue是如何初始化的？
