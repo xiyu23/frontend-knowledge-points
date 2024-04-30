@@ -899,7 +899,11 @@ var slice = Function.prototype.call.bind(unboundSlice);
 function ToArray() {
   return slice(arguments);
 }
-arguments is an Array-like object accessible inside functions that contains the values of the arguments passed to that function.
+`arguments` is an **Array-like object** accessible inside functions that contains the values of the arguments passed to that function.
+
+**Array-like object** is an object that has indexed access and a `length` property. It's not inherited from array.
+
+arrow function doesn't have `arguments`.
 
 var list1 = ToArray(1, 2, 3); // [1, 2, 3]
 [ref]https://stackoverflow.com/questions/7056925/how-does-array-prototype-slice-call-work
@@ -921,7 +925,7 @@ var cleanRoomPromise = new Promise(function (resolve, reject){
     }
 });
 
-2. 机制
+1. 机制
 Promise的构造函数接受一个function参数，称之为executor。new Promise时，executor会被立即执行，执行完毕后，构造函数才返回。
 executor中关键在于，当任务完成时（正常/出错），分别调用resolve/reject。resolve/reject都接受一个参数，可以是任意类型。这俩函数是由javascript引擎定义好的，在构造Promise时，在ctor内部调用executor时，会将内置的这俩函数传给executor。当promise设置的任务完成时调用这俩，其实就是做了一件事：修改Promise内部的状态。对于resolve，设置status为"fulfilled"（即promise成功）、result为"room cleaned"（即调用resolve时的参数）；同理对于reject，设置status为"rejected"（即promise出错）、result为"not cleaned"（即调用reject时的参数）。
 当调用了resolve/reject后，此时会执行传给then的回调函数。

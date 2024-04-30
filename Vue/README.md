@@ -619,6 +619,11 @@ const props = withDefaults(defineProps<Props>(), {
 </script>
 ```
 
+5.`defineComponent`
+
+use to infer types when used with typescript
+
+6.
 
 
 1. the options passed to both **cannot** reference any local variables because the two will be **hoisted** out of the setup into module scope. Thus, they can reference anything inside module scope
@@ -838,7 +843,7 @@ vuex内部主要有几个对象：Store，ModuleCollection，Module。Store是�
 
 ### 20. Vue.set(obj, key, val)
 vue 2.7里，本质上就干了一件事：
-  若obj是数组，则直接设置`obj[key]=val`
+  若obj是数组，则直接通过splice修改 obj.splice(key, 1, val)，相当于`obj[key]=val`。但splice是响应式的（vue重写了，调__ob__去notify它的deps）。
   否则，
     第一次调用Vue.set添加属性的话，
       调用 `defineReactive` 在obj上定义一个reactive property，即 `obj[key] = val`。而后触发obj.dep.notify()，表示新属性添加到了obj上。
@@ -910,6 +915,27 @@ vm.$watch(
   }
 )
 ```
+
+### 23. `watch` API是怎么工作的？什么时候会执行callback？
+vue初始化时，在`initState`最后一步会initWatch。
+initWatch对提供给`watch`选项的每个key-val，创建一个watcher对象，getter就是这个key。key如果是string，则相当于监听了vm.key；key如果是一个function，则watcher内部的getter就是这个function，new watcher的构造函数初始化时会执行一次getter以获取初始value，拿到的初始值就是这个function的返回值，即如果提供给watcher的key是一个function，则会监听你提供的函数的返回值。
+key-val pair的val就是cb了，也就是当监听的值发生改变，cb就会被执行。
+这里值的改变是用`!==`判断的，即如果是对象，只要引用不同就会触发cb；
+但如果对象引用没变，默认是不会触发cb了（即使内部有属性改变）；此时可以给api的`options`对象设置一个参数`{ deep: true }`，那么即使对象引用没变，vue也会调cb，这里deep并不代表vue会帮你做deep比较，它只是一个很简单的行为，就是一个flag，传了就无脑调cb，不管你的对象是不是真的一模一样，不管。
+
+什么时候执行callback？初始化时只是创建watcher，并不立即执行（除非给了参数`{ immediate: true }`，此时cb拿到的只有一个参数`newVal`，即watcher在构造函数执行时调用过一次getter返回的值）；随后，当getter的deps发生变化，使得watcher的value重新计算，如果不等则调cb。
+
+```ts
+Vue.prototype.$watch = function (
+    expOrFn: string | (() => any),
+    cb: any,
+    options?: Record<string, any>
+) {
+  // ...
+}
+```
+
+
 
 # 附: Vue源码学习
 ## 0. Vue是如何初始化的？

@@ -90,7 +90,7 @@
   - [24. 如何为`className`写多个值？](#24-如何为classname写多个值)
   - [25. 生命周期](#25-生命周期)
     - [25.2 父子组件的生命周期顺序是怎样的？](#252-父子组件的生命周期顺序是怎样的)
-  - [Q&A](#qa)
+  - [Q\&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
     - [2. 使用`FC`](#2-使用fc)
     - [3. *function component*中`useState`原理](#3-function-component中usestate原理)
@@ -2046,6 +2046,10 @@ function bar() {
 ## 23. Refs and the DOM
 
 ## 24. 如何为`className`写多个值？
+
+```jsx
+<div className={[classname1, classname2].join(' ')}></div>
+```
 
 ## 25. 生命周期
 

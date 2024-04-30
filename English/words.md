@@ -1,3 +1,9 @@
+
+- arseholes 人的肛门；一个愚蠢、令人讨厌的人
+- anus /[ˈeɪnəs]/ 肛门... the opening at the end of the alimentary canal through which solid waste matter leaves the body.
+- canal /kəˈnal/ 运河；食道，气管
+- alimentary /ˌaləˈmen(t)ərē/ 食物的，营养的
+- nourishment /ˈnəriSHm(ə)nt/ 营养；食物或其他必须的物质，以维持生长、健康、良好的情况
 - backport 软件术语，将新版本中的部分内容作为补丁形式，打到老版本中，以使得老版本也具有新特性的能力
 - inception /ɪnˈsep.ʃən/ the beginning of sth
 - succinct /səkˈsɪŋkt/ means "short concise expression"
