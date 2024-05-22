@@ -1,4 +1,5 @@
-
+- fictitious [fɪkˈtɪʃəs] 虚构的 made up, imaginary
+- collide [kəˈlaɪd] vi. 撞击，冲突 hit with force when moving
 - arseholes 人的肛门；一个愚蠢、令人讨厌的人
 - anus /[ˈeɪnəs]/ 肛门... the opening at the end of the alimentary canal through which solid waste matter leaves the body.
 - canal /kəˈnal/ 运河；食道，气管

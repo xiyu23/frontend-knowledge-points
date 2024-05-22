@@ -117,6 +117,8 @@
   - [86. `npm create xxx` == `npm init xxx`](#86-npm-create-xxx--npm-init-xxx)
   - [87. pinia](#87-pinia)
   - [88. pnpm link做了什么](#88-pnpm-link做了什么)
+  - [89. `Symbol` 和 plain object有啥区别？](#89-symbol-和-plain-object有啥区别)
+  - [90. `Reflect`有啥用](#90-reflect有啥用)
   - [6. jsonp vs jsonpCallback（跨域访问的解决方法之一）](#6-jsonp-vs-jsonpcallback跨域访问的解决方法之一)
 
 # 前端知识点
@@ -2776,6 +2778,27 @@ pinia 和 vuex <=4 的区别：
 2.根目录下$ pnpm run compile
 3.用当前pnpm包测试：$ node pnpm/bin/pnpm.cjs -v
 4.link代码在：pkg-manager\plugin-commands-installation\src\link.ts
+
+## 89. `Symbol` 和 plain object有啥区别？
+1. Symbol一般用来给object添加key，以使得这个symbol key与众不同。它不会与其它通常普通做法的key冲突。因为每个Symbol都是唯一的（感觉就是一个built-in object而已，有啥神奇的？）
+2. JS有一个symbol的global registry，通过`Symbol.for(key)`创建的Symbol都是唯一的，这是因为它会在registry中找有没有这个key对应的symbol，有则返回；没则创建一个并返回。因此，Symbol.for对于相同的key，返回结果都是同一个Symbol。global registry内部用一个list（数组）存储，每个元素是一个record形如`{ [[key]]: xx, [[Symbol]] }`。每次调用Symbol.for若需要创建Symbol时，把给定的key转为string以作为这个Symbol的`description`(`Symbol.[[description]]`)，创建一个新的record append到list（追加到数组末尾）。注意这个list是 **append-only**。（可能内存泄漏？）
+3. 可以看到Symbol作为key，通过普通的解引用方式是获取不到的，创建了一种类似于encapsulation或者数据隐藏
+   e.g
+   ```js
+   var symFoo = Symbol.for('foo')
+   var obj = { bar: 1, [symFoo]: 2, foo: 3 }
+
+   obj[Symbol.for('foo')]
+   // output: 2
+   ```
+   ![img](Pics/keeplearning/symbol-1.PNG)
+4. Symbol也是一个primitive value
+5. Symbol是全局函数，可以通过 Symbol('foo') 创建一个 Symbol。注意与 Symbol.for(key)的区别。
+6. 最后，ES6引入Symbol的motivation是*private* properties。但最后妥协成了这种，避免与用户代码的key冲突。
+
+## 90. `Reflect`有啥用
+
+
 
 ---CSS---
 ref=https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
