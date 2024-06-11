@@ -30,6 +30,28 @@ npm i redux
 
 ## 1. 介绍
 
+redux的源码非常简单，就几个能力：
+- createStore
+  
+  创建一个名为store的plain object，对象上挂了getState, dispatch方法。
+  dispatch接收一个名为action的参数，内部就调用了reducer函数来计算出新的state，最后通知到listeners。
+  
+- combineReducers
+
+  传入一个对象，每个 key-value 都是 reducerKey-reducerFunc。返回一个combined后的recuder，相当于rootReducer吧，每当dispatch action后需要调reducer计算新state时，都会走这个combined reducer逻辑。
+  combined reducer执行时，实质上是一个for循环，遍历之前传入的reducers，对每个reducer取`state[reducerKey]`作为传入对应reducer函数的第一个参数，并执行这个reducer函数获取新state。任何一个reducer产生的state改变的话，就认为这次action更改了state。最终，这个combined reducer函数返回整个state对象。注意这里是创建了一个新的object，但是若某些字段没变，则仍旧引用的是之前的state。只是root state的引用变了的。
+
+- applyMiddleware
+  
+  这是精髓。中间件目的就是扩展了dispatch的能力，比如redux-thunk可以让你dispatch一个函数，而redux本身是不允许的，它只能dispatch一个plain object。
+  就像一条流水线，每个中间件接收action，中间件自行处理这个action，不处理就传给下一个中间件。
+  redux-thunk判断action是一个函数，就执行这个action并return了，不会传递给下一个中间件。
+
+总结：
+redux本身并没有和react关联，它更像是提供了一种全局状态管理的机制，而没有与具体的框架耦合。
+若要与react结合，那就得用react-redux
+  
+
 ### 1.1、单向数据流
 
 ![例1](./imgs/one-way-data-flow-04fe46332c1ccb3497ecb04b94e55b97.png)
@@ -687,7 +709,7 @@ return funcs.reduce(
 )
 ```
 
-每个chain中的元素都是这样的格式：接收1个参数next，返回一个函数。
+chain中的每个元素都是这样的格式：接收1个参数next，返回一个函数。
 
 实质上从中间件chain最开始执行时，传入的参数就是`store.dispath`。它经过这些中间件挨个处理，
 
