@@ -935,6 +935,22 @@ Vue.prototype.$watch = function (
 }
 ```
 
+### 24. `.sh`脚本构建项目，怎么导出变量？并能让`.js`代码使用这个变量？
+思路：
+1. shell通过`export`导出变量，可以让当前shell上下文获取到这个环境变量
+2. js运行时要拿到，那这个变量得在构建项目的时候（编译时）打进去
+3. 中间需要一个桥梁，一个工具代劳：构建工具，比如vue项目的vite
+4. vite要做的事情无非是：读取当前环境变量 -> 定义需要暴露给vue项目的变量
+5. 读取：vite可以用`loadEnv`来获取environment variables
+6. 定义：vite config里的`define`用来定义暴露给项目的全局变量
+7. 注意了，这些变量在mode=dev时，会被挂载window对象上；在build项目时，会做替换（replacements），就像C的#define一样文本替换
+8. 最后，vite config用`define`定义时，value必须是string，最好用`JSON.stringify`包一下
+
+这个是vue项目的例子，实测通过。
+![img](./commitid.png)
+![img](./defines.png)
+
+
 
 
 # 附: Vue源码学习
