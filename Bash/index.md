@@ -1,5 +1,8 @@
 `.sh`: shell script, 脚本文件，所有command line命令组合成一个脚本文件。
 
+man page doc: https://linuxcommand.org/lc3_man_pages/echoh.html
+learn: https://linuxconfig.org/bash-scripting-tutorial#Reading%20User%20Input:~:text=LINUX%0Auname%20%2Do-,Reading%20User%20Input,-We%20can%20use
+
 ## 1. 脚本文件第一行
 先找bash（.sh解释器）在哪里
 ```bash
@@ -90,4 +93,52 @@ export count = 5
 并且导出的变量都被存在当前shell的`env`变量中，它包含当前上下文中所有的环境变量。
 
 
-https://linuxconfig.org/bash-scripting-tutorial#Reading%20User%20Input:~:text=LINUX%0Auname%20%2Do-,Reading%20User%20Input,-We%20can%20use
+## 6. 读取输入 read user input
+1. 用户按下Enter结束输入
+2. 如果是一次性输入多个变量，是空格分隔这些变量的
+3. 整个输入会被trim，即前后空白会被忽略
+
+```sh
+# 1个变量：把用户输入存到 word 变量
+read word
+
+# 2个变量：空格分隔输入的两个变量
+read word1 word2
+
+# 会读到默认变量，通过 $REPLY 引用
+read
+echo "your input is: $REPLY"
+
+# 加 `-a` 读到数组里
+read -a colours
+echo "My favorite colours are also ${colours[0]}, ${colours[1]} and ${colours[2]}"
+```
+
+## 7. 监听系统信号：listen SYSTEM_SIGNAL and do sth
+```sh
+trap <Function_Name> <SIGNAL>
+```
+
+e.g
+```sh
+# 监听中断信号（比如CTRL+C），而后执行 `bashtrap` 函数
+# 这一句不会阻塞执行，代码会继续向下
+trap bashtrap INT
+
+# 中断函数
+bashtrap()
+{
+    echo "CTRL+C Detected !...executing bash trap !"
+}
+
+# for loop from 1/10 to 10/10
+for a in `seq 1 10`; do
+    echo "$a/10 to Exit." 
+    sleep 1;
+done
+echo "Exit Bash Trap Example!!!" 
+```
+
+## 8. 
+
+https://linuxconfig.org/bash-scripting-tutorial#Reading%20User%20Input:~:text=Read%20file%20into%20bash%20array
