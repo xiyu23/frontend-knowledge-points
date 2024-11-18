@@ -14,6 +14,7 @@
     - [4.2 创建基于React的项目](#42-创建基于react的项目)
   - [5. 如何发布一个包](#5-如何发布一个包)
   - [6. `npm link`](#6-npm-link)
+  - [7. `exports` in package.json](#7-exports-in-packagejson)
 
 
 ## 1. 如何安装一个包
@@ -211,4 +212,24 @@ $ npm install --save-dev @babel/cli @babel/core @babel/preset-env
   "build": "babel index.js -d dist", // 构建
   "start": "npm run build && node dist/index.js" // 构建并执行，一句命令搞定
 },
+```
+
+## 7. `exports` in package.json
+1. 使得在package包里面，自己可以通过引用包名来import定义了的exports。这种方式定义的exports叫做 *subpath exports*
+2. 使用包名加路径的方式import，这种导入形式叫做 *Self-referencing*
+3. 必须定义`exports`才可以*Self-referencing*
+```json
+// package.json
+{
+  "name": "mypackage",
+  "exports": {
+    ".": "./index.mjs", // 默认.为包的根目录
+    "./foo.js": "./src/foo.js" // subpath export
+  }
+} 
+```
+
+```js
+// load node_modules/mypackage/src/foo.js
+import { someVar } from "mypackage/foo.js"
 ```

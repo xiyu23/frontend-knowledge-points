@@ -354,7 +354,25 @@ function myReactComponent() {
 
 **问题**：
 
-1、store更新后，`useSelector`是怎么触发react组件更新的呢？
+1. store更新后，`useSelector`是怎么触发react组件更新的呢？
+2. 如果store保存的是一个对象，每个value也是一个对象，那当某个value对象的某个属性发生变化，useSelector返回的是同一个对象，还是不同呢？（一个引用还是两个不同的引用？）
+```js
+/*
+students: 
+{
+  yuhui: { age: 18, gender: 'male', score: 10, }
+}
+*/
+const students = useSelector(state => state.students)
+const student = students['yuhui'];
+
+useEffect(() => {
+  console.log('student changed')
+}, [student]);
+```
+
+When yuhui's score changed to 11, will the `student` object to be the same reference? or different?
+i.e will the function for useEffect runs?
 
 ### 2.11 `useDispatch`
 

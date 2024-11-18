@@ -1707,9 +1707,11 @@ useMemo(() => fn, deps)
 
 ### 22.8 Ref Hook: `useRef`
 
+> `useRef`不会触发rerender，因为只是相当于改了这个plain object，不会调react渲染相关的函数
+
 `useRef`返回一个可修改的对象，它的`current`属性被初始化为传入的值。
 
-```js
+```js 
 const myRef = useRef(5);
 myRef.current === 5; // true
 ```
@@ -1776,6 +1778,10 @@ const contextItem = {
   next: null,
 };
 ```
+
+useContext对于mount/update/rerender，用的是同一个函数`readContext`：
+第一次执行，创建一个node保存context；后续每次调用，都会创建一个新的挂到末尾。
+![img](./pics/useContext.png)
 
 
 ### 22.12 函数组件内使用`useState`，渲染更新逻辑是怎样的？
