@@ -14,14 +14,14 @@ export default defineConfig({
 函数
 ```js
 export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
-  // vite === vite dev === vite serve, command为dev
-  // vite build，command为build 
+  // command只能是 serve 或 build
+  //   1) vite === vite dev === vite serve, command为dev
+  //   2) vite build，command为build 
   if (command === 'serve') {
     return {
       // dev specific config
     }
   } else {
-    // command === 'build'
     return {
       // build specific config
     }
@@ -137,7 +137,13 @@ export default function myPlugin() {
       if (id === resolvedVirtualModuleId) {
         // 要加载这个module，就load下面这段作为module的content，即当作module的源码
         // 所以我们可以在import之处，用`msg`
-        return `export const msg = "from virtual module"`
+        return `
+          export const msg = "from virtual module";
+          export const type = 'add';
+          export const foo = 'Hello';
+          export const bar = 42;
+          export const baz = { message: 'World' };
+        `
       }
       // 否则沿用原逻辑处理
     },
@@ -178,4 +184,37 @@ export default defineConfig({
   }
 })
 ```
+
+## 6. vite dev / serve / preview / build
+
+源码位置：packages\vite\src\node\cli.ts
+
+`dev`: start dev server，然后就没做啥了
+
+vite === vite dev === vite serve
+
+
+`build`: createBuilder -> buildApp
+
+
+`preview`: 本地预览production build。本质上是NODE_ENV、mode都被设置为production。但注意，command还是serve
+
+
+## 7. dynamic import
+用途：运行时才能确定加载什么资源，统统用dynamic import。
+vite怎么做的：代码有用动态导入的`import(xxx)`，vite会把动态加载的module单独打包为一个文件。注意，如果代码逻辑不会执行到的地方，构建时tree-shaking也会丢掉不需要的模块。
+
+比如index.js依赖了2个module，需要运行时才能确认，则vite打包出1个entry，2个module分别打包为一个js
+![png](./dynamic-import-1.png)
+
+如果运行时能确认有无用的module，vite会tree-shake掉它，而且最终产物只有1个entry，1个module
+![png](./dynamic-import-2.png)
+
+## 8. dynamic import产生的产物，名字后面为啥加了hash，什么含义？
+dynamic import之上，vite有个特殊的语法：[import.meta.glob](https://vite.dev/guide/features.html#glob-import)
+
+本质上还是es的import，但它可以一次性import一类module，或者仅导入指定的名称（比如exports了10个，你可以指定要某一个）
+
+`{ eager: true }` 相当于立即导入，这和静态导入没区别了（既然是静态导入，就没有split to separated chunks了）：
+![png](./dynamic-import-3.png)
 
