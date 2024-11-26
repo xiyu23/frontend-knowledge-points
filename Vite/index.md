@@ -198,6 +198,13 @@ vite === vite dev === vite serve
 
 
 `preview`: 本地预览production build。本质上是NODE_ENV、mode都被设置为production。但注意，command还是serve
+```bash
+# 先build
+$ vite build
+
+# 再preview
+$ vite preview
+```
 
 
 ## 7. dynamic import
@@ -218,3 +225,6 @@ dynamic import之上，vite有个特殊的语法：[import.meta.glob](https://vi
 `{ eager: true }` 相当于立即导入，这和静态导入没区别了（既然是静态导入，就没有split to separated chunks了）：
 ![png](./dynamic-import-3.png)
 
+
+## 8. public directory
+用途：此目录存放那些不在源码中引用的资源。dev时，这些资源被放在dev服务的`/`根目录下；build后会原封不动地copy到dist目录下，也是通过服务端根目录路径访问这些资源。

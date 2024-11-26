@@ -19,3 +19,27 @@ A -> B -> C -> A
 
 
 ## 4. 项目build后，为什么dist下的js代码仍有`process.env.NODE_ENV`这种环境变量
+
+
+## 5. how does pnpm organize node modules
+
+
+## 6. pnpm global store在哪？
+windows:
+```
+$ pnpm store path
+D:\.pnpm-store\v3
+```
+一般默认在 `C:\Users\Administrator\AppData\Local\pnpm\store\v3`
+
+一些`pnpm store`的命令：
+```bash
+# 查看路径
+$ pnpm store path
+
+# 删掉没有引用到的packages（不建议频繁做，因为后续可能又需要它，又得重新下载。比如切分支）
+$ pnpm store prune
+
+# 直接给store添加package，与 pnpm add [package_name] 功能一样（只不过是直接给global store加，不影响项目）
+$ pnpm store add [package_name]
+```

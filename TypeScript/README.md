@@ -57,6 +57,8 @@
   - [2、`|`是用来干啥？](#2是用来干啥)
   - [1. npm](#1-npm)
   - [2. npm的选项](#2-npm的选项)
+- [21. 如何declare一个知道存在的变量](#21-如何declare一个知道存在的变量)
+- [22. 在写chrome extension，chrome是runtime才有的，我怎么能让ts构建通过？](#22-在写chrome-extensionchrome是runtime才有的我怎么能让ts构建通过)
 
 1. TypeScript(微软推出)是javascript的超集，相当于是js的语法糖，好处就是js类型松散，而ts可以是强类型利于编译时静态检查避免出错，另外面向对象方面ts具备面向对象语言的几乎全部特性写起来规范。但.ts需要编译成.js才能运行。
 
@@ -1023,3 +1025,53 @@ npm install saves any specified packages into dependencies by default. Additiona
 
     npm i --no-save
 
+
+## 21. 如何declare一个知道存在的变量
+比如我知道window上一定有一个chrome属性，怎么声明
+```ts
+declare namespace chrome {
+  // ...
+}
+```
+
+声明global变量
+```ts
+declare var foo: number;
+declare const bar: number;
+declare let baz: number;
+```
+
+声明global函数
+```ts
+declare function greet(greeting: string): void;
+```
+
+声明class
+```ts
+declare class Greeter {
+  constructor(greeting: string);
+  greeting: string;
+  showGreeting(): void;
+}
+```
+
+声明object with properties，`declare namespace`用于声明需要用`.`解引用的**变量**或者**类型**
+```ts
+declare namespace myLib {
+  function makeGreeting(s: string): string;
+  let numberOfGreetings: number;
+}
+```
+
+
+## 22. 在写chrome extension，chrome是runtime才有的，我怎么能让ts构建通过？
+忽略掉。
+```json
+// tsconfig.json
+{
+  // ...
+  "exclude": [
+    "src/chrome-runtime/**/*.*"
+  ]
+}
+```
