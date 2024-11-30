@@ -43,3 +43,28 @@ $ pnpm store prune
 # 直接给store添加package，与 pnpm add [package_name] 功能一样（只不过是直接给global store加，不影响项目）
 $ pnpm store add [package_name]
 ```
+
+## 7. 项目中`node_modules`下的`.pnpm`文件夹是干什么用的？
+存放symbolic links. pnpm全局维护一个store，所有pkg都会存到global store。
+项目中用到的pkg都会hard link到全局的store，这样项目下node_modules存放的只是symbolic links。
+目录结构是flatten的，展平的。当项目依赖A、B，目录结构是：
+```bash
+node_modules
+  .pnpm
+    A@1.0.0
+      node_modules
+        A -> <store>/A   # this is the symbolic hard link, the files inside this directory is the "real" files in the entire node_modules directory of this project
+          index.js
+          package.json
+    B@1.0.0
+      node_modules
+        B -> <store>/B
+          index.js
+          package.json
+```
+
+pnpm根据symoblic links创建dependency graph。A依赖B，所以
+如果A依赖了B，则
+```
+
+```
