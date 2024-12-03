@@ -1964,6 +1964,10 @@ window中的叫做*window event loop*，worker中的叫做*worker event loop*。
 
 一个event loop有多个*task queue*，1个*microtask queue*。
 
+task source: 是HTML标准中，用于在逻辑上区分不同类型的task，也就是同一类task放在一起叫做xxx类型的task source，每个task source都有一个关联的task queue。task queues是浏览器(user agent)在event loop中用于合并task sources的。（感觉像是event loop中有多个task queue，每个task queue代表不同类型的task source，每个task queue就是同类task的集合）
+
+To queue a task: 创建一个task结构体对象，然后append到这个task source所关联的task queue上
+
 task queue: **注意它是一个set而不是queue**，运行时从这些*task queues*中按某个算法机制选择一个当前可运行的task（runnable task）来执行。
 某一类型的task都会放在一种task queue里。
 不同类的task source(和task queue是一一对应关系？好像是近义词？）可以有不同的有优先级，通用的有：

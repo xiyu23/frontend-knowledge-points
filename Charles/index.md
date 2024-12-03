@@ -117,3 +117,112 @@ example.com/js/foo/a.js                      ->  localhost:4173/scripts/foo/a.js
 example.com/js/bar2/sdf/bar4/a.js            ->  localhost:4173/scripts/bar2/sdf/bar4/a.js
 ```
 <img src='5.png' width=300 />
+
+
+
+----
+
+
+## Android Mobile报错
+
+AudioContext::SendLogMessage - 
+WebRtcLogMessage - add |message| to the diagnostic WebRTC log, if started
+
+<img src='bug1.png'/>
+
+Apparently, the error log comes from the associated AudioContext which should be the one on which current media relies.
+
+So what's the stack trace?
+
+case 1. device disconnected
+<img src='bug2.png'/>
+
+must have `is_sink_id_given_` to be true. but that is set at here:
+<img src='bug3.png'/>
+
+so we shall add an event listener for `AudioContext.onsinkchange`:
+```js
+audioCtx.addEventListener("sinkchange", () => {
+  if (typeof audioCtx.sinkId === "object" && audioCtx.sinkId.type === "none") {
+    console.log("Audio changed to not play on any device");
+  } else {
+    console.log(`Audio output device changed to ${audioCtx.sinkId}`);
+  }
+});
+```
+
+or, we can get it directly from `audioCtx.sinkId` to see whether it's invalid(slient or exists in the list of output devices).
+
+It none of them satisfies, then case 1 is impossible.
+
+`WebAudioSinkDescriptor` is a class that wrap the sink related properties.
+- type: kAudible | kSilent
+- sinkId: string
+- token: ???
+
+
+`RealtimeAudioDestinationHandler` holds a reference to audio context object that can be retrieved by `Context()`.
+
+
+case 2. onRenderError
+<img src='./case2-onRenderError.png'/>
+
+
+可能有关的地方：
+<img src='./AudioRendererImpl-onRenderError.png'/>
+
+
+RealtimeAudioDestinationHandler::OnRenderError()
+  AudioContext::OnRenderError()
+    // DVLOG(2)
+    "The AudioContext encountered an error from the audio device or the "
+        "WebAudio renderer."
+
+
+要看chromium的log，
+首先开启log开关
+NDEBUG == false || DCHECK_ALWAYS_ON == true
+
+>
+> DCHECK, the "debug mode" check
+>
+> NDEBUG: no debug
+> 
+
+其次设置verbose level `ENABLED_VLOG_LEVEL`（默认为-1）
+只要日志的级别 <= ENABLED_VLOG_LEVEL
+通过DVLOG打log的都会打印
+
+ERROR: 0
+KEY: 1 ??
+INFO: 2 ??
+VERBOSE: 3 ??
+
+"/C/Program Files/Google/Chrome/Application/chrome.exe" --enable-logging=stderr --v=3 --log-level=0 --vmodule=media=2,content=2,blink=2
+
+
+## NeatFrame报错: `MEDIA_ERR_DECODE`
+
+The callback would trigger the error.
+- WebMediaPlayerMS::OnAudioRenderErrorCallback (ready_state_ != WebMediaPlayer::kReadyStateHaveNothing)
+  - HTMLMediaElement::SetNetworkState
+    - HTMLMediaElement::MediaLoadingFailed (kNetworkStateDecodeError)
+      - HTMLMediaElement::MediaEngineError
+
+Then there were 2 cases here(they might trigger the callback):
+- ? no references?
+  - WebMediaPlayerMS::**Load**
+    - renderer_factory_->GetAudioRenderer(..., callback)
+
+- ? both have no references? browser will call them ?
+  - MediaElementEventListener::Invoke or HTMLMediaElementCapture::captureStream
+    - CreateHTMLAudioElementCapturer
+      - MediaStreamDescriptor::AddRemoteTrack(MediaStreamComponent*)
+        - MediaStreamDescriptor::AddComponent(MediaStreamComponent*) or MediaStreamDescriptor::RemoveComponent(MediaStreamComponent*) // MediaStreamComponent有个id，和 MediaStreamTrack.id 相同。A MediaStreamComponent is a MediaStreamTrack
+          - WebMediaPlayerMS::TrackAdded or WebMediaPlayerMS::TrackRemoved
+            - WebMediaPlayerMS::**Reload**()
+              - WebMediaPlayerMS::ReloadAudio()
+                - renderer_factory_->GetAudioRenderer(..., callback)
+
+
+
