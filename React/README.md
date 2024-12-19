@@ -90,6 +90,7 @@
   - [24. 如何为`className`写多个值？](#24-如何为classname写多个值)
   - [25. 生命周期](#25-生命周期)
     - [25.2 父子组件的生命周期顺序是怎样的？](#252-父子组件的生命周期顺序是怎样的)
+  - [26. 开发模式下，灰色的log是什么？StrictMode是什么？](#26-开发模式下灰色的log是什么strictmode是什么)
   - [Q\&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
     - [2. 使用`FC`](#2-使用fc)
@@ -1061,16 +1062,19 @@ React在组件**挂载时**会将DOM元素对象赋值给`current`属性；在**
   React 16.3+建议使用*ref forwarding*，即让组件选择将任何子组件的`ref`暴露给自己，以提供access。
 
 - Callback Refs
-另一种设置`ref`的方法。之前是为`ref`赋值`React.createRef()`，而现在是为其赋值一个*函数*。
-
-  该函数接受一个参数，参数类型是React组件实例或HTML DOM元素（具体根据attached对象决定）。
-
+  
+  比如我们需要拿到一个list的每个item的DOM，这明显需要多个refs，之前的做法都是一个ref。
+  此时可以给ref传一个函数，这种ref就叫做callback ref。当react每当要更新ref时，都会调用这个函数，并传入一个DOM Node作为参数。
   React保证在componentDidMount、componentDidUpdate事件触发前，refs已更新。
 
 
 > ***Caveats with callback refs: Better do NOT define the callback as inline function***
 
 不要将`callback refs`的回调函数定义为*内联函数*，因为每次render都会创建一个函数的实例，所以React会调用两次，第一次给callback传null，第二次才是DOM元素。
+
+什么时候callback ref会被执行？即这个函数什么时候执行的？
+每次render后会调用之前的cleanup（入参为null），再调当前的setup（入参为DOM Node）
+![1](./pics/ref.png)
 
 ## 10. 
 
@@ -1100,7 +1104,7 @@ return <div> {props.children} </div>
 
 ref/React.forwardRef, React.createRef/React.useRef, useImperativeHandle
 
-`ref`是基础，用于方便地引用到DOM节点、React组件实例；
+`ref`是基础，用于方便地引用到DOM节点、React组件实例，以便做一些React本身不能做的事情，如focus、scroll，只要不影响React内部state就可以做。
 `React.forwardRef`只是用于包裹，把ref传递下去；
 
 这俩都返回一个普通的js对象，但所用作用域不同；
@@ -1149,11 +1153,11 @@ Q1：为什么*ref*可用于类组件，而不能用于函数组件？
 
 A1：类组件创建一个实例后，*ref*引用的就是这个实例对象，这样就可以调用类上的成员方法了；而函数组件没有实例，渲染的时候是再重新执行一遍函数，没有实例的概念。因此*ref*引用不了。
 
-接着来看`React.forwardRef`。
+接着来看`React.forwardRef`。我们可以将ref添加到DOM上，但无法直接添加到React组件上。因为React默认不会将代表组件的DOM Node赋值给传入的ref。（直接加就被认为是prop，并不是具备ref的意义），为了能让React组件也能接受ref，以便组件通过这个ref把其内的DOM Node暴露给父组件，那么就需要把这个函数组件用forwardRef包以下。这样React会认为此组件opt-in了这个ref的feature，传入的ref会最终会被设置为DOM Node。
 
 使用`React.forwardRef`创建一个组件，接收父组件传来的`ref`，继续向下传递给子组件。相当于是一个hoc，包裹子组件，决定了ref传给谁。
 
-`React.forwardRef`的参数是一个`render`函数，这个render函数第2个参数为`ref`，即可通过这个`ref`关联到A中的子组件或DOM节点。
+`React.forwardRef`的参数是一个`render`函数，这个render函数第2个参数为`ref`，即可通过这个`ref`关联到某个子组件或DOM节点。
 
 ```tsx
 /* 子组件 ChildComponent.tsx */
@@ -2186,6 +2190,26 @@ child-C0::componentDidMount
 child-C1::componentDidMount
 parent::componentDidMount
 ```
+
+
+## 26. 开发模式下，灰色的log是什么？StrictMode是什么？
+![f](./pics/strict-mode-1.png)
+
+是strict mode导致的，它用于开发环境下辅助找到潜在bug。strict mode下，react会对组件“再额外渲染一次”，在额外渲染过程中打印的console.log都会被标记为淡灰色。
+额外渲染是指react会再执行一遍函数体（function component body）。
+```jsx
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+```
+它用来发现什么bug？
+
+- [pure component渲染两次结果不一样](https://react.dev/reference/react/StrictMode#fixing-bugs-found-by-double-rendering-in-development)，可能就存在bug。比如每次render结果都不一样，但我们props、state并没改变，输出却变了。这样不符合pure component的理念，容易出bug。
+![f](./pics/strict-mode-2.png)
+- [检查effect是否漏掉了cleanup](https://react.dev/reference/react/StrictMode#fixing-bugs-found-by-double-rendering-in-development)。比如常见的event listener、timer。react会对每个effect“再额外执行一次setup + cleanup”，如果我们漏了cleanup，功能表现上会更容易发现。
+- [检查callback refs](https://react.dev/reference/react/StrictMode#fixing-bugs-found-by-re-running-ref-callbacks-in-development)，strict mode下react会对callback refs “额外执行一次setup + cleanup"。和effect很类似，检查我们是否cleanup。
+
+
 
 ## Q&A
 

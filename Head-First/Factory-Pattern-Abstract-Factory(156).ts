@@ -17,7 +17,8 @@
   这样看来，对一种CheesePizza，我们根据原料的不同，可以产生多种不同风味的CheesePizza。
   即对同一个产品，因为其组成部分相同，只是具体每个细节有差异，可以看成是一个产品由多个子产品组成的，每个单独子产品又可以进行分类。
   如此一来，对于一个由M个子产品组成的产品而言，第i个子产品如果有Ni个具体的类别，那么最终产生的产品就会有：
-  M * (N1 + N2 +... + Nm) 个。
+  ~~M * (N1 + N2 +... + Nm) 个。~~
+  N1 * N2 * Ni * ... * Nm 个。
 
   秉承使用Pizza的代码不应该关心Pizza如何创建的的思想，那么理应提供一个createPizza；
   类似的，Pizza会使用这些原料，而每一种原料也会有多种具体类型（继承），Pizza也不应该关心面团如何创建的，那么就应该再提供一个createXXX（xxx就是某一个原料）
@@ -74,7 +75,7 @@ class Pizza {
 
   // 具体原料咋来？交给这个工厂来创建
   ingredientFactory: PizzaIngredientFactory;
-  
+
   constructor(ingredientFactory: PizzaIngredientFactory) {
     this.dough = ingredientFactory.createDough();
     this.sauce = ingredientFactory.createSauce();

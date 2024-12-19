@@ -225,4 +225,19 @@ Then there were 2 cases here(they might trigger the callback):
                 - renderer_factory_->GetAudioRenderer(..., callback)
 
 
+微软的一篇文章，查memroy leak的
+https://learn.microsoft.com/en-us/microsoft-edge/devtools-guide-chromium/memory-problems/dom-leaks
 
+
+> A memory leak can occur in your application when an element is no longer attached to the Document Object Model (DOM) tree, but is still referenced by some JavaScript running on the webpage. These elements are called detached elements. For the browser to garbage-collect (GC) the detached element, the element must not be referenced from the DOM tree or from JavaScript code.
+>
+> Element不在DOM中，但仍被js对象引用，导致GC无法释放。这种Element就叫做 Detached Elements。
+>
+> 为了能让垃圾回收器（GC）回收这样的Element，只有当JS代码不再引用这个Element才行。
+
+
+`@12345`: This is the unique identifier of the element in the memory heap snapshot.
+
+
+`srcObject = null` 触发 player 析构
+<img src='./srcObject-null-trigers-WebMediaPlayerMS-destoryed-triggers-player-destroyed.png'/>

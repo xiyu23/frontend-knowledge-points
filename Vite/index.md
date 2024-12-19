@@ -228,3 +228,36 @@ dynamic import之上，vite有个特殊的语法：[import.meta.glob](https://vi
 
 ## 8. public directory
 用途：此目录存放那些不在源码中引用的资源。dev时，这些资源被放在dev服务的`/`根目录下；build后会原封不动地copy到dist目录下，也是通过服务端根目录路径访问这些资源。
+
+
+## 9. 打包产物格式 `umd` 和 `es` 的区别
+先上结论：
+> umd 打包出的是一个整体，资源加载后，所有module都会被立即evaluate
+>
+> es 打包出的是一个入口+分包的形式，runtime才确定加载哪些module，进而对应module才会被evaluate
+
+详解：
+umd是兼容三合一的统称，cjs, iief, amd。
+es是ECMAScript标准语法，比如支持import语法。
+
+特别注意，产物是有区别的。
+module中全局作用域的代码，在umd中也会出现在产物的全局作用域。比如你在module的全局作用域的代码，umd js被加载后会被立即执行。
+
+而es则不会；每个module都是一个独立的作用域，只有当module被加载时才会执行。
+
+比如下图，动态引入module 'add'，我们期望的是运行时加载 module 'add'，加载后才执行 module 'add' 的代码。
+![png](./dynamic-import-4.png)
+
+但对于 umd 而言，并非想象的那样。module内全局作用域的代码，都会被移动到最终的全局作用域内，即相当于umd.js加载时就会被执行。
+umd产物可以理解为“all-in-one”，全都打包在一起了，不管你有没有用动态import。
+那动态import怎么处理的呢？每个module本质上都是一个js对象，导出的东西都挂在这个对象上，动态import就直接转换成resolve为这个对象了。
+而这个对象已经随着umd加载好了。
+至于为啥`index$1`这个module没有导出的成员，我想是因为打包工具的影响，因为检测到代码没用导出的成员，所以它就是一个空对象了。
+![png](./dynamic-import-5.png)
+当我们用到exported成员时，构建产物中就有它了：
+![png](./dynamic-import-7.png)
+
+反观 es ，如我们的预期。产物分为主包（入口）和分包（chunks）：
+![png](./dynamic-import-6.png)
+module只有在runtime才会被加载，因此并不随着入口加载而执行。
+
