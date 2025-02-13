@@ -91,6 +91,8 @@
   - [25. 生命周期](#25-生命周期)
     - [25.2 父子组件的生命周期顺序是怎样的？](#252-父子组件的生命周期顺序是怎样的)
   - [26. 开发模式下，灰色的log是什么？StrictMode是什么？](#26-开发模式下灰色的log是什么strictmode是什么)
+  - [27. 如何调试React源码](#27-如何调试react源码)
+  - [28. React的工作流](#28-react的工作流)
   - [Q\&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
     - [2. 使用`FC`](#2-使用fc)
@@ -2209,6 +2211,17 @@ parent::componentDidMount
 - [检查effect是否漏掉了cleanup](https://react.dev/reference/react/StrictMode#fixing-bugs-found-by-double-rendering-in-development)。比如常见的event listener、timer。react会对每个effect“再额外执行一次setup + cleanup”，如果我们漏了cleanup，功能表现上会更容易发现。
 - [检查callback refs](https://react.dev/reference/react/StrictMode#fixing-bugs-found-by-re-running-ref-callbacks-in-development)，strict mode下react会对callback refs “额外执行一次setup + cleanup"。和effect很类似，检查我们是否cleanup。
 
+
+## 27. 如何调试React源码
+见《React设计原理》卡颂 一书P74。（但没放github地址啊）
+
+拉React源码main分支，构建开发版本的react, react-dom, scheduler；
+然后在你的项目里，软链到上述三个package即可
+
+
+## 28. React的工作流
+
+render (Virtual DOM，React中叫做reconciler) -> commit (真正与UI打交道的阶段，调用DOM API渲染UI)
 
 
 ## Q&A

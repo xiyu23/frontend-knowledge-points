@@ -1,3 +1,17 @@
+- [1. vite.config.js](#1-viteconfigjs)
+- [2. import.meta.env.XXX](#2-importmetaenvxxx)
+- [3. `process.env.NODE_ENV` vs `mode`](#3-processenvnode_env-vs-mode)
+- [4. virtual modules convention](#4-virtual-modules-convention)
+- [5. 对vite project，`index.html`是必须的吗？](#5-对vite-projectindexhtml是必须的吗)
+- [6. vite dev / serve / preview / build](#6-vite-dev--serve--preview--build)
+- [7. dynamic import](#7-dynamic-import)
+- [8. dynamic import产生的产物，名字后面为啥加了hash，什么含义？](#8-dynamic-import产生的产物名字后面为啥加了hash什么含义)
+- [8. public directory](#8-public-directory)
+- [9. 打包产物格式 `umd` 和 `es` 的区别](#9-打包产物格式-umd-和-es-的区别)
+- [10. vite打包chunks是根据什么来的？entry是怎么确定的？怎么确定一个chunk应该包含哪些代码？](#10-vite打包chunks是根据什么来的entry是怎么确定的怎么确定一个chunk应该包含哪些代码)
+- [11. Production环境，vite不用ESBuild构建？用的Rollup？](#11-production环境vite不用esbuild构建用的rollup)
+
+
 ## 1. vite.config.js
 导出一个对象，给defineConfig可以直接传对象，也可以给个函数，以根据条件确定不同的配置
 
@@ -214,7 +228,7 @@ vite怎么做的：代码有用动态导入的`import(xxx)`，vite会把动态�
 比如index.js依赖了2个module，需要运行时才能确认，则vite打包出1个entry，2个module分别打包为一个js
 ![png](./dynamic-import-1.png)
 
-如果运行时能确认有无用的module，vite会tree-shake掉它，而且最终产物只有1个entry，1个module
+如果构建时能确认有无用的module，vite会tree-shake掉它，而且最终产物只有1个entry，1个module
 ![png](./dynamic-import-2.png)
 
 ## 8. dynamic import产生的产物，名字后面为啥加了hash，什么含义？
@@ -237,7 +251,7 @@ dynamic import之上，vite有个特殊的语法：[import.meta.glob](https://vi
 > es 打包出的是一个入口+分包的形式，runtime才确定加载哪些module，进而对应module才会被evaluate
 
 详解：
-umd是兼容三合一的统称，cjs, iief, amd。
+umd是兼容三合一的统称，cjs, iife, amd(或者说requireJs，requireJs其实是amd的一种实现）。
 es是ECMAScript标准语法，比如支持import语法。
 
 特别注意，产物是有区别的。
@@ -261,3 +275,20 @@ umd产物可以理解为“all-in-one”，全都打包在一起了，不管你�
 ![png](./dynamic-import-6.png)
 module只有在runtime才会被加载，因此并不随着入口加载而执行。
 
+umd 长啥样？只要看到这一行就是 umd 了：
+![png](./dynamic-import-8.png)
+
+把它变成if-else就很清晰了：
+![png](./dynamic-import-9.png)
+
+umd加载后立即执行，判断环境（cjs / amd / iife），而后将环境特定的"控制模块导出的符号"传入主体函数并执行。
+即umd整体对外导出的东西，都挂在传入的对象上。
+
+对cjs（commonJs，在node跑，无法在浏览器中跑），exports = { xx }；
+对amd（requireJs也是amd，它是amd的一种实现，可以在浏览器中运行），define
+对iife（Immediately-Invoked Function Expression，立即执行的函数表达式），直接挂
+
+## 10. vite打包chunks是根据什么来的？entry是怎么确定的？怎么确定一个chunk应该包含哪些代码？
+
+
+## 11. Production环境，vite不用ESBuild构建？用的Rollup？
