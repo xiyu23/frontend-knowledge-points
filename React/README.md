@@ -1790,6 +1790,24 @@ useContext对于mount/update/rerender，用的是同一个函数`readContext`：
 ![img](./pics/useContext.png)
 
 
+优缺点
+优点：
+1. 避免 props drilling
+2. 方便共享
+
+缺点：
+1. 性能，可能触发非必要的re-render
+2. 
+
+什么时候该用？
+1. 需要全局共享的数据
+
+什么时候不该用？
+1. 静态数据，不适合存context
+2. 只在特定组件内用，范围局限的数据
+3. 只在兄弟节点用，则可以提升到parent组件，直接用props传入
+
+
 ### 22.12 函数组件内使用`useState`，渲染更新逻辑是怎样的？
 
 `useState`创建一个闭包，返回一个数组`[state, setState]`。
