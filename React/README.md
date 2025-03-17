@@ -93,6 +93,8 @@
   - [26. 开发模式下，灰色的log是什么？StrictMode是什么？](#26-开发模式下灰色的log是什么strictmode是什么)
   - [27. 如何调试React源码](#27-如何调试react源码)
   - [28. React的工作流](#28-react的工作流)
+  - [29. debounce input](#29-debounce-input)
+  - [30. debounce button](#30-debounce-button)
   - [Q\&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
     - [2. 使用`FC`](#2-使用fc)
@@ -2240,6 +2242,54 @@ parent::componentDidMount
 ## 28. React的工作流
 
 render (Virtual DOM，React中叫做reconciler) -> commit (真正与UI打交道的阶段，调用DOM API渲染UI)
+
+## 29. debounce input
+onInput仍立即更新，但我们对值的变化进行debounce，其它需要依赖值的变化去做事情的代码，监听变化即可。
+```js
+export function DebouncedInput() {
+  const [val, setVal] = useState('')
+  const onInput = useCallback((e) => {
+    // 实时更新
+    console.log('onInput: ', e.target.value)
+    setVal(e.target.value)
+  }, [])
+  const debouncedVal = useDebouncedValue(val, 500)
+
+  useEffect(() => {
+    console.log(`input val changed to ${debouncedVal}`)
+  }, [debouncedVal])
+
+
+  return <input value={val} onInput={onInput} />
+}
+
+export function useDebouncedValue(val: any, wait: number, isTrailing = true) {
+  const [debouncedVal, setDebounceVal] = useState(val)
+  const timerIdRef = useRef(-1)
+  useEffect(() => {
+    if (!isTrailing) {
+      // leading, trigger it if there's no timer counting
+      if (timerIdRef.current === -1) {
+        setDebounceVal(val)
+      }
+      window.clearTimeout(timerIdRef.current)
+      timerIdRef.current = setTimeout(() => {
+        timerIdRef.current = -1
+      }, wait)
+    } else {
+      window.clearTimeout(timerIdRef.current)
+      timerIdRef.current = setTimeout(() => {
+        setDebounceVal(val)
+        timerIdRef.current = -1
+      }, wait)
+    }
+  }, [val, wait, isTrailing])
+
+  return debouncedVal
+}
+```
+
+## 30. debounce button
 
 
 ## Q&A
