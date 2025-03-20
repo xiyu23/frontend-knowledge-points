@@ -94,6 +94,8 @@
   - [27. 如何调试React源码](#27-如何调试react源码)
   - [28. React的工作流](#28-react的工作流)
   - [29. debounce input](#29-debounce-input)
+    - [方法一: 让value延迟变化](#方法一-让value延迟变化)
+    - [方法二: 用ref保存handler](#方法二-用ref保存handler)
   - [30. debounce button](#30-debounce-button)
   - [Q\&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
@@ -2244,6 +2246,8 @@ parent::componentDidMount
 render (Virtual DOM，React中叫做reconciler) -> commit (真正与UI打交道的阶段，调用DOM API渲染UI)
 
 ## 29. debounce input
+
+### 方法一: 让value延迟变化
 onInput仍立即更新，但我们对值的变化进行debounce，其它需要依赖值的变化去做事情的代码，监听变化即可。
 ```js
 export function DebouncedInput() {
@@ -2286,6 +2290,44 @@ export function useDebouncedValue(val: any, wait: number, isTrailing = true) {
   }, [val, wait, isTrailing])
 
   return debouncedVal
+}
+```
+
+### 方法二: 用ref保存handler
+
+```tsx
+export function DebouncedInputWithRef() {
+  const [val, setVal] = useState('')
+
+  const doSth = () => {
+    console.log(`do sth with ${val}`)
+  }
+
+  // use ref to keep the up-to-date `doSth` function
+  const doSthRef = useRef<(...args: any[]) => any>(null)
+  useEffect(() => {
+    doSthRef.current = doSth
+  }, [val])
+
+  // handler is debounced, it's only set on mount
+  // when the time elapsed we will call the function
+  // note the function is referenced by ref, so it's up-to-date(can reference newest states inside FC)
+  const debouncedHandler = useCallback(debounce(() => {
+    doSthRef.current?.()
+  }, 500), [])
+
+  const onInput = useCallback((e) => {
+    // 实时更新
+    console.log('onInput: ', e.target.value)
+    setVal(e.target.value)
+
+    // 触发handler
+    debouncedHandler()
+  }, [debouncedHandler])
+
+
+
+  return <input value={val} onInput={onInput} />
 }
 ```
 

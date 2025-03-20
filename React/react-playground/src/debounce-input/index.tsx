@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useDebouncedValue } from '../hooks/useDebouncedValue'
+import { useDebouncedValue } from './useDebouncedValue'
 
 export function DebouncedInput() {
   const [val, setVal] = useState('')
