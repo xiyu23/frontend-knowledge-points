@@ -96,6 +96,7 @@
   - [29. debounce input](#29-debounce-input)
     - [方法一: 让value延迟变化](#方法一-让value延迟变化)
     - [方法二: 用ref保存handler](#方法二-用ref保存handler)
+    - [方法三: 利用cleanup](#方法三-利用cleanup)
   - [30. debounce button](#30-debounce-button)
   - [Q\&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
@@ -2326,6 +2327,28 @@ export function DebouncedInputWithRef() {
   }, [debouncedHandler])
 
 
+
+  return <input value={val} onInput={onInput} />
+}
+```
+
+### 方法三: 利用cleanup
+```tsx
+export function DebouncedInputShortCode() {
+  const [val, setVal] = useState('')
+
+  useEffect(() => {
+    const timerId = window.setTimeout(() => {
+      console.log('do sth')
+    }, 500)
+    return () => window.clearTimeout(timerId)
+  }, [val])
+
+  const onInput = useCallback((e) => {
+    // 实时更新
+    console.log('onInput: ', e.target.value)
+    setVal(e.target.value)
+  }, [])
 
   return <input value={val} onInput={onInput} />
 }

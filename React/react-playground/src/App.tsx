@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { DebouncedInput } from './debounce-input/index'
 import { DebouncedInputWithRef } from './debounce-input-with-ref/index'
+import { DebouncedInputShortCode } from './debounce-input-short-code/index'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -32,6 +33,7 @@ function App() {
       </p>
       <DebouncedInput />
       <DebouncedInputWithRef />
+      <DebouncedInputShortCode />
     </>
   )
 }
