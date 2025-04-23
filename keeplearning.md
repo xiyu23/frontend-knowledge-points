@@ -119,6 +119,8 @@
   - [88. pnpm link做了什么](#88-pnpm-link做了什么)
   - [89. `Symbol` 和 plain object有啥区别？](#89-symbol-和-plain-object有啥区别)
   - [90. `Reflect`有啥用](#90-reflect有啥用)
+  - [91.](#91)
+  - [92. iframe](#92-iframe)
   - [6. jsonp vs jsonpCallback（跨域访问的解决方法之一）](#6-jsonp-vs-jsonpcallback跨域访问的解决方法之一)
 
 # 前端知识点
@@ -2797,6 +2799,69 @@ pinia 和 vuex <=4 的区别：
 6. 最后，ES6引入Symbol的motivation是*private* properties。但最后妥协成了这种，避免与用户代码的key冲突。
 
 ## 90. `Reflect`有啥用
+
+
+## 91.
+- Media Volume: any app plays audio/video
+- In-call Volume: volume during phone call. earpiece(or speakerphone)
+- Ringtone Volume: notifications, ringtones, and alarms
+- System Volume: touch feedback, UI sounds
+
+The volume slider shown by the system depends on which volume channel the audio is routed through.
+浏览器播放audio时，通过In-call channel播放的。
+
+为啥看到的是in-call bar：
+If you're using a browser that’s routing audio to an in-call volume channel (which can happen with apps that use VoIP or WebRTC), then the "In-call" volume slider will become active, and the physical volume buttons will control it
+
+
+## 92. iframe
+1. parent访问iframe
+iframe.contentWindow
+
+2. 双向通信
+parent -> child: iframe.contentWindow.postMessage
+child -> parent: window.parent.postMessage
+
+3. 特殊限制
+1) iframe和parent如果是同源的，则可以互相可以直接访问到全局变量或函数。
+```js
+// parent
+const iframe = document.getElementById('iframe1');
+iframe.contentWindow.someFunction();
+console.log(iframe.contentWindow.someVariable);
+```
+
+2) 同上，如果同源，可以共享 localStorage / sessionStorage，毕竟本来就是按域名隔离的
+3) `Window.name`可以在页面 nagivate to another url，甚至是reload时，都能保持不变；如果tab reload了其它域名的页面，则浏览器会reset为空字符串。但更骚的是，如果navigate back到原页面，name又能恢复。
+4) iframe的属性`src` vs `srcdoc`的区别
+   src: 加载url
+   
+   srcdoc加载inline html，即赋值直接是一个html string。适合立竿见影的那种，比如从当前页面取个DOM传过去，比如做所见即所得的编辑器、预览？
+   
+5)
+
+4. iframe属性 `sandbox`
+声明对iframe一些限制，主要包括`allow-scripts`、`allow-same-origin`等。
+只给一个sandbox属性表示全部能力都被限制，不允许执行脚本、下载资源、打开弹窗等。
+```html
+<iframe src="https://example.com" sandbox></iframe>
+```
+
+最松散的规则：
+```html
+<iframe src="editor.html" sandbox="allow-scripts allow-same-origin"></iframe>
+```
+甚至不写 sandbox
+```html
+<iframe src="editor.html"></iframe>
+```
+
+`allow-same-origin`: 把iframe当作与parent页面同源，即使它并不同源。
+若iframe本就与parent同源，而iframe限制了此规则，则iframe无法访问本可以访问的parent的cookie、localStorage等，也不能向parent域名的server发请求（跨域了）。
+
+若加上这个规则，则iframe被认为是同源。
+
+
 
 
 

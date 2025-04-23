@@ -525,9 +525,20 @@ export default {
 ```
 vue will run the setup function at init stage(right before event 'created', but after 'beforeCreated'). The return value should be either function or an object.
 - if you provide a function as return value, this function will be set as `render` option on current vue instance
-- if you provide an object, vue will iterate each of the key and add them to vue instance, and do wrap/unwrap stuff for `ref` if the value of that key is type of `ref`.(through Object.defineProperty)
+- if you provide an object, vue will iterate each of the key and add them to vue instance, and do ref unwrap for `ref`(through Object.defineProperty).
 
 in single word, add the returned props on vue instance and unwrap for `ref`.
+```js
+vm._setupState = returned_object
+if setup is through <script setup>
+  // sfc. In v2.7, it will force sfc even we write it as `setup` options
+  vm._setupProxy = {}
+  defineProperty for each key on `vm._setupProxy`
+else
+  // non-sfc
+  defineProperty for each key on `vm`
+```
+
 
 after setup done, vue will init data. Which is the data option we defined.
 vue invoke `defineReactive` for each key in data(which uses Object.defineProperty).
@@ -714,6 +725,13 @@ ps: 那ref vs reactive有啥区别？
 
 为啥要用ref?
 因为我们要track、trigger一个变量，js中无法直接对一个plain variable这样做，得包到object里才可以。
+
+4. shallowRef
+ref的shallow版本，只令root是reactive的，其余层级的属性不做reactive。即修改root时会触发update，其余操作都不会。
+用途：对庞大的数据结构，不必要的reactive可以优化属性的读取速度。
+
+
+5. shallowReactive
 
 
 1. readonly

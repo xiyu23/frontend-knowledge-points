@@ -98,6 +98,7 @@
     - [方法二: 用ref保存handler](#方法二-用ref保存handler)
     - [方法三: 利用cleanup](#方法三-利用cleanup)
   - [30. debounce button](#30-debounce-button)
+  - [31.](#31)
   - [Q\&A](#qa)
     - [1. ts中的`React.FC`是啥？](#1-ts中的reactfc是啥)
     - [2. 使用`FC`](#2-使用fc)
@@ -2355,6 +2356,9 @@ export function DebouncedInputShortCode() {
 ```
 
 ## 30. debounce button
+本质和29一样.
+
+## 31. 
 
 
 ## Q&A
