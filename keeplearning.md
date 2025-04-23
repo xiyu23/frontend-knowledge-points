@@ -121,6 +121,7 @@
   - [90. `Reflect`有啥用](#90-reflect有啥用)
   - [91.](#91)
   - [92. iframe](#92-iframe)
+  - [93. Picture in Picture (PIP) 画中画](#93-picture-in-picture-pip-画中画)
   - [6. jsonp vs jsonpCallback（跨域访问的解决方法之一）](#6-jsonp-vs-jsonpcallback跨域访问的解决方法之一)
 
 # 前端知识点
@@ -2817,10 +2818,39 @@ If you're using a browser that’s routing audio to an in-call volume channel (w
 ## 92. iframe
 1. parent访问iframe
 iframe.contentWindow
+如果同源，则可以通过 contentWindow 访问到iframe的DOM、全局变量等
+如果非同源，则无法通过 contentWindow 访问iframe的DOM、全局变量等，会限制访问（同源策略）。
+此时非同源，只能调 contentWindow.postMessage 给 iframe 发消息。postMessage是可以跨域，且在iframes之间、甚至是windows之间进行通信。
 
 2. 双向通信
 parent -> child: iframe.contentWindow.postMessage
+```js
+// parent 只发给指定origin
+iframe.contentWindow.postMessage('Hello from Parent!', 'https://child.com');
+
+// child 接收
+window.addEventListener('message', function(event) {
+  // Validate the origin to make sure it's trusted
+  if (event.origin === 'https://parent.com') {
+    console.log('Received message:', event.data);
+  }
+});
+```
+
 child -> parent: window.parent.postMessage
+```js
+// child 只发给指定origin
+window.parent.postMessage('Hello from Child!', 'https://parent.com');
+
+// parent 接收
+window.addEventListener('message', function(event) {
+  // Validate the origin to make sure it's trusted
+  if (event.origin === 'https://child.com') {
+    console.log('Received message:', event.data);
+  }
+});
+```
+
 
 3. 特殊限制
 1) iframe和parent如果是同源的，则可以互相可以直接访问到全局变量或函数。
@@ -2860,6 +2890,55 @@ console.log(iframe.contentWindow.someVariable);
 若iframe本就与parent同源，而iframe限制了此规则，则iframe无法访问本可以访问的parent的cookie、localStorage等，也不能向parent域名的server发请求（跨域了）。
 
 若加上这个规则，则iframe被认为是同源。
+
+
+5. postMessage: 支持同源或跨域通信
+1) 同窗口内：parent page vs iframe
+   见92.1
+2) 不同窗口：parent page vs popup window
+   得通过 opener 拿到父window。如果父window关闭了，那就歇菜了。
+   parent -> popup
+   ```js
+   // parent 发给 popup
+   const popup = window.open('popup.html', 'popupWindow');
+   popup.postMessage('Hello from parent!', '*');
+   ```
+
+   popup -> parent
+   ```js
+   //  popup 发给 parent
+   window.opener.postMessage('Hello from popup!', '*');
+   ```
+
+3) 
+
+
+6. Broadcast Channel: 同源的tabs/windows之间的通信
+```js
+// Tab A
+const channel = new BroadcastChannel('my_channel');
+channel.postMessage('Hello from Tab A!');
+```
+
+```js
+// Tab B
+const channel = new BroadcastChannel('my_channel');
+channel.onmessage = (event) => {
+    console.log('Received in Tab B:', event.data);
+};
+```
+
+7. iframe优缺点
+缺点：
+1) 性能，它又是一个独立的 browsing context，HTML Parser、JS Engine。尤其是 Mobile 端
+2) bad SEO，iframe内嵌内容不会被搜索引擎index
+3) AX：screen reader 或者 键盘操作 带来困难
+4) 复杂度：需要 postMessage 通信
+
+
+
+
+## 93. Picture in Picture (PIP) 画中画
 
 
 
