@@ -2816,6 +2816,14 @@ If you're using a browser that’s routing audio to an in-call volume channel (w
 
 
 ## 92. iframe
+同窗
+ - parent <---> iframe
+
+不同窗
+ - 有父子关系: parent <---> new_window
+ - 无父子关系: 无解
+
+
 1. parent访问iframe
 iframe.contentWindow
 如果同源，则可以通过 contentWindow 访问到iframe的DOM、全局变量等
@@ -2873,15 +2881,18 @@ console.log(iframe.contentWindow.someVariable);
 4. iframe属性 `sandbox`
 声明对iframe一些限制，主要包括`allow-scripts`、`allow-same-origin`等。
 只给一个sandbox属性表示全部能力都被限制，不允许执行脚本、下载资源、打开弹窗等。
+
+最严格的规则：
 ```html
 <iframe src="https://example.com" sandbox></iframe>
 ```
 
-最松散的规则：
+松散的规则：
 ```html
 <iframe src="editor.html" sandbox="allow-scripts allow-same-origin"></iframe>
 ```
-甚至不写 sandbox
+
+最松散的规则（不写 sandbox）：
 ```html
 <iframe src="editor.html"></iframe>
 ```
@@ -2910,7 +2921,8 @@ console.log(iframe.contentWindow.someVariable);
    window.opener.postMessage('Hello from popup!', '*');
    ```
 
-3) 
+   什么情况下能拿到opener: `window.open()`、通过link打开的，新窗口可以拿到opener window。
+   opener这个window允许navigation，即它能前后路由，而不影响新窗口对其的引用。（那页面岂不是都变了，domain也变了呢）
 
 
 6. Broadcast Channel: 同源的tabs/windows之间的通信

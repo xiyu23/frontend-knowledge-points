@@ -118,6 +118,9 @@ example.com/js/bar2/sdf/bar4/a.js            ->  localhost:4173/scripts/bar2/sdf
 ```
 <img src='5.png' width=300 />
 
+## Rewrite
+
+## Override Content 修改请求响应回包
 
 
 ----
